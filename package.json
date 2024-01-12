@@ -4,7 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test"
+    "prettier:check": "prettier --check .",
+    "prettier:format": "prettier --write \"deploy/**/*.ts\" \"scripts/**/*.ts\" \"test/**/*.ts\"",
+    "prettier:fix": "prettier --config ./.prettierrc --ignore-path ./prettierignore --write .",
+    "lint": "npx eslint '{test,scripts,deploy,shared}/**/*.ts'",
+    "lint:fix": "npx eslint '{test,scripts,deploy,shared}/**/*.ts' --fix",
+    "lint:sol": "npx solhint 'contracts/**/*.sol'",
+    "compile": "hardhat compile",
+    "test": "npm run compile && hardhat test"
   },
   "author": "",
   "license": "MIT",
@@ -14,17 +21,18 @@
     "secp256k1": "^5.0.0"
   },
   "devDependencies": {
-    "hardhat": "^2.19.4",
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.3",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@types/ecurve": "^1.0.0",
     "@types/elliptic": "^6.4.14",
     "@types/secp256k1": "^4.0.3",
     "chai-asserttype": "^1.0.5",
     "eslint": "^8.56.0",
     "ethers": "^6.9.2",
+    "hardhat": "^2.19.4",
     "prettier": "^3.1.1",
-    "solc": "0.8.19"
+    "solc": "0.8.19",
+    "solhint": "^4.1.1"
   }
 }

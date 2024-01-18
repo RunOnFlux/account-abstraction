@@ -3,7 +3,8 @@ import { ethers } from "ethers"
 import Schnorrkel from "../../src/index"
 import DefaultSigner from "../../utils/DefaultSigner"
 import { _generatePk } from "../../src/core"
-import { deploySchnorAA, generateCombinedPublicAddress } from "../deployments"
+import { deploySchnorrAA } from "../deployments"
+import { generateCombinedPublicAddress } from "../../src/utils/schnorr-helpers"
 const ERC1271_MAGICVALUE_BYTES32 = "0x1626ba7e"
 
 describe("Multi Sign Tests", function () {
@@ -12,7 +13,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const isSigner = await contract.signers(combinedAddress)
     expect(isSigner).to.equal("0x0000000000000000000000000000000000000000000000000000000000000001")
@@ -44,7 +45,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -73,7 +74,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const signerThree = new DefaultSigner(2)
     const msg = "just a test message"
@@ -105,7 +106,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -130,7 +131,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -144,7 +145,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -173,7 +174,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerTwo.getPublicKey(), signerOne.getPublicKey()]

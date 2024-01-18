@@ -3,14 +3,14 @@ import secp256k1 from "secp256k1"
 import { ethers } from "ethers"
 import Schnorrkel, { Key } from "../../src/index"
 import { pk1 } from "../config"
-import { deploySchnorAA, generateAddress } from "../deployments"
+import { deploySchnorrAA, generateAddress } from "../deployments"
 
 const ERC1271_MAGICVALUE_BYTES32 = "0x1626ba7e"
 
 describe("Single Sign Tests", function () {
   it("should generate a schnorr signature and verify onchain", async function () {
     const { address } = await generateAddress()
-    const { schnorrAA: contract } = await deploySchnorAA([address])
+    const { schnorrAA: contract } = await deploySchnorrAA([address])
 
     // sign
     const msg = "just a test message"

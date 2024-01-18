@@ -3,13 +3,12 @@ import secp256k1 from "secp256k1"
 
 import type { SchnorrAccountAbstraction } from "../typechain-types"
 import { pk1 } from "./config"
-import Schnorrkel from "../src"
 
-interface SchnorAAFixture {
+interface SchnorrAAFixture {
   schnorrAA: SchnorrAccountAbstraction
 }
 
-export async function deploySchnorAA(addresses: string[]): Promise<SchnorAAFixture> {
+export async function deploySchnorrAA(addresses: string[]): Promise<SchnorrAAFixture> {
   const [deployer] = await ethers.getSigners()
   // contract implementation
   const SchnorrAAFactory = await ethers.getContractFactory("SchnorrAccountAbstraction")
@@ -27,13 +26,4 @@ export async function generateAddress() {
   const address = "0x" + pxGeneratedAddress.slice(pxGeneratedAddress.length - 40, pxGeneratedAddress.length)
 
   return { address }
-}
-
-export async function generateCombinedPublicAddress(signerOne: any, signerTwo: any) {
-  // get the public key
-  const combinedPublicKey = Schnorrkel.getCombinedPublicKey([signerOne.getPublicKey(), signerTwo.getPublicKey()])
-  const px = ethers.hexlify(combinedPublicKey.buffer.subarray(1, 33))
-  const combinedAddress = "0x" + px.slice(px.length - 40, px.length)
-
-  return { combinedAddress }
 }

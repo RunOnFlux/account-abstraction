@@ -4,7 +4,7 @@ import Schnorrkel from "../../src/index"
 import DefaultSigner from "../../utils/DefaultSigner"
 import { _generatePk } from "../../src/core"
 import { deploySchnorrAA } from "../deployments"
-import { generateCombinedPubAddress, generateCombinedPublicAddress, generateCombinedSigDataAndHash } from "../../src/utils/schnorr-helpers"
+import { generateCombinedPubAddress, generateCombinedSigDataAndHash } from "../../src/utils/schnorr-helpers"
 
 const ERC1271_MAGICVALUE_BYTES32 = "0x1626ba7e"
 const ERC1271_INVALID_SIGNATURE = "0xffffffff"
@@ -16,7 +16,7 @@ describe("Multi Sign Tests: X of Y signers", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
+    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const isSigner = await contract.signers(combinedAddress)
@@ -43,7 +43,7 @@ describe("Multi Sign Tests: X of Y signers", function () {
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
-  it("should generate a schnorr musig2 and validate it on the blockchain", async function () {
+  it("should generate a schnorr musig2 x of y and validate onchain", async function () {
     const msg = "just a test message"
     // create signers
     const signerOne = new DefaultSigner(1)
@@ -88,5 +88,11 @@ describe("Multi Sign Tests: X of Y signers", function () {
     const { sigData: sigData23, msgHash: msgHash23 } = await generateCombinedSigDataAndHash([signerTwo, signerThree], msg)
     const result23 = await contract.isValidSignature(msgHash23, sigData23)
     expect(result23).to.equal(ERC1271_INVALID_SIGNATURE)
+
+    // 2 of 3: signer1 and signer3
+    // combined pub keys NOT passed as signer
+    const { sigData: sigData13, msgHash: msgHash13 } = await generateCombinedSigDataAndHash([signerOne, signerThree], msg)
+    const result13 = await contract.isValidSignature(msgHash13, sigData13)
+    expect(result13).to.equal(ERC1271_INVALID_SIGNATURE)
   })
 })

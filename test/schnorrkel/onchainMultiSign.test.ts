@@ -12,7 +12,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const isSigner = await contract.signers(combinedAddress)
@@ -44,7 +44,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
@@ -73,7 +73,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const signerThree = new DefaultSigner(2)
@@ -105,7 +105,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
@@ -130,7 +130,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
@@ -144,7 +144,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
@@ -173,7 +173,7 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPubAddress([signerOne, signerTwo])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
     const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"

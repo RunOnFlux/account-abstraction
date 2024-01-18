@@ -2,8 +2,9 @@ import { ethers } from "ethers"
 import Schnorrkel from "../schnorrkel"
 import DefaultSigner from "../../utils/DefaultSigner"
 import { Challenge, Key, PublicNonces, Signature, SignatureOutput } from "../types"
+import { _generatePk } from "../core"
 
-export async function generateCombinedPubAddress(signers: any[]) {
+export function generateCombinedPubAddress(signers: any[]) {
   // get the public key
   const pubKeys = signers.map((signer) => signer.getPublicKey())
 
@@ -11,7 +12,7 @@ export async function generateCombinedPubAddress(signers: any[]) {
   const px = ethers.hexlify(combinedPublicKey.buffer.subarray(1, 33))
   const combinedAddress = "0x" + px.slice(px.length - 40, px.length)
 
-  return { combinedAddress }
+  return combinedAddress
 }
 
 export async function generateCombinedSigDataAndHash(signers: DefaultSigner[], msg: string) {
@@ -38,4 +39,24 @@ export async function generateCombinedSigDataAndHash(signers: DefaultSigner[], m
   const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
 
   return { sigData, msgHash }
+}
+
+export function getAllCombinedPubAddressXofY(signers: DefaultSigner[], x: number) {
+  // example X of Y signers defined as [A, B, C]
+  // 3 of 3: [ABC]
+  // 2 of 3: [AB, AC, BC, ABC]
+  // 1 of 3: [A, B, C, AB, AC, BC, ABC]
+
+  // create array of possible signers combinations limited by given X out of Y multisignature
+  const allSignersCombos: DefaultSigner[][] = getAllCombos(signers).filter((combo) => combo.length >= x)
+  const allCombinedAddresses = allSignersCombos.map((signersCombo) =>
+    signersCombo.length > 1 ? generateCombinedPubAddress(signersCombo) : _generatePk(signersCombo[0].getPublicKey().buffer)
+  )
+
+  return allCombinedAddresses
+}
+
+export function getAllCombos(arr: any[]): any[] {
+  if (arr[0] === undefined) return [arr]
+  return getAllCombos(arr.slice(1)).flatMap((el) => [el.concat(arr[0]), el])
 }

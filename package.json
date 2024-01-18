@@ -16,6 +16,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
     "bigi": "^1.4.2",
     "ecurve": "^1.0.6",
     "secp256k1": "^5.0.0"

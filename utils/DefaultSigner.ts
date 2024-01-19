@@ -23,4 +23,8 @@ export default class DefaultSigner {
   multiSignMessage(msg: string, publicKeys: Key[], publicNonces: PublicNonces[]) {
     return schnorrkel.multiSigSign(this.#privateKey, msg, publicKeys, publicNonces)
   }
+
+  signMessage(msg: string) {
+    return Schnorrkel.sign(this.#privateKey, msg)
+  }
 }

@@ -15,6 +15,24 @@ export function generateCombinedPubAddress(signers: any[]) {
   return combinedAddress
 }
 
+export async function generateSingleSigDataAndHash(signer: DefaultSigner, msg: string) {
+  // generate signature for a signer
+  const signatureOutput: SignatureOutput = signer.signMessage(msg)
+
+  // the multisig px and parity
+  const pk = signer.getPublicKey().buffer
+  const px = ethers.hexlify(pk.subarray(1, 33))
+  const parity = pk[0] - 2 + 27
+  const { challenge: e, signature } = signatureOutput
+
+  // wrap the result
+  const abiCoder = new ethers.AbiCoder()
+  const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, signature.buffer, parity])
+  const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
+
+  return { sigData, msgHash }
+}
+
 export async function generateCombinedSigDataAndHash(signers: DefaultSigner[], msg: string) {
   const publicKeys: Key[] = signers.map((signer) => signer.getPublicKey())
   const publicNonces: PublicNonces[] = signers.map((signer) => signer.getPublicNonces())

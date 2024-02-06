@@ -1,18 +1,19 @@
 import { expect } from "chai"
 import { ethers } from "ethers"
 import Schnorrkel from "../../src/index"
-import DefaultSigner from "../../utils/DefaultSigner"
+import DefaultSigner from "../../src/types/DefaultSigner"
 import { _generatePk } from "../../src/core"
-import { deploySchnorAA, generateCombinedPublicAddress } from "../deployments"
-const ERC1271_MAGICVALUE_BYTES32 = "0x1626ba7e"
+import { deploySchnorrAA } from "../utils/deployments"
+import { generateCombinedPubAddress } from "../../src/utils/schnorrHelpers"
+import { ERC1271_MAGICVALUE_BYTES32 } from "../utils/helpers"
 
 describe("Multi Sign Tests", function () {
   it("should generate a schnorr musig2 and validate it on the blockchain", async function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const isSigner = await contract.signers(combinedAddress)
     expect(isSigner).to.equal("0x0000000000000000000000000000000000000000000000000000000000000001")
@@ -43,8 +44,8 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -72,8 +73,8 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const signerThree = new DefaultSigner(2)
     const msg = "just a test message"
@@ -81,9 +82,6 @@ describe("Multi Sign Tests", function () {
     const publicNonces = [signerOne.getPublicNonces(), signerThree.getPublicNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
 
-    //     finalPublicNonce: FinalPublicNonce, // the final public nonce
-    //   challenge: Challenge, // the schnorr challenge
-    //   signature: Signature, // the signature
     const { signature: sigOne, challenge: e } = signerOne.multiSignMessage(msg, publicKeys, publicNonces)
     const { signature: sigTwo } = signerThree.multiSignMessage(msg, publicKeys, publicNonces)
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
@@ -104,8 +102,8 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -129,8 +127,8 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -143,8 +141,8 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -172,8 +170,8 @@ describe("Multi Sign Tests", function () {
     // deploy the contract
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
-    const { combinedAddress } = await generateCombinedPublicAddress(signerOne, signerTwo)
-    const { schnorrAA: contract } = await deploySchnorAA([combinedAddress])
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerTwo.getPublicKey(), signerOne.getPublicKey()]
@@ -219,5 +217,32 @@ describe("Multi Sign Tests", function () {
     } catch (e: any) {
       expect(e.message).to.equal("At least 2 public keys should be provided")
     }
+  })
+
+  it("should successfully pass even if the order of the signatures is different", async function () {
+    // deploy the contract
+    const signerOne = new DefaultSigner(0)
+    const signerTwo = new DefaultSigner(1)
+    const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
+    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+
+    const msg = "just a test message"
+    const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
+    const publicNonces = [signerOne.getPublicNonces(), signerTwo.getPublicNonces()]
+    const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
+    const { signature: sigTwo } = signerTwo.multiSignMessage(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge: e } = signerOne.multiSignMessage(msg, publicKeys, publicNonces)
+    const sSummed = Schnorrkel.sumSigs([sigTwo, sigOne])
+
+    // the multisig px and parity
+    const px = combinedPublicKey.buffer.subarray(1, 33)
+    const parity = combinedPublicKey.buffer[0] - 2 + 27
+
+    // wrap the result
+    const abiCoder = new ethers.AbiCoder()
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
+    const result = await contract.isValidSignature(msgHash, sigData)
+    expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
 })

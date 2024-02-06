@@ -44,9 +44,9 @@ const _bCoefficient = (combinedPublicKey: Buffer, msgHash: string, publicNonces:
 const areBuffersSame = (buf1: Buffer, buf2: Buffer): boolean => {
   if (buf1.byteLength != buf2.byteLength) return false
 
-  var dv1 = Buffer.from(buf1)
-  var dv2 = Buffer.from(buf2)
-  for (var i = 0; i != buf1.byteLength; i++) {
+  const dv1 = Buffer.from(buf1)
+  const dv2 = Buffer.from(buf2)
+  for (let i = 0; i != buf1.byteLength; i++) {
     if (dv1[i] != dv2[i]) return false
   }
 
@@ -55,9 +55,9 @@ const areBuffersSame = (buf1: Buffer, buf2: Buffer): boolean => {
 
 const challenge = (R: Buffer, msgHash: string, publicKey: Buffer): Buffer => {
   // convert R to address
-  var R_uncomp = secp256k1.publicKeyConvert(R, false)
-  var R_addr_array = ethers.getBytes(ethers.keccak256(R_uncomp.slice(1, 65))).slice(12, 32)
-  var R_addr = ethers.hexlify(R_addr_array)
+  const R_uncomp = secp256k1.publicKeyConvert(R, false)
+  const R_addr_array = ethers.getBytes(ethers.keccak256(R_uncomp.slice(1, 65))).slice(12, 32)
+  const R_addr = ethers.hexlify(R_addr_array)
 
   // e = keccak256(address(R) || compressed publicKey || msgHash)
   return Buffer.from(
@@ -82,17 +82,17 @@ const internalSign = (privateKey: Buffer, hash: string): InternalSignature => {
   const publicKey = Buffer.from(secp256k1.publicKeyCreate(localPk))
 
   // R = G * k
-  var k = ethers.randomBytes(32)
-  var R = Buffer.from(secp256k1.publicKeyCreate(k))
+  const k = ethers.randomBytes(32)
+  const R = Buffer.from(secp256k1.publicKeyCreate(k))
 
   // e = h(address(R) || compressed pubkey || m)
-  var e = challenge(R, hash, publicKey)
+  const e = challenge(R, hash, publicKey)
 
   // xe = x * e
-  var xe = secp256k1.privateKeyTweakMul(localPk, e)
+  const xe = secp256k1.privateKeyTweakMul(localPk, e)
 
   // s = k + xe mod(n)
-  var s = Buffer.from(secp256k1.privateKeyTweakAdd(k, xe))
+  let s = Buffer.from(secp256k1.privateKeyTweakAdd(k, xe))
   s = bigi.fromBuffer(s).mod(n).toBuffer(32)
 
   return {

@@ -1,5 +1,5 @@
-import Schnorrkel, { Key, PublicNonces } from "../src/index"
-import { generateRandomKeys } from "../src/core"
+import Schnorrkel, { Key, PublicNonces } from "../index"
+import { generateRandomKeys } from "../core"
 const schnorrkel = new Schnorrkel()
 
 export default class DefaultSigner {
@@ -22,5 +22,9 @@ export default class DefaultSigner {
 
   multiSignMessage(msg: string, publicKeys: Key[], publicNonces: PublicNonces[]) {
     return schnorrkel.multiSigSign(this.#privateKey, msg, publicKeys, publicNonces)
+  }
+
+  signMessage(msg: string) {
+    return Schnorrkel.sign(this.#privateKey, msg)
   }
 }

@@ -3,9 +3,10 @@ pragma solidity ^0.8.12;
 
 /* solhint-disable reason-string */
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IPaymaster.sol";
-import "../interfaces/IAlchemyEntryPoint.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {UserOperation} from "./UserOperation.sol";
+import {IPaymaster} from "../interfaces/IPaymaster.sol";
+import {IEntryPoint} from "../interfaces/IEntryPoint.sol";
 
 /**
  * Helper class for creating a paymaster.
@@ -13,13 +14,13 @@ import "../interfaces/IAlchemyEntryPoint.sol";
  * validates that the postOp is called only by the entryPoint
  */
 abstract contract BasePaymaster is IPaymaster, Ownable {
-    IAlchemyEntryPoint public entryPoint;
+    IEntryPoint public entryPoint;
 
-    constructor(IAlchemyEntryPoint _entryPoint, address _owner) Ownable(_owner) {
+    constructor(IEntryPoint _entryPoint, address _owner) Ownable(_owner) {
         setEntryPoint(_entryPoint);
     }
 
-    function setEntryPoint(IAlchemyEntryPoint _entryPoint) public onlyOwner {
+    function setEntryPoint(IEntryPoint _entryPoint) public onlyOwner {
         entryPoint = _entryPoint;
     }
 

@@ -8,17 +8,19 @@ pragma solidity ^0.8.12;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
-import "../interfaces/IAlchemyAccount.sol";
-import "../interfaces/IPaymaster.sol";
-import "../interfaces/IAlchemyEntryPoint.sol";
+import {IAccount} from "../interfaces/IAccount.sol";
+import {IAggregator} from "../interfaces/IAggregator.sol";
+import {IEntryPoint} from "../interfaces/IEntryPoint.sol";
+import {IPaymaster} from "../interfaces/IPaymaster.sol";
+import {NonceManager} from "./NonceManager.sol";
+import {SenderCreator} from "./SenderCreator.sol";
+import {StakeManager} from "./StakeManager.sol";
+import {UserOperation, UserOperationLib} from "./UserOperation.sol";
 
-import "./NonceManager.sol";
-import "./StakeManager.sol";
-import "./SenderCreator.sol";
-import "../utils/Exec.sol";
-import "../utils/Helpers.sol";
+import {Exec} from "../utils/Exec.sol";
+import {ValidationData, Helper} from "../utils/Helpers.sol";
 
-contract EntryPoint is IAlchemyEntryPoint, StakeManager, NonceManager {
+contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
     using UserOperationLib for UserOperation;
 
     SenderCreator private immutable senderCreator = new SenderCreator();
@@ -190,7 +192,7 @@ contract EntryPoint is IAlchemyEntryPoint, StakeManager, NonceManager {
         UserOpInfo memory opInfo;
         _simulationOnlyValidations(op);
         (uint256 validationData, uint256 paymasterValidationData) = _validatePrepayment(0, op, opInfo);
-        ValidationData memory data = _intersectTimeRange(validationData, paymasterValidationData);
+        ValidationData memory data = Helper._intersectTimeRange(validationData, paymasterValidationData);
 
         numberMarker();
         uint256 paid = _executeUserOp(0, op, opInfo);
@@ -315,7 +317,7 @@ contract EntryPoint is IAlchemyEntryPoint, StakeManager, NonceManager {
             factoryInfo = _getStakeInfo(factory);
         }
 
-        ValidationData memory data = _intersectTimeRange(validationData, paymasterValidationData);
+        ValidationData memory data = Helper._intersectTimeRange(validationData, paymasterValidationData);
         address aggregator = data.aggregator;
         bool sigFailed = aggregator == address(1);
         ReturnInfo memory returnInfo = ReturnInfo(
@@ -431,7 +433,7 @@ contract EntryPoint is IAlchemyEntryPoint, StakeManager, NonceManager {
                 missingAccountFunds = bal > requiredPrefund ? 0 : requiredPrefund - bal;
             }
             try
-                IAlchemyAccount(sender).validateUserOp{gas: mUserOp.verificationGasLimit}(
+                IAccount(sender).validateUserOp{gas: mUserOp.verificationGasLimit}(
                     op,
                     opInfo.userOpHash,
                     missingAccountFunds
@@ -529,7 +531,7 @@ contract EntryPoint is IAlchemyEntryPoint, StakeManager, NonceManager {
         if (validationData == 0) {
             return (address(0), false);
         }
-        ValidationData memory data = _parseValidationData(validationData);
+        ValidationData memory data = Helper._parseValidationData(validationData);
         // solhint-disable-next-line not-rely-on-time
         outOfTimeRange = block.timestamp > data.validUntil || block.timestamp < data.validAfter;
         aggregator = data.aggregator;

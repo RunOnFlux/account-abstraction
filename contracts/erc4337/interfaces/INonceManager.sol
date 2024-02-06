@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
-interface IAlchemyNonceManager {
+interface INonceManager {
     /**
      * Return the next nonce for this sender.
      * Within a given key, the nonce values are sequenced (starting with zero, and incremented by one on each userop)

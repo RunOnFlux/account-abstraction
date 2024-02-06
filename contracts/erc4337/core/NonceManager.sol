@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
-import "../interfaces/IAlchemyEntryPoint.sol";
+import {INonceManager} from "../interfaces/IEntryPoint.sol";
 
 /**
  * nonce management functionality
  */
-abstract contract NonceManager is IAlchemyNonceManager {
+abstract contract NonceManager is INonceManager {
     /**
      * The next valid sequence number for a given nonce key.
      */

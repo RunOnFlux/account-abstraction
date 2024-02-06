@@ -4,16 +4,16 @@ pragma solidity ^0.8.12;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-empty-blocks */
 
-import "./AlchemyHelpers.sol";
-import "../interfaces/IAlchemyAccount.sol";
-import "../interfaces/IAlchemyEntryPoint.sol";
+import {IAccount} from "../interfaces/IAccount.sol";
+import {IEntryPoint} from "../interfaces/IEntryPoint.sol";
+import {UserOperation, UserOperationLib} from "./UserOperation.sol";
 
 /**
  * Basic account implementation.
  * this contract provides the basic logic for implementing the IAccount interface  - validateUserOp
  * specific account implementation should inherit it and provide the account-specific logic
  */
-abstract contract AlchemyBaseAccount is IAlchemyAccount {
+abstract contract BaseAccount is IAccount {
     using UserOperationLib for UserOperation;
 
     //return value in case of signature failure, with no time-range.
@@ -33,7 +33,7 @@ abstract contract AlchemyBaseAccount is IAlchemyAccount {
      * return the entryPoint used by this account.
      * subclass should return the current entryPoint used by this account.
      */
-    function entryPoint() public view virtual returns (IAlchemyEntryPoint);
+    function entryPoint() public view virtual returns (IEntryPoint);
 
     /**
      * Validate user's signature and nonce.

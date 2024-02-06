@@ -9,12 +9,12 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "./IStakeManager.sol";
-import "./IAggregator.sol";
-import "./IAlchemyNonceManager.sol";
-import "../core/UserOperation.sol";
+import {IStakeManager} from "./IStakeManager.sol";
+import {IAggregator} from "./IAggregator.sol";
+import {INonceManager} from "./INonceManager.sol";
+import {UserOperation} from "../core/UserOperation.sol";
 
-interface IAlchemyEntryPoint is IStakeManager, IAlchemyNonceManager {
+interface IEntryPoint is IStakeManager, INonceManager {
     /***
      * An event emitted after each successful request
      * @param userOpHash - unique identifier for the request (hash its entire content, except signature).

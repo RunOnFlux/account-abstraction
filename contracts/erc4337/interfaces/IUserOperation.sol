@@ -3,7 +3,7 @@ pragma solidity ^0.8.12;
 
 import {UserOperation} from "../core/UserOperation.sol";
 
-interface IAlchemyAccount {
+interface IAccount {
     /**
      * Validate user's signature and nonce
      * the entryPoint will make the call to the recipient only if this validation call returns successfully.

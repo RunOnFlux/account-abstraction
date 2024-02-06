@@ -1,11 +1,11 @@
 import { expect } from "chai"
 import { ethers } from "ethers"
-import Schnorrkel from "../../src/index"
 import DefaultSigner from "../../src/types/DefaultSigner"
 import { _generatePk } from "../../src/core"
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { generateCombinedPubAddress } from "../../src/utils/schnorrHelpers"
 import { ERC1271_MAGICVALUE_BYTES32, SIGNER_ROLE_HASH } from "../utils/helpers"
+import Schnorrkel from "../../src/schnorrkel"
 
 describe("Multi Sign Tests", function () {
   it("should generate a schnorr musig2 and validate it on the blockchain", async function () {

@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import "@nomicfoundation/hardhat-chai-matchers"
 
-import Schnorrkel from "../../src/index"
 import { _hashPrivateKey, generateRandomKeys } from "../../src/core"
+import Schnorrkel from "../../src/schnorrkel"
 
 describe("testing generatePublicNonces", () => {
   it("should generate public nonces", () => {

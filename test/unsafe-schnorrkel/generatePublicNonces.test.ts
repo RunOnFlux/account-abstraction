@@ -1,7 +1,7 @@
 import { expect } from "chai"
 
-import { UnsafeSchnorrkel } from "../../src/index"
 import { _hashPrivateKey, generateRandomKeys } from "../../src/core"
+import UnsafeSchnorrkel from "../../src/unsafeSchnorrkel"
 
 describe("testing generatePublicNonces", () => {
   it("should overwrite public nonces with same private key", () => {

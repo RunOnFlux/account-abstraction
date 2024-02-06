@@ -1,10 +1,11 @@
 import { expect } from "chai"
 import secp256k1 from "secp256k1"
 import { ethers } from "ethers"
-import Schnorrkel, { Key } from "../../src/index"
 import { pk1 } from "../utils/config"
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, generateAddress } from "../utils/helpers"
+import { Key } from "../../src/types"
+import Schnorrkel from "../../src/schnorrkel"
 
 describe("Single Sign Tests", function () {
   it("should generate a schnorr signature and verify onchain", async function () {

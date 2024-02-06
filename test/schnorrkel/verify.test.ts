@@ -1,8 +1,9 @@
 import { expect } from "chai"
 
-import Schnorrkel, { Key } from "../../src/index"
 import { _hashPrivateKey, generateRandomKeys } from "../../src/core"
 import { SigningKey, ethers } from "ethers"
+import Schnorrkel from "../../src/schnorrkel"
+import { Key } from "../../src/types"
 
 describe("testing verify", () => {
   it("should verify a normal schnorr signature and make sure sign does not overwrite the private key", () => {

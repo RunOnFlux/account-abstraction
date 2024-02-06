@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import Schnorrkel from "../../src/index"
+import Schnorrkel from "../../src/schnorrkel"
 import { generateRandomKeys } from "../../src/core"
 
 describe("testing getCombinedAddress", () => {

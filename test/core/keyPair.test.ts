@@ -1,7 +1,7 @@
 import { expect } from "chai"
 
-import { KeyPair } from "../../src/index"
 import { _hashPrivateKey, generateRandomKeys } from "../../src/core"
+import { KeyPair } from "../../src/types"
 
 describe("testing KeyPair", () => {
   it("should load from json", () => {

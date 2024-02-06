@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import Schnorrkel from "../../src/index"
+import Schnorrkel from "../../src/schnorrkel"
 import { _hashPrivateKey, generateRandomKeys } from "../../src/core"
 import { ethers } from "ethers"
 

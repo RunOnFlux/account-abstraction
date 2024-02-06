@@ -1,21 +1,16 @@
 import { expect } from "chai"
-import { ethers, hashMessage } from "ethers"
-import Schnorrkel from "../../src/index"
-import DefaultSigner from "../../utils/DefaultSigner"
+import { hashMessage } from "ethers"
+import DefaultSigner from "../../src/types/DefaultSigner"
 import { _generatePk } from "../../src/core"
-import { deploySchnorrAA } from "../deployments"
+import { deploySchnorrAA } from "../utils/deployments"
 import {
   generateCombinedPubAddress,
   generateCombinedSigDataAndHash,
   generateSingleSigDataAndHash,
   getAllCombinedPubAddressXofY,
-} from "../../src/utils/schnorr-helpers"
+} from "../../src/utils/schnorrHelpers"
 import { SchnorrAccountAbstraction } from "../../typechain-types"
-
-const ERC1271_MAGICVALUE_BYTES32 = "0x1626ba7e"
-const ERC1271_INVALID_SIGNATURE = "0xffffffff"
-const HEX_ZERO = "0x0000000000000000000000000000000000000000000000000000000000000000"
-const HEX_ONE = "0x0000000000000000000000000000000000000000000000000000000000000001"
+import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, HEX_ONE, HEX_ZERO } from "../utils/helpers"
 
 let contract: SchnorrAccountAbstraction
 let combinedAdd12: string

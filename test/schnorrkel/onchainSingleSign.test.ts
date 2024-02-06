@@ -3,13 +3,13 @@ import secp256k1 from "secp256k1"
 import { ethers } from "ethers"
 import Schnorrkel, { Key } from "../../src/index"
 import { pk1 } from "../utils/config"
-import { deploySchnorrAA } from "../utils/deployments"
+import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, generateAddress } from "../utils/helpers"
 
 describe("Single Sign Tests", function () {
   it("should generate a schnorr signature and verify onchain", async function () {
     const { address } = await generateAddress(pk1)
-    const { schnorrAA: contract } = await deploySchnorrAA([address])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([address])
 
     // sign
     const msg = "just a test message"
@@ -28,7 +28,7 @@ describe("Single Sign Tests", function () {
   })
   it("should fail if msgHash is different than msg signed", async function () {
     const { address } = await generateAddress(pk1)
-    const { schnorrAA: contract } = await deploySchnorrAA([address])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([address])
 
     // sign
     const msg = "just a test message"

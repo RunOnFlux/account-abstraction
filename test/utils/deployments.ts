@@ -1,17 +1,35 @@
 import { ethers } from "hardhat"
+import {
+  MultiSigSmartAccount,
+  MultiSigSmartAccountFactory,
+  MultiSigSmartAccountFactory__factory,
+  MultiSigSmartAccount__factory,
+} from "../../typechain-types"
+import { getEventLog, getSalt } from "./helpers"
+import { ENTRY_POINT_ALCHEMY_ADDRESS } from "../../src/utils/constants"
 
-import type { SchnorrAccountAbstraction } from "../../typechain-types"
-
-interface SchnorrAAFixture {
-  schnorrAA: SchnorrAccountAbstraction
+interface MultiSigSmartAccountSet {
+  mssaFactory: MultiSigSmartAccountFactory
+  schnorrAA: MultiSigSmartAccount
 }
 
-export async function deploySchnorrAA(addresses: string[]): Promise<SchnorrAAFixture> {
+export async function deployMultiSigSmartAccount(combinedPubKeys: string[]): Promise<MultiSigSmartAccountSet> {
   const [deployer] = await ethers.getSigners()
-  // contract implementation
-  const SchnorrAAFactory = await ethers.getContractFactory("SchnorrAccountAbstraction")
+  const _salt = getSalt("salt")
 
-  const schnorrAA = (await SchnorrAAFactory.connect(deployer).deploy(addresses)) as unknown as SchnorrAccountAbstraction
+  const mssaFactory = (await new MultiSigSmartAccountFactory__factory(deployer).deploy(
+    ENTRY_POINT_ALCHEMY_ADDRESS
+  )) as MultiSigSmartAccountFactory
 
-  return { schnorrAA }
+  // create new account
+  const createTx = await mssaFactory.connect(deployer).createAccount(deployer.address, combinedPubKeys, _salt)
+
+  const predictedAddress = await mssaFactory.getAccountAddress(deployer.address, combinedPubKeys, _salt)
+  const event = await getEventLog(createTx, mssaFactory, "SmartAccountCreated")
+  const accountAddress = event.args[0]
+  if (accountAddress != predictedAddress) throw new Error(`Predicted address differs from created account's address`)
+
+  const schnorrAA = new MultiSigSmartAccount__factory(deployer).attach(predictedAddress) as MultiSigSmartAccount
+
+  return { mssaFactory, schnorrAA }
 }

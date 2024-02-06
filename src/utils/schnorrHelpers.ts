@@ -78,3 +78,7 @@ export function getAllCombos(arr: any[]): any[] {
   if (arr[0] === undefined) return [arr]
   return getAllCombos(arr.slice(1)).flatMap((el) => [el.concat(arr[0]), el])
 }
+
+export const hashMsgKeccak256 = (message: string): string => {
+  return ethers.solidityPackedKeccak256(["string"], [message])
+}

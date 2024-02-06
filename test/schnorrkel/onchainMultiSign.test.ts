@@ -3,9 +3,9 @@ import { ethers } from "ethers"
 import Schnorrkel from "../../src/index"
 import DefaultSigner from "../../src/types/DefaultSigner"
 import { _generatePk } from "../../src/core"
-import { deploySchnorrAA } from "../utils/deployments"
+import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { generateCombinedPubAddress } from "../../src/utils/schnorrHelpers"
-import { ERC1271_MAGICVALUE_BYTES32 } from "../utils/helpers"
+import { ERC1271_MAGICVALUE_BYTES32, SIGNER_ROLE_HASH } from "../utils/helpers"
 
 describe("Multi Sign Tests", function () {
   it("should generate a schnorr musig2 and validate it on the blockchain", async function () {
@@ -13,10 +13,9 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
-    const isSigner = await contract.signers(combinedAddress)
-    expect(isSigner).to.equal("0x0000000000000000000000000000000000000000000000000000000000000001")
+    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAddress)).to.be.eq(true)
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -45,7 +44,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -74,7 +73,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const signerThree = new DefaultSigner(2)
     const msg = "just a test message"
@@ -103,7 +102,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -128,7 +127,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -142,7 +141,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]
@@ -171,7 +170,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerTwo.getPublicKey(), signerOne.getPublicKey()]
@@ -224,7 +223,7 @@ describe("Multi Sign Tests", function () {
     const signerOne = new DefaultSigner(0)
     const signerTwo = new DefaultSigner(1)
     const combinedAddress = generateCombinedPubAddress([signerOne, signerTwo])
-    const { schnorrAA: contract } = await deploySchnorrAA([combinedAddress])
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([combinedAddress])
 
     const msg = "just a test message"
     const publicKeys = [signerOne.getPublicKey(), signerTwo.getPublicKey()]

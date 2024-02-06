@@ -8,6 +8,7 @@
     "/dist"
   ],
   "scripts": {
+    "reinstall": "rm -rf node_modules/ && npm install",
     "clear": "rm -rf dist",
     "prettier:format": "prettier --write \"deploy/**/*.ts\" \"scripts/**/*.ts\" \"test/**/*.ts\"",
     "prettier:fix": "prettier --config ./.prettierrc --ignore-path ./prettierignore --write .",
@@ -40,7 +41,7 @@
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.3",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "@nomicfoundation/hardhat-verify": "^2.0.4",
     "@types/ecurve": "^1.0.0",
     "@types/elliptic": "^6.4.14",
     "@types/secp256k1": "^4.0.3",

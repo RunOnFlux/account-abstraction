@@ -2,11 +2,11 @@ import dotenv from "dotenv"
 
 import { HardhatUserConfig } from "hardhat/config"
 
-import "hardhat-deploy"
-import "@nomiclabs/hardhat-ethers"
-import "@nomiclabs/hardhat-etherscan"
 import "@nomicfoundation/hardhat-chai-matchers"
+import "@nomicfoundation/hardhat-ethers"
 import "@nomicfoundation/hardhat-network-helpers"
+import "@nomicfoundation/hardhat-toolbox"
+import "@nomicfoundation/hardhat-verify"
 import "@typechain/hardhat"
 
 import "hardhat-deploy"
@@ -21,7 +21,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.20",
   typechain: {
     outDir: "src/typechain",
-    target: "ethers-v5",
+    target: "ethers-v6",
   },
 
   defaultNetwork: "hardhat",

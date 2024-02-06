@@ -13,6 +13,7 @@ import {BaseAccount} from "./erc4337/core/BaseAccount.sol";
 import {UserOperation, UserOperationLib} from "./erc4337/core/UserOperation.sol";
 import {TokenCallbackHandler} from "./erc4337/utils/TokenCallbackHandler.sol";
 import {Schnorr} from "./schnorr/Schnorr.sol";
+import {IMultiSigSmartAccount} from "./interfaces/IMultiSigSmartAccount.sol";
 
 /**
  * @dev MultiSigSmartAccount
@@ -20,6 +21,7 @@ import {Schnorr} from "./schnorr/Schnorr.sol";
  * - Schnorr signature verifications for multisig
  */
 contract MultiSigSmartAccount is
+    IMultiSigSmartAccount,
     BaseAccount,
     TokenCallbackHandler,
     UUPSUpgradeable,
@@ -38,13 +40,11 @@ contract MultiSigSmartAccount is
 
     IEntryPoint private immutable _entryPoint;
 
-    event SimpleAccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
-
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint EntryPoint) {
-        _entryPoint = EntryPoint;
+    constructor(IEntryPoint defaultEntryPoint) {
+        _entryPoint = defaultEntryPoint;
         _disableInitializers();
     }
 
@@ -81,7 +81,7 @@ contract MultiSigSmartAccount is
         for (uint i = 0; i < len; i++) {
             _grantRole(SIGNER_ROLE, combinedPubKeys[i]);
         }
-        emit SimpleAccountInitialized(_entryPoint, owner);
+        emit AccountInitialized(address(entryPoint()), owner);
     }
 
     // Require the function call went through EntryPoint or owner

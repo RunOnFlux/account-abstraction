@@ -6,6 +6,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 import {IEntryPoint} from "./erc4337/interfaces/IEntryPoint.sol";
 import {MultiSigSmartAccount} from "./MultiSigSmartAccount.sol";
+import {IMultiSigSmartAccountFactory} from "./interfaces/IMultiSigSmartAccountFactory.sol";
 
 /**
  * A sample factory contract for SimpleAccount
@@ -13,9 +14,7 @@ import {MultiSigSmartAccount} from "./MultiSigSmartAccount.sol";
  * The factory's createAccount returns the target account address even if it is already installed.
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
-contract MultiSigSmartAccountFactory {
-    event SmartAccountCreated(address smartAccount);
-
+contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
     MultiSigSmartAccount public immutable accountImplementation;
 
     constructor(IEntryPoint _entryPoint) {
@@ -46,7 +45,7 @@ contract MultiSigSmartAccountFactory {
                 )
             )
         );
-        emit SmartAccountCreated(addr);
+        emit AccountCreated(addr);
     }
 
     /**

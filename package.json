@@ -29,7 +29,7 @@
     "export-deployments": "npm run export-deployments-mumbai",
     "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi && npm run generate-index && npm run export-deployments",
     "build": "tsc --project tsconfig.build.json",
-    "verify": "npx hardhat verify --network polygon-mumbai 0x914a769A51f6796d12835a623EBdB2CEEf3c0fF4 '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789'"
+    "verify": "npx hardhat verify --network polygon-mumbai <DEPLOYED_CONTRACT_ADDRESS> <ARGS>"
   },
   "author": "",
   "license": "MIT",

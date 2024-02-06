@@ -1,1 +1,1 @@
-export * as SchnorrHelpers from "./schnorr-helpers"
+export * as SchnorrHelpers from "./schnorrHelpers"

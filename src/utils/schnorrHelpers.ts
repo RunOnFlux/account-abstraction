@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
 import Schnorrkel from "../schnorrkel"
-import DefaultSigner from "../../utils/DefaultSigner"
+import DefaultSigner from "../types/DefaultSigner"
 import { Challenge, Key, PublicNonces, Signature, SignatureOutput } from "../types"
 import { _generatePk } from "../core"
 

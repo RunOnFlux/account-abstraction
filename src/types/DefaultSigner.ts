@@ -1,5 +1,5 @@
-import Schnorrkel, { Key, PublicNonces } from "../src/index"
-import { generateRandomKeys } from "../src/core"
+import Schnorrkel, { Key, PublicNonces } from "../index"
+import { generateRandomKeys } from "../core"
 const schnorrkel = new Schnorrkel()
 
 export default class DefaultSigner {

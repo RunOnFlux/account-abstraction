@@ -1,8 +1,6 @@
 import { ethers } from "hardhat"
-import secp256k1 from "secp256k1"
 
-import type { SchnorrAccountAbstraction } from "../typechain-types"
-import { pk1 } from "./config"
+import type { SchnorrAccountAbstraction } from "../../typechain-types"
 
 interface SchnorrAAFixture {
   schnorrAA: SchnorrAccountAbstraction
@@ -16,14 +14,4 @@ export async function deploySchnorrAA(addresses: string[]): Promise<SchnorrAAFix
   const schnorrAA = (await SchnorrAAFactory.connect(deployer).deploy(addresses)) as unknown as SchnorrAccountAbstraction
 
   return { schnorrAA }
-}
-
-export async function generateAddress() {
-  // the eth address
-  const publicKey = secp256k1.publicKeyCreate(ethers.getBytes(pk1))
-  const px = publicKey.slice(1, 33)
-  const pxGeneratedAddress = ethers.hexlify(px)
-  const address = "0x" + pxGeneratedAddress.slice(pxGeneratedAddress.length - 40, pxGeneratedAddress.length)
-
-  return { address }
 }

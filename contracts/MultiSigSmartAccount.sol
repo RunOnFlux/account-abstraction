@@ -16,8 +16,9 @@ import {Schnorr} from "./schnorr/Schnorr.sol";
 import {IMultiSigSmartAccount} from "./interfaces/IMultiSigSmartAccount.sol";
 
 /**
- * @dev MultiSigSmartAccount
- * - ERC4337 Account Abstraction functionality
+ * MultiSigSmartAccount
+ * this contract was designed to integrate implementations of:
+ * - ERC4337 Account Abstraction
  * - Schnorr signature verifications for multisig
  */
 contract MultiSigSmartAccount is
@@ -43,28 +44,9 @@ contract MultiSigSmartAccount is
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint defaultEntryPoint) {
-        _entryPoint = defaultEntryPoint;
+    constructor(IEntryPoint EntryPoint) {
+        _entryPoint = EntryPoint;
         _disableInitializers();
-    }
-
-    /**
-     * execute a transaction (called directly from owner, or by entryPoint)
-     */
-    function execute(address dest, uint256 value, bytes calldata func) external {
-        _requireFromEntryPointOrOwner();
-        _call(dest, value, func);
-    }
-
-    /**
-     * execute a sequence of transactions
-     */
-    function executeBatch(address[] calldata dest, bytes[] calldata func) external {
-        _requireFromEntryPointOrOwner();
-        require(dest.length == func.length, "wrong array lengths");
-        for (uint256 i = 0; i < dest.length; i++) {
-            _call(dest[i], 0, func[i]);
-        }
     }
 
     /**
@@ -81,66 +63,30 @@ contract MultiSigSmartAccount is
         for (uint i = 0; i < len; i++) {
             _grantRole(SIGNER_ROLE, combinedPubKeys[i]);
         }
-        emit AccountInitialized(address(entryPoint()), owner);
+        emit SimpleAccountInitialized(_entryPoint, owner);
     }
 
-    // Require the function call went through EntryPoint or owner
-    function _requireFromEntryPointOrOwner() internal view {
-        require(
-            msg.sender == address(entryPoint()) || hasRole(OWNER_ROLE, msg.sender),
-            "account: not Owner or EntryPoint"
-        );
+    /**
+     * @dev execute a transaction (called directly from owner, or by entryPoint)
+     *
+     * @param dest destination address
+     * @param value tx values
+     * @param func tx data
+     */
+    function execute(address dest, uint256 value, bytes calldata func) external {
+        _requireFromEntryPointOrOwner();
+        _call(dest, value, func);
     }
 
-    /// implement template method of BaseAccount
-    function _validateSignature(
-        UserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal virtual override returns (uint256 validationData) {
-        bytes32 _hash = userOpHash.toEthSignedMessageHash();
-        address recovered = _verifySchnorr(_hash, userOp.signature);
-        if (!hasRole(SIGNER_ROLE, recovered)) return SIG_VALIDATION_FAILED;
-        return 0;
-    }
-
-    function _call(address target, uint256 value, bytes memory data) internal {
-        (bool success, bytes memory result) = target.call{value: value}(data);
-        if (!success) {
-            assembly {
-                revert(add(result, 32), mload(result))
-            }
+    /**
+     * @dev execute a sequence of transactions
+     */
+    function executeBatch(address[] calldata dest, bytes[] calldata func) external {
+        _requireFromEntryPointOrOwner();
+        require(dest.length == func.length, "wrong array lengths");
+        for (uint256 i = 0; i < dest.length; i++) {
+            _call(dest[i], 0, func[i]);
         }
-    }
-
-    /**
-     * check current account deposit in the entryPoint
-     */
-    function getDeposit() public view returns (uint256) {
-        return entryPoint().balanceOf(address(this));
-    }
-
-    /**
-     * deposit more funds for this account in the entryPoint
-     */
-    function addDeposit() public payable {
-        entryPoint().depositTo{value: msg.value}(address(this));
-    }
-
-    /**
-     * withdraw value from the account's deposit
-     * @param withdrawAddress target to send to
-     * @param amount to withdraw
-     */
-    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public onlyRole(OWNER_ROLE) {
-        entryPoint().withdrawTo(withdrawAddress, amount);
-    }
-
-    /**
-     * @dev See {UUPSUpgradeable}.
-     * The {_authorizeUpgrade} function must be overridden to include access restriction to the upgrade mechanism.
-     */
-    function _authorizeUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
-        (newImplementation);
     }
 
     /**
@@ -163,9 +109,78 @@ contract MultiSigSmartAccount is
         }
     }
 
-    /// @inheritdoc BaseAccount
+    /**
+     * @dev Returns entryPoint
+     * @inheritdoc BaseAccount
+     */
     function entryPoint() public view virtual override returns (IEntryPoint) {
         return _entryPoint;
+    }
+
+    /**
+     * withdraw value from the account's deposit
+     * @param withdrawAddress target to send to
+     * @param amount to withdraw
+     */
+    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public onlyRole(OWNER_ROLE) {
+        entryPoint().withdrawTo(withdrawAddress, amount);
+    }
+
+    /**
+     * deposit more funds for this account in the entryPoint
+     */
+    function addDeposit() public payable {
+        entryPoint().depositTo{value: msg.value}(address(this));
+    }
+
+    /**
+     * check current account deposit in the entryPoint
+     */
+    function getDeposit() public view returns (uint256) {
+        return entryPoint().balanceOf(address(this));
+    }
+
+    /**
+     * Require the function call went through EntryPoint or owner
+     */
+    function _requireFromEntryPointOrOwner() internal view {
+        require(
+            msg.sender == address(entryPoint()) || hasRole(OWNER_ROLE, msg.sender),
+            "account: not Owner or EntryPoint"
+        );
+    }
+
+    /**
+     * Validate the signature is valid for this message.
+     * @inheritdoc BaseAccount
+     */
+    function _validateSignature(
+        UserOperation calldata userOp,
+        bytes32 userOpHash
+    ) internal virtual override returns (uint256 validationData) {
+        emit TestUserOp(userOp);
+
+        address recovered = _verifySchnorr(userOpHash, userOp.signature);
+        emit TestRecovered(hasRole(SIGNER_ROLE, recovered), recovered);
+        if (!hasRole(SIGNER_ROLE, recovered)) return SIG_VALIDATION_FAILED;
+        return 0;
+    }
+
+    function _call(address target, uint256 value, bytes memory data) internal {
+        (bool success, bytes memory result) = target.call{value: value}(data);
+        if (!success) {
+            assembly {
+                revert(add(result, 32), mload(result))
+            }
+        }
+    }
+
+    /**
+     * @dev See {UUPSUpgradeable}.
+     * The {_authorizeUpgrade} function must be overridden to include access restriction to the upgrade mechanism.
+     */
+    function _authorizeUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
+        (newImplementation);
     }
 
     /**

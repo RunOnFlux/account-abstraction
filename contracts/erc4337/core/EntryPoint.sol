@@ -8,19 +8,20 @@ pragma solidity ^0.8.12;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
-import {IAccount} from "../interfaces/IAccount.sol";
-import {IAggregator} from "../interfaces/IAggregator.sol";
-import {IEntryPoint} from "../interfaces/IEntryPoint.sol";
-import {IPaymaster} from "../interfaces/IPaymaster.sol";
-import {NonceManager} from "./NonceManager.sol";
-import {SenderCreator} from "./SenderCreator.sol";
-import {StakeManager} from "./StakeManager.sol";
+import "../interfaces/IAccount.sol";
+import "../interfaces/IPaymaster.sol";
+import "../interfaces/IEntryPoint.sol";
+
+import "../utils/Exec.sol";
+import "../utils/Helpers.sol";
+import "./StakeManager.sol";
+import "./SenderCreator.sol";
+import "./NonceManager.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 import {UserOperation, UserOperationLib} from "./UserOperation.sol";
 
-import {Exec} from "../utils/Exec.sol";
-import {ValidationData, Helper} from "../utils/Helpers.sol";
-
-contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
+contract EntryPoint is IEntryPoint, StakeManager, NonceManager, ReentrancyGuard {
     using UserOperationLib for UserOperation;
 
     SenderCreator private immutable senderCreator = new SenderCreator();
@@ -93,7 +94,7 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
      * @param ops the operations to execute
      * @param beneficiary the address to receive the fees
      */
-    function handleOps(UserOperation[] calldata ops, address payable beneficiary) public {
+    function handleOps(UserOperation[] calldata ops, address payable beneficiary) public nonReentrant {
         uint256 opslen = ops.length;
         UserOpInfo[] memory opInfos = new UserOpInfo[](opslen);
 
@@ -105,6 +106,7 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
             }
 
             uint256 collected = 0;
+            emit BeforeExecution();
 
             for (uint256 i = 0; i < opslen; i++) {
                 collected += _executeUserOp(i, ops[i], opInfos[i]);
@@ -119,7 +121,10 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
      * @param opsPerAggregator the operations to execute, grouped by aggregator (or address(0) for no-aggregator accounts)
      * @param beneficiary the address to receive the fees
      */
-    function handleAggregatedOps(UserOpsPerAggregator[] calldata opsPerAggregator, address payable beneficiary) public {
+    function handleAggregatedOps(
+        UserOpsPerAggregator[] calldata opsPerAggregator,
+        address payable beneficiary
+    ) public nonReentrant {
         uint256 opasLen = opsPerAggregator.length;
         uint256 totalOps = 0;
         for (uint256 i = 0; i < opasLen; i++) {
@@ -141,6 +146,8 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
         }
 
         UserOpInfo[] memory opInfos = new UserOpInfo[](totalOps);
+
+        emit BeforeExecution();
 
         uint256 opIndex = 0;
         for (uint256 a = 0; a < opasLen; a++) {
@@ -184,6 +191,7 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
         _compensate(beneficiary, collected);
     }
 
+    /// @inheritdoc IEntryPoint
     function simulateHandleOp(
         UserOperation calldata op,
         address target,
@@ -338,7 +346,7 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
 
     function _getRequiredPrefund(MemoryUserOp memory mUserOp) internal pure returns (uint256 requiredPrefund) {
         unchecked {
-            //when using a BasePaymaster, the verificationGasLimit is used also to as a limit for the postOp call.
+            //when using a Paymaster, the verificationGasLimit is used also to as a limit for the postOp call.
             // our security model might call postOp eventually twice
             uint256 mul = mUserOp.paymaster != address(0) ? 3 : 1;
             uint256 requiredGas = mUserOp.callGasLimit +
@@ -371,7 +379,8 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
      * @param initCode the constructor code to be passed into the UserOperation.
      */
     function getSenderAddress(bytes calldata initCode) public {
-        revert SenderAddressResult(senderCreator.createSender(initCode));
+        address sender = senderCreator.createSender(initCode);
+        revert SenderAddressResult(sender);
     }
 
     function _simulationOnlyValidations(UserOperation calldata userOp) internal view {
@@ -571,6 +580,11 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager {
             outOpInfo,
             requiredPreFund
         );
+
+        if (!_validateAndUpdateNonce(mUserOp.sender, mUserOp.nonce)) {
+            revert FailedOp(opIndex, "AA25 invalid account nonce");
+        }
+
         //a "marker" where account opcode validation is done and paymaster opcode validation is about to start
         // (used only by off-chain simulateValidation)
         numberMarker();

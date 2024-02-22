@@ -4,9 +4,8 @@ pragma solidity ^0.8.12;
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {IEntryPoint} from "./erc4337/interfaces/IEntryPoint.sol";
 import {MultiSigSmartAccount} from "./MultiSigSmartAccount.sol";
-import {IMultiSigSmartAccountFactory} from "./interfaces/IMultiSigSmartAccountFactory.sol";
+import {IEntryPoint} from "./erc4337/interfaces/IEntryPoint.sol";
 
 /**
  * A sample factory contract for SimpleAccount
@@ -14,7 +13,9 @@ import {IMultiSigSmartAccountFactory} from "./interfaces/IMultiSigSmartAccountFa
  * The factory's createAccount returns the target account address even if it is already installed.
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
-contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
+contract MultiSigSmartAccountFactory {
+    event SmartAccountCreated(address smartAccount);
+
     MultiSigSmartAccount public immutable accountImplementation;
 
     constructor(IEntryPoint _entryPoint) {
@@ -22,10 +23,15 @@ contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
     }
 
     /**
-     * create an account, and return its address.
-     * returns the address even if the account is already deployed.
+     * @dev create an account, and return its address.
+     * Create an account, and return its address.
+     * Returns the address even if the account is already deployed.
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
+     *
+     * @param owner account owner
+     * @param combinedPubKeys combined schnorr signers' public keys
+     * @param salt salt
      */
     function createAccount(
         address owner,
@@ -45,11 +51,15 @@ contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
                 )
             )
         );
-        emit AccountCreated(addr);
+        emit SmartAccountCreated(addr);
     }
 
     /**
-     * calculate the counterfactual address of this account as it would be returned by createAccount()
+     * @dev calculate the counterfactual address of this account as it would be returned by createAccount()
+     *
+     * @param owner account owner
+     * @param combinedPubKeys combined schnorr signers' public keys
+     * @param salt salt
      */
     function getAccountAddress(
         address owner,

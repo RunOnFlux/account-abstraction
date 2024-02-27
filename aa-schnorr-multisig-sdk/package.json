@@ -4,6 +4,9 @@
   "description": "Account Abstraction Schnorr Multi-Signatures SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
     "copy": "../scripts/copy.sh",
     "prebuild": "npm run copy",

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": false
+  },
+  "include": [
+    "./src",
+    "./scripts",
+    "./test",
+    "./typechain",
+    "./deploy",
+    "./shared",
+    "./config",
+    "./aa-schnorr-multisig-sdk/src"
+  ],
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "files": ["hardhat.config.ts"]
+}

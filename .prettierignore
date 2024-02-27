@@ -1,0 +1,12 @@
+.github
+.vscode
+node_modules
+artifacts
+cache
+coverage*
+gasReporterOutput.json
+dist
+typechain
+deployments
+deploymentManager
+README.md

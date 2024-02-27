@@ -1,31 +1,31 @@
-import { ContractTransactionResponse, EventLog } from "ethers"
-import { ethers } from "hardhat"
+import { ethers, providers, utils } from "ethers"
 import secp256k1 from "secp256k1"
-
-export const ERC1271_MAGICVALUE_BYTES32 = "0x1626ba7e"
-export const ERC1271_INVALID_SIGNATURE = "0xffffffff"
-export const HEX_ZERO = "0x0000000000000000000000000000000000000000000000000000000000000000"
-export const HEX_ONE = "0x0000000000000000000000000000000000000000000000000000000000000001"
-export const OWNER_ROLE_HASH = ethers.solidityPackedKeccak256(["string"], ["OWNER_ROLE"])
-export const SIGNER_ROLE_HASH = ethers.solidityPackedKeccak256(["string"], ["SIGNER_ROLE"])
+import { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
+import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 
 export async function generateAddress(pk: string) {
   // the eth address
-  const publicKey = secp256k1.publicKeyCreate(ethers.getBytes(pk))
+  const publicKey = secp256k1.publicKeyCreate(ethers.utils.arrayify(pk))
   const px = publicKey.slice(1, 33)
-  const pxGeneratedAddress = ethers.hexlify(px)
+  const pxGeneratedAddress = ethers.utils.hexlify(px)
   const address = "0x" + pxGeneratedAddress.slice(pxGeneratedAddress.length - 40, pxGeneratedAddress.length)
 
   return { address }
 }
 
-export const getSalt = (salt: string) => ethers.keccak256(ethers.toUtf8Bytes(salt))
+export const getSalt = (salt: string) => ethers.utils.keccak256(ethers.utils.toUtf8Bytes(salt))
 
-export async function getEventLog(tx: ContractTransactionResponse, contract: any, eventName: string): Promise<EventLog> {
-  const receipt = await tx.wait()
+export async function getEvent(tx: providers.TransactionResponse, contract: any, eventName: string) {
+  const receipt = await contract.provider.getTransactionReceipt(tx.hash)
   const eventFragment = contract.interface.getEvent(eventName)
-  const topic = eventFragment?.topicHash
-  const logs = (receipt?.logs?.filter((log: any) => log.topics.includes(topic)) ?? "") as EventLog[]
+  const topic = contract.interface.getEventTopic(eventFragment)
+  const logs = receipt.logs?.filter((log) => log.topics.includes(topic)) ?? ""
   if (logs.length === 0) throw new Error(`Event ${eventName} was not emmited`)
-  return logs[0]
+
+  return contract.interface.parseLog(logs[0])
+}
+
+export function createRandomSchnorrSigner(): SchnorrSigner {
+  const keys = generateRandomKeys()
+  return new SchnorrSigner(keys.privateKey.buffer)
 }

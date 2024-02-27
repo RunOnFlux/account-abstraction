@@ -1,27 +1,32 @@
 import dotenv from "dotenv"
 
 import { HardhatUserConfig } from "hardhat/config"
-
-import "@nomicfoundation/hardhat-chai-matchers"
-import "@nomicfoundation/hardhat-ethers"
-import "@nomicfoundation/hardhat-network-helpers"
-import "@nomicfoundation/hardhat-toolbox"
+import "@nomiclabs/hardhat-ethers"
 import "@nomicfoundation/hardhat-verify"
+import "@nomicfoundation/hardhat-chai-matchers"
+import "@nomicfoundation/hardhat-network-helpers"
 import "@typechain/hardhat"
-
 import "hardhat-deploy"
 import "hardhat-abi-exporter"
 import "hardhat-dependency-compiler"
-
-import { CHAIN_IDS, CHAIN_NAMES, KNOWN_ACCOUNT, KNOWN_NETWORK } from "./src/utils/constants"
+import { CHAIN_IDS, CHAIN_NAMES, KNOWN_ACCOUNT, KNOWN_NETWORK } from "./config/networks"
 
 dotenv.config()
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.20",
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
+
   typechain: {
     outDir: "src/typechain",
-    target: "ethers-v6",
+    target: "ethers-v5",
   },
 
   defaultNetwork: "hardhat",

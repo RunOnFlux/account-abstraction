@@ -1,0 +1,1 @@
+export { SchnorrMultiSigTx } from "./SchnorrMultiSigTx"

@@ -1,0 +1,22 @@
+{
+  "name": "aa-schnorr-multisig-sdk",
+  "version": "1.0.0",
+  "description": "Account Abstraction Multi Schnorr Signature SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "copy": "../scripts/copy.sh",
+    "prebuild": "npm run copy",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RunOnFlux/aa-schnorr-multisig-sdk.git"
+  },
+  "homepage": "https://github.com/RunOnFlux/aa-schnorr-multisig-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/RunOnFlux/aa-schnorr-multisig-sdk/issues"
+  }
+}

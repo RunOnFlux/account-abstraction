@@ -1,7 +1,7 @@
 {
-  "name": "account-abstraction",
+  "name": "aa-schnorr-multisig",
   "version": "1.0.0",
-  "description": "Multi Signature Account Abstraction",
+  "description": "Account Abstraction Schnorr Multi-Signatures",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

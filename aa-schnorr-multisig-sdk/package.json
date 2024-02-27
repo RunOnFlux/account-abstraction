@@ -1,7 +1,7 @@
 {
   "name": "aa-schnorr-multisig-sdk",
   "version": "1.0.0",
-  "description": "Account Abstraction Multi Schnorr Signature SDK",
+  "description": "Account Abstraction Schnorr Multi-Signatures SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

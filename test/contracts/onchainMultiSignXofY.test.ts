@@ -1,9 +1,10 @@
 import { expect } from "chai"
+import { ethers } from "ethers"
+
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, SIGNER_ROLE_HASH, pk1, pk2, pk3 } from "../utils/config"
-import { ethers } from "ethers"
-import { MultiSigSmartAccount } from "../../src/typechain"
-import { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
+import type { MultiSigSmartAccount } from "../../src/typechain"
+import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { createRandomSchnorrSigner } from "../utils/helpers"
 import {
   createSchnorrSigner,

@@ -1,4 +1,5 @@
 import { expect } from "chai"
+
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { Key } from "../../aa-schnorr-multisig-sdk/src/types"
@@ -9,7 +10,6 @@ describe("testing getCombinedPublicKey", () => {
     const keyPairTwo = generateRandomKeys()
 
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey([keyPairOne.publicKey, keyPairTwo.publicKey])
-    expect(combinedPublicKey).to.exist
     expect(combinedPublicKey).to.be.instanceOf(Key)
     expect(combinedPublicKey.toHex()).to.have.length(66)
   })

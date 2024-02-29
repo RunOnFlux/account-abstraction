@@ -1,4 +1,5 @@
 import { expect } from "chai"
+
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 
@@ -7,9 +8,6 @@ describe("testing generatePublicNonces", () => {
     const schnorrkel = new Schnorrkel()
     const keyPair = generateRandomKeys()
     const publicNonces = schnorrkel.generatePublicNonces(keyPair.privateKey)
-    expect(publicNonces).to.exist
-    expect(publicNonces.kPublic).to.exist
-    expect(publicNonces.kTwoPublic).to.exist
     expect(publicNonces.kPublic.buffer).to.have.length(33)
     expect(publicNonces.kTwoPublic.buffer).to.have.length(33)
   })

@@ -1,11 +1,19 @@
 {
   "name": "aa-schnorr-multisig-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Account Abstraction Schnorr Multi-Signatures SDK",
+  "keywords": [
+    "Account Abstraction",
+    "AA",
+    "ERC-4337",
+    "Schnorr",
+    "Signature",
+    "Multisig"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "/dist"
+    "dist"
   ],
   "scripts": {
     "copy": "../scripts/copy.sh",
@@ -16,10 +24,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RunOnFlux/aa-schnorr-multisig-sdk.git"
+    "url": "git+https://github.com/RunOnFlux/account-abstraction.git",
+    "directory": "aa-schnorr-multisig-sdk"
   },
-  "homepage": "https://github.com/RunOnFlux/aa-schnorr-multisig-sdk#readme",
   "bugs": {
-    "url": "https://github.com/RunOnFlux/aa-schnorr-multisig-sdk/issues"
+    "url": "https://github.com/RunOnFlux/account-abstraction/issues"
   }
 }

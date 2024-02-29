@@ -22,10 +22,10 @@ module.exports = {
   },
   extends: [
     "eslint:recommended",
-    "prettier",
     "plugin:@typescript-eslint/recommended",
     "plugin:unicorn/recommended",
     "plugin:import/typescript",
+    "prettier",
   ],
   plugins: ["unicorn", "@typescript-eslint", "prettier", "sort-keys-fix", "import"],
   overrides: [
@@ -53,12 +53,12 @@ module.exports = {
         "@typescript-eslint/no-dynamic-delete": "error",
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/no-empty-interface": "off",
+        "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-implied-eval": "error",
         "@typescript-eslint/no-loop-func": "error",
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-useless-empty-export": "error",
         "@typescript-eslint/require-await": "error",
-        "@typescript-eslint/no-duplicate-imports": "error",
         "@typescript-eslint/no-shadow": ["error", { ignoreTypeValueShadow: true, ignoreFunctionTypeParameterNameValueShadow: true }],
         "@typescript-eslint/naming-convention": [
           "error",

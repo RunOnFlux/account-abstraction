@@ -90,6 +90,9 @@ const uoCallData: UserOperationCallData = encodeFunctionData({
       })
 ```
 
+- `ERC20_abi` imported from [aa-schnorr-multisig](https://www.npmjs.com/package/aa-schnorr-multisig)
+- `encodeFunctionData` imported from [viem](https://www.npmjs.com/package/viem) encodes the function name and parameters into an ABI encoded value
+
 ### 4. Build User Operation. 
 Use `MultiSigAccountSigner`'s method with gas estimator `buildUserOpWithGasEstimator()`.
 ```
@@ -125,5 +128,5 @@ In this step signatures signed before by every signer are collected and combined
 const txHash = await multiSigAccountSigner.sendMultiSigTransaction(msTx)
 ```
 
-## Associated repos
-* [MultiSig Smart Account - ERC-4337 Smart Contracts](https://github.com/RunOnFlux/account-abstraction.git)
+## Associated package
+* [MultiSig Smart Account - ERC-4337 Smart Contracts](https://www.npmjs.com/package/aa-schnorr-multisig)

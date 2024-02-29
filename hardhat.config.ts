@@ -32,10 +32,20 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
 
   networks: {
+    [KNOWN_NETWORK.ETHEREUM_MAINNET]: {
+      url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ETHEREUM_MAINNET_ALCHEMY_API_KEY}`,
+      accounts: [`${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.ETHEREUM_MAINNET],
+    },
     [KNOWN_NETWORK.ETHEREUM_SEPOLIA]: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ETHEREUM_SEPOLIA_ALCHEMY_API_KEY}`,
       accounts: [`${process.env.DEPLOYER_PRIVATE_KEY}`],
       chainId: CHAIN_IDS[CHAIN_NAMES.ETHEREUM_SEPOLIA],
+    },
+    [KNOWN_NETWORK.POLYGON_MAINNET]: {
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.POLYGON_MAINNET_ALCHEMY_API_KEY}`,
+      accounts: [`${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_MAINNET],
     },
     [KNOWN_NETWORK.POLYGON_MUMBAI]: {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.POLYGON_MUMBAI_ALCHEMY_API_KEY}`,
@@ -54,7 +64,8 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      goerli: process.env.ETHERSCAN_API_KEY ?? "",
+      mainnet: process.env.ETHERSCAN_API_KEY ?? "",
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
       polygon: process.env.POLYGONSCAN_API_KEY ?? "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY ?? "",
     },
@@ -62,13 +73,10 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     [KNOWN_ACCOUNT.DEPLOYER]: {
       default: 0,
+      [KNOWN_NETWORK.ETHEREUM_MAINNET]: `${process.env.DEPLOYER_ADDRESS}`,
       [KNOWN_NETWORK.ETHEREUM_SEPOLIA]: `${process.env.DEPLOYER_ADDRESS}`,
+      [KNOWN_NETWORK.POLYGON_MAINNET]: `${process.env.DEPLOYER_ADDRESS}`,
       [KNOWN_NETWORK.POLYGON_MUMBAI]: `${process.env.DEPLOYER_ADDRESS}`,
-    },
-    [KNOWN_ACCOUNT.SIGNER]: {
-      default: 1,
-      [KNOWN_NETWORK.ETHEREUM_SEPOLIA]: `${process.env.SIGNER_ADDRESS}`,
-      [KNOWN_NETWORK.POLYGON_MUMBAI]: `${process.env.SIGNER_ADDRESS}`,
     },
   },
   abiExporter: {

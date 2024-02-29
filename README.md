@@ -31,11 +31,27 @@ To deploy MultiSigSmartAccount Factory on Polygon Mumbai Testnet run command:
 npm run deploy:mumbai
 ```
 
+To deploy on any different supported network run
+```bash
+npx hardhat deploy --network <NETWORK_NAME> --tags FULL
+```
+List of supported network names:
+  * mainnet,
+  * sepolia,
+  * polygon-mainnet,
+  * polygon-mumbai,
+
+
 ## Build package
 
 ```bash
 npm run build
 ```
 
-## Associated repos
-* [MultiSig Schnorr Signature SDK](https://github.com/RunOnFlux/aa-schnorr-multisig-sdk.git)
+The package contains the following folders:
+* `abi` - generated smart contracts' ABI json files
+* `deployments` - addresses of deployed contrancts (if any) for each supported network
+* `typechain` - generated TypeScript typings based on the given ABI files
+
+## Associated package
+* [MultiSig Schnorr Signature SDK](https://www.npmjs.com/package/aa-schnorr-multisig-sdk)

@@ -9,7 +9,6 @@ describe("testing getCombinedPublicKey", () => {
     const keyPairTwo = generateRandomKeys()
 
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey([keyPairOne.publicKey, keyPairTwo.publicKey])
-    expect(combinedPublicKey).to.exist
     expect(combinedPublicKey).to.be.instanceOf(Key)
     expect(combinedPublicKey.toHex()).to.have.length(66)
   })

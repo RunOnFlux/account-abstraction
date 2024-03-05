@@ -1,6 +1,6 @@
 import { expect } from "chai"
-
 import { ethers } from "ethers"
+
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 
@@ -20,7 +20,6 @@ describe("testing multiSigSign", () => {
     const msg = "test message"
     const signature = schnorrkelOne.multiSigSign(keyPairOne.privateKey, msg, publicKeys, publicNonces)
 
-    expect(signature).to.exist
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
     expect(signature.challenge.buffer).to.have.length(32)
@@ -66,7 +65,6 @@ describe("testing multiSigSign", () => {
     const hash = ethers.utils.solidityKeccak256(["string"], [msg])
     const signature = schnorrkelOne.multiSigSignHash(keyPairOne.privateKey, hash, publicKeys, publicNonces)
 
-    expect(signature).to.exist
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
     expect(signature.challenge.buffer).to.have.length(32)

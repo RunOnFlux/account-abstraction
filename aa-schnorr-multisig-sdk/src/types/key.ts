@@ -6,10 +6,10 @@ export class Key {
   }
 
   toHex(): string {
-    return  this.buffer.toString('hex')
+    return this.buffer.toString("hex")
   }
 
   static fromHex(hex: string): Key {
-    return new Key(Buffer.from(hex, 'hex'))
+    return new Key(Buffer.from(hex, "hex"))
   }
 }

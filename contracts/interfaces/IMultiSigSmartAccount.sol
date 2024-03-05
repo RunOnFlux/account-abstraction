@@ -5,9 +5,9 @@ import {IEntryPoint} from "../erc4337/interfaces/IEntryPoint.sol";
 import {UserOperation} from "../erc4337/core/UserOperation.sol";
 
 interface IMultiSigSmartAccount {
-    event TestUserOp(UserOperation op);
-    event TestHash(bytes32 userOpHash, bytes32 _hash);
-    event TestRecovered(bool signer, address recovered);
-    event TestSignature(bytes opSignature);
-    event SimpleAccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
+    error MsgSenderNotThisAccount(address msgSender);
+    error NeitherOwnerNorEntryPoint(address msgSender);
+    error OwnerNotDefined();
+
+    event MultiSigAccountInitialized(IEntryPoint entryPoint, uint256 pubKeysCounter);
 }

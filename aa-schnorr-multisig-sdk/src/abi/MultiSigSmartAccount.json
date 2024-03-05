@@ -69,8 +69,35 @@
     "type": "error"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "msgSender",
+        "type": "address"
+      }
+    ],
+    "name": "MsgSenderNotThisAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "msgSender",
+        "type": "address"
+      }
+    ],
+    "name": "NeitherOwnerNorEntryPoint",
+    "type": "error"
+  },
+  {
     "inputs": [],
     "name": "NotInitializing",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OwnerNotDefined",
     "type": "error"
   },
   {
@@ -100,6 +127,25 @@
       }
     ],
     "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract IEntryPoint",
+        "name": "entryPoint",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "pubKeysCounter",
+        "type": "uint256"
+      }
+    ],
+    "name": "MultiSigAccountInitialized",
     "type": "event"
   },
   {
@@ -182,146 +228,6 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "contract IEntryPoint",
-        "name": "entryPoint",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
-    ],
-    "name": "SimpleAccountInitialized",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "userOpHash",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "_hash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "TestHash",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "signer",
-        "type": "bool"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "recovered",
-        "type": "address"
-      }
-    ],
-    "name": "TestRecovered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "opSignature",
-        "type": "bytes"
-      }
-    ],
-    "name": "TestSignature",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "sender",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "nonce",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "initCode",
-            "type": "bytes"
-          },
-          {
-            "internalType": "bytes",
-            "name": "callData",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "callGasLimit",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "verificationGasLimit",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "preVerificationGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxFeePerGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxPriorityFeePerGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "paymasterAndData",
-            "type": "bytes"
-          },
-          {
-            "internalType": "bytes",
-            "name": "signature",
-            "type": "bytes"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct UserOperation",
-        "name": "op",
-        "type": "tuple"
-      }
-    ],
-    "name": "TestUserOp",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "implementation",
         "type": "address"
@@ -346,19 +252,6 @@
   {
     "inputs": [],
     "name": "OWNER_ROLE",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "SIGNER_ROLE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -533,13 +426,8 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
         "internalType": "address[]",
-        "name": "combinedPubKeys",
+        "name": "combinedPubAddress",
         "type": "address[]"
       }
     ],

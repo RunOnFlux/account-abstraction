@@ -1,9 +1,10 @@
 import { expect } from "chai"
-import { deployMultiSigSmartAccount } from "../utils/deployments"
-import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, SIGNER_ROLE_HASH, pk1, pk2, pk3 } from "../utils/config"
 import { ethers } from "ethers"
-import { MultiSigSmartAccount } from "../../src/typechain"
-import { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
+
+import { deployMultiSigSmartAccount } from "../utils/deployments"
+import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, OWNER_ROLE_HASH, pk1, pk2, pk3 } from "../utils/config"
+import type { MultiSigSmartAccount } from "../../src/typechain"
+import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { createRandomSchnorrSigner } from "../utils/helpers"
 import {
   createSchnorrSigner,
@@ -11,9 +12,9 @@ import {
   generateCombinedSigDataAndHash,
   generateSingleSigDataAndHash,
   getAllCombinedPubAddressXofY,
-  hashMsgKeccak256,
 } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
 import { Key } from "../../aa-schnorr-multisig-sdk/src/types"
+import { hashMsgKeccak256 } from "../../aa-schnorr-multisig-sdk/src/helpers/converters"
 
 let contract: MultiSigSmartAccount
 let combinedAdd12: string
@@ -26,7 +27,7 @@ let signerTwo: SchnorrSigner
 let signerThree: SchnorrSigner
 let msg: string
 
-describe("Multi Sign Tests: 3 out of 3 signers", function () {
+describe("Onchain Multi Sign Tests: 3 out of 3 signers", function () {
   this.beforeEach("create signers and deploy contract", async function () {
     msg = "just a test message"
 
@@ -48,14 +49,12 @@ describe("Multi Sign Tests: 3 out of 3 signers", function () {
     contract = schnorrAA.schnorrAA
   })
   it("should generate only one combined address and set as signer (3/3)", async function () {
-    ;[combinedAdd123, combinedAdd23, combinedAdd13, combinedAdd12] = combinedAddresses
+    ;[combinedAdd123] = combinedAddresses
 
-    // check if combined addresses are undefined
-    expect(combinedAdd12).to.be.undefined
-    expect(combinedAdd13).to.be.undefined
-    expect(combinedAdd23).to.be.undefined
+    // check if only one address was generated
+    expect(combinedAddresses.length).to.be.eql(1)
 
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAdd123)).to.be.eq(true)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAdd123)).to.be.eq(true)
   })
   it("should generate a schnorr musig and validate onchain: 3/3", async function () {
     // 3 of 3
@@ -129,9 +128,9 @@ describe("Multi Sign Tests: 2 out of 3 signers", function () {
     expect(combinedAdd12).not.eqls(combinedAdd23)
     expect(combinedAdd12).not.eqls(combinedAdd13)
 
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAdd123)).to.be.eq(true)
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAdd12)).to.be.eq(true)
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAdd13)).to.be.eq(true)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAdd123)).to.be.eq(true)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAdd12)).to.be.eq(true)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAdd13)).to.be.eq(true)
   })
   it("should generate a schnorr musig and validate onchain: 3/3", async function () {
     // 3 of 3
@@ -152,7 +151,7 @@ describe("Multi Sign Tests: 2 out of 3 signers", function () {
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
   it("should FAIL if signer not set in contract", async function () {
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAdd23)).to.be.eq(false)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAdd23)).to.be.eq(false)
   })
   it("should FAIL if generate a schnorr musig out of not valid signer address", async function () {
     // 2 of 3: signer2 and signer3

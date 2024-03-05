@@ -9,18 +9,29 @@ export enum TAGS {
 
 export const getEntryPointByChainId = (chainId: string | undefined): string | undefined => {
   switch (chainId) {
-    case "1": //mainnet
+    case "1": {
+      // mainnet
       return ENTRY_POINT_ALCHEMY_ADDRESS
-    case "11155111": //sepolia
+    }
+    case "11155111": {
+      // sepolia
       return ENTRY_POINT_ALCHEMY_ADDRESS
-    case "137": //polygon
+    }
+    case "137": {
+      // polygon
       return ENTRY_POINT_ALCHEMY_ADDRESS
-    case "80001": //mumbai
+    }
+    case "80001": {
+      // mumbai
       return ENTRY_POINT_ALCHEMY_ADDRESS
-    case "31337": //hardhat
+    }
+    case "1337": {
+      // hardhat
       return ENTRY_POINT_ALCHEMY_ADDRESS
+    }
 
-    default:
+    default: {
       throw new Error("Wrong chainId")
+    }
   }
 }

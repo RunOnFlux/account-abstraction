@@ -32,14 +32,28 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
 
   networks: {
+    hardhat: {
+      chainId: 1337,
+      loggingEnabled: false,
+    },
+    [KNOWN_NETWORK.ETHEREUM_MAINNET]: {
+      url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ETHEREUM_MAINNET_ALCHEMY_API_KEY}`,
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.ETHEREUM_MAINNET],
+    },
     [KNOWN_NETWORK.ETHEREUM_SEPOLIA]: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ETHEREUM_SEPOLIA_ALCHEMY_API_KEY}`,
-      accounts: [`${process.env.DEPLOYER_PRIVATE_KEY}`],
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
       chainId: CHAIN_IDS[CHAIN_NAMES.ETHEREUM_SEPOLIA],
+    },
+    [KNOWN_NETWORK.POLYGON_MAINNET]: {
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.POLYGON_MAINNET_ALCHEMY_API_KEY}`,
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_MAINNET],
     },
     [KNOWN_NETWORK.POLYGON_MUMBAI]: {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.POLYGON_MUMBAI_ALCHEMY_API_KEY}`,
-      accounts: [`${process.env.DEPLOYER_PRIVATE_KEY}`],
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`], // use if want to use private account; important! use `0x` prefix
       chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_MUMBAI],
     },
   },
@@ -54,22 +68,14 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      goerli: process.env.ETHERSCAN_API_KEY ?? "",
+      mainnet: process.env.ETHERSCAN_API_KEY ?? "",
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
       polygon: process.env.POLYGONSCAN_API_KEY ?? "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY ?? "",
     },
   },
   namedAccounts: {
-    [KNOWN_ACCOUNT.DEPLOYER]: {
-      default: 0,
-      [KNOWN_NETWORK.ETHEREUM_SEPOLIA]: `${process.env.DEPLOYER_ADDRESS}`,
-      [KNOWN_NETWORK.POLYGON_MUMBAI]: `${process.env.DEPLOYER_ADDRESS}`,
-    },
-    [KNOWN_ACCOUNT.SIGNER]: {
-      default: 1,
-      [KNOWN_NETWORK.ETHEREUM_SEPOLIA]: `${process.env.SIGNER_ADDRESS}`,
-      [KNOWN_NETWORK.POLYGON_MUMBAI]: `${process.env.SIGNER_ADDRESS}`,
-    },
+    [KNOWN_ACCOUNT.DEPLOYER]: 0,
   },
   abiExporter: {
     path: "./src/abi",
@@ -78,6 +84,9 @@ const config: HardhatUserConfig = {
     flat: true,
     spacing: 2,
     format: "json",
+  },
+  sourcify: {
+    enabled: true,
   },
 }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HardhatRuntimeEnvironment } from "hardhat/types"
 
 export const verifyContract = async (deployedContractAddress: string, hre: HardhatRuntimeEnvironment, args?: any[]) => {

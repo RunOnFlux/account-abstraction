@@ -17,7 +17,7 @@ import {IMultiSigSmartAccount} from "./interfaces/IMultiSigSmartAccount.sol";
 
 /**
  * MultiSigSmartAccount
- * this contract was designed to integrate implementations of:
+ * This contract was designed to integrate implementations of:
  * - ERC4337 Account Abstraction
  * - Schnorr signature verifications for multisig
  */
@@ -34,11 +34,8 @@ contract MultiSigSmartAccount is
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
     bytes4 internal constant ERC1271_MAGICVALUE_BYTES32 = 0x1626ba7e;
-
     // AccessControl contract roles
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
-    bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
-
     IEntryPoint private immutable _entryPoint;
 
     // solhint-disable-next-line no-empty-blocks
@@ -54,21 +51,19 @@ contract MultiSigSmartAccount is
      * To upgrade EntryPoint a new implementation of SimpleAccount must be deployed with the new EntryPoint address,
      * then upgrading the implementation by calling `upgradeTo()`
      */
-    function initialize(address owner, address[] memory combinedPubKeys) public initializer {
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
-        _grantRole(OWNER_ROLE, owner);
-
-        // grant signer role for every schnorr's combinedPubKey
-        uint len = combinedPubKeys.length;
-        for (uint i = 0; i < len; i++) {
-            _grantRole(SIGNER_ROLE, combinedPubKeys[i]);
+    function initialize(address[] memory combinedPubAddress) public initializer {
+        // grant owner role for every schnorr's combinedPubKey
+        uint256 len = combinedPubAddress.length;
+        if (len == 0) revert OwnerNotDefined();
+        for (uint8 i = 0; i < len; i++) {
+            _grantRole(DEFAULT_ADMIN_ROLE, combinedPubAddress[i]);
+            _grantRole(OWNER_ROLE, combinedPubAddress[i]);
         }
-        emit SimpleAccountInitialized(_entryPoint, owner);
+        emit MultiSigAccountInitialized(_entryPoint, combinedPubAddress.length);
     }
 
     /**
      * @dev execute a transaction (called directly from owner, or by entryPoint)
-     *
      * @param dest destination address
      * @param value tx values
      * @param func tx data
@@ -90,19 +85,43 @@ contract MultiSigSmartAccount is
     }
 
     /**
+     * Withdraw value from the account's deposit
+     * @param withdrawAddress target to send to
+     * @param amount to withdraw
+     */
+    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public {
+        _requireSelfCall();
+        entryPoint().withdrawTo(withdrawAddress, amount);
+    }
+
+    /**
+     * Deposit more funds for this account in the entryPoint
+     */
+    function addDeposit() public payable {
+        entryPoint().depositTo{value: msg.value}(address(this));
+    }
+
+    /**
+     * Check current account deposit in the entryPoint
+     */
+    function getDeposit() public view returns (uint256) {
+        return entryPoint().balanceOf(address(this));
+    }
+
+    /**
      * @dev The signature is valid if it is signed by the owner's private key
      * (if the owner is an EOA) or if it is a valid ERC-1271 signature from the
-     * owner (if the owner is a contract). Note that unlike the signature
-     * validation used in `validateUserOp`, this does **not** wrap the digest in
-     * an "Ethereum Signed Message" envelope before checking the signature in
-     * the EOA-owner case.
+     * owner (if the owner is a contract).
+     * Note that unlike the signature validation used in `validateUserOp`, this
+     * does **not** wrap the digest in an "Ethereum Signed Message" envelope
+     * before checking the signature in the EOA-owner case.
      * @inheritdoc IERC1271
      * @param hash hash to be signed
      * @param signature signature
      */
     function isValidSignature(bytes32 hash, bytes memory signature) public view override returns (bytes4) {
         address recovered = _verifySchnorr(hash, signature);
-        if (hasRole(SIGNER_ROLE, recovered)) {
+        if (hasRole(OWNER_ROLE, recovered)) {
             return ERC1271_MAGICVALUE_BYTES32;
         } else {
             return 0xffffffff;
@@ -110,7 +129,7 @@ contract MultiSigSmartAccount is
     }
 
     /**
-     * @dev Returns entryPoint
+     * Returns entryPoint
      * @inheritdoc BaseAccount
      */
     function entryPoint() public view virtual override returns (IEntryPoint) {
@@ -118,51 +137,15 @@ contract MultiSigSmartAccount is
     }
 
     /**
-     * withdraw value from the account's deposit
-     * @param withdrawAddress target to send to
-     * @param amount to withdraw
-     */
-    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public onlyRole(OWNER_ROLE) {
-        entryPoint().withdrawTo(withdrawAddress, amount);
-    }
-
-    /**
-     * deposit more funds for this account in the entryPoint
-     */
-    function addDeposit() public payable {
-        entryPoint().depositTo{value: msg.value}(address(this));
-    }
-
-    /**
-     * check current account deposit in the entryPoint
-     */
-    function getDeposit() public view returns (uint256) {
-        return entryPoint().balanceOf(address(this));
-    }
-
-    /**
-     * Require the function call went through EntryPoint or owner
-     */
-    function _requireFromEntryPointOrOwner() internal view {
-        require(
-            msg.sender == address(entryPoint()) || hasRole(OWNER_ROLE, msg.sender),
-            "account: not Owner or EntryPoint"
-        );
-    }
-
-    /**
-     * Validate the signature is valid for this message.
+     * Validate the signature
      * @inheritdoc BaseAccount
      */
     function _validateSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
-        emit TestUserOp(userOp);
-
         address recovered = _verifySchnorr(userOpHash, userOp.signature);
-        emit TestRecovered(hasRole(SIGNER_ROLE, recovered), recovered);
-        if (!hasRole(SIGNER_ROLE, recovered)) return SIG_VALIDATION_FAILED;
+        if (!hasRole(OWNER_ROLE, recovered)) return SIG_VALIDATION_FAILED;
         return 0;
     }
 
@@ -176,10 +159,29 @@ contract MultiSigSmartAccount is
     }
 
     /**
-     * @dev See {UUPSUpgradeable}.
-     * The {_authorizeUpgrade} function must be overridden to include access restriction to the upgrade mechanism.
+     * Require the function call is from this account
+     * @dev Since there is no EOA Owner and this Account Abstraction (AA) is owned by
+     * multiple Schnorr Signers (offchain ones), the only way to call functions
+     * is to do it from AA address: address(this)
      */
-    function _authorizeUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
+    function _requireSelfCall() internal view {
+        if (!(msg.sender == address(this))) revert MsgSenderNotThisAccount(msg.sender);
+    }
+
+    /**
+     * Require the function call went through EntryPoint or owner
+     */
+    function _requireFromEntryPointOrOwner() internal view {
+        if (!(msg.sender == address(entryPoint()) || hasRole(OWNER_ROLE, msg.sender)))
+            revert NeitherOwnerNorEntryPoint(msg.sender);
+    }
+
+    /**
+     * @dev The {_authorizeUpgrade} function must be overriddn to include access restriction to the upgrade mechanism.
+     * @inheritdoc UUPSUpgradeable
+     */
+    function _authorizeUpgrade(address newImplementation) internal view override {
+        _requireSelfCall();
         (newImplementation);
     }
 

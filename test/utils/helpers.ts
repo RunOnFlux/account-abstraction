@@ -1,20 +1,23 @@
-import { ethers, providers, utils } from "ethers"
+import type { providers } from "ethers"
+import { ethers } from "ethers"
 import secp256k1 from "secp256k1"
+
 import { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 
-export async function generateAddress(pk: string) {
+export function generateAddress(pk: string) {
   // the eth address
   const publicKey = secp256k1.publicKeyCreate(ethers.utils.arrayify(pk))
   const px = publicKey.slice(1, 33)
   const pxGeneratedAddress = ethers.utils.hexlify(px)
-  const address = "0x" + pxGeneratedAddress.slice(pxGeneratedAddress.length - 40, pxGeneratedAddress.length)
+  const address = `0x${pxGeneratedAddress.slice(-40, pxGeneratedAddress.length)}`
 
   return { address }
 }
 
 export const getSalt = (salt: string) => ethers.utils.keccak256(ethers.utils.toUtf8Bytes(salt))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getEvent(tx: providers.TransactionResponse, contract: any, eventName: string) {
   const receipt = await contract.provider.getTransactionReceipt(tx.hash)
   const eventFragment = contract.interface.getEvent(eventName)

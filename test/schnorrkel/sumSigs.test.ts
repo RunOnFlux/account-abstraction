@@ -22,7 +22,6 @@ describe("testing sumSigs", () => {
     const signatures = [signatureOne.signature, signatureTwo.signature]
     const signature = Schnorrkel.sumSigs(signatures)
 
-    expect(signature).to.exist
     expect(signature.buffer).to.have.length(32)
   })
 })

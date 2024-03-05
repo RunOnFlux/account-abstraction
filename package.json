@@ -1,11 +1,19 @@
 {
   "name": "aa-schnorr-multisig",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Account Abstraction Schnorr Multi-Signatures",
+  "keywords": [
+    "Account Abstraction",
+    "AA",
+    "ERC-4337",
+    "Schnorr",
+    "Signature",
+    "Multisig"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "/dist"
+    "dist"
   ],
   "scripts": {
     "reinstall": "rm -rf node_modules/ && npm install",
@@ -27,9 +35,9 @@
     "export-deployments": "npm run export-deployments-mumbai",
     "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi  && npm run export-deployments",
     "build": "tsc --project tsconfig.build.json",
-    "deploy:mumbai": "hardhat deploy --network polygon-mumbai --tags FULL",
+    "deploy:mumbai": "hardhat deploy --network polygon-mumbai --tags ACCOUNT_FACTORY",
     "clean-full-deploy:mumbai": "hardhat clean && hardhat compile && npm run deploy:mumbai",
-    "verify": "npx hardhat verify --network polygon-mumbai <DEPLOYED_CONTRACT_ADDRESS> <ARGS>"
+    "verify": "npx hardhat verify --network polygon-mumbai <DEPLOYED_CONTRACT_ADDRESS> 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
   },
   "author": "",
   "license": "MIT",
@@ -42,38 +50,46 @@
     "url": "https://github.com/RunOnFlux/account-abstraction/issues"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "@openzeppelin/contracts-upgradeable": "^5.0.1"
+  },
+  "peerDependencies": {
     "@alchemy/aa-core": "^2.3.1",
     "@alchemy/aa-ethers": "^2.3.1",
-    "@openzeppelin/contracts": "^5.0.1"
-  },
-  "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@nomicfoundation/hardhat-verify": "^2.0.4",
     "@nomiclabs/hardhat-ethers": "2.2.2",
-    "@openzeppelin/contracts": "^5.0.1",
-    "@openzeppelin/contracts-upgradeable": "^5.0.1",
     "@typechain/ethers-v5": "^10.2.0",
     "@typechain/hardhat": "^6.1.5",
-    "@types/bigi": "^1.4.5",
-    "@types/ecurve": "^1.0.0",
-    "@types/elliptic": "^6.4.14",
-    "@types/mocha": "^10.0.6",
-    "@types/secp256k1": "^4.0.6",
-    "bigi": "^1.4.2",
-    "chai-asserttype": "^1.0.5",
-    "dotenv": "^16.4.1",
-    "ecurve": "^1.0.6",
-    "eslint": "^8.56.0",
     "ethers": "^5.7.2",
     "hardhat": "^2.12.5",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-dependency-compiler": "^1.1.3",
     "hardhat-deploy": "^0.11.37",
+    "viem": "^1.21.4"
+  },
+  "devDependencies": {
+    "@types/bigi": "^1.4.5",
+    "@types/ecurve": "^1.0.0",
+    "@types/elliptic": "^6.4.14",
+    "@types/mocha": "^10.0.6",
+    "@types/secp256k1": "^4.0.6",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "bigi": "^1.4.2",
+    "chai-asserttype": "^1.0.5",
+    "dotenv": "^16.4.1",
+    "ecurve": "^1.0.6",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-sort-keys-fix": "^1.1.2",
+    "eslint-plugin-unicorn": "^51.0.1",
     "prettier": "^3.1.1",
     "secp256k1": "^5.0.0",
     "solc": "0.8.19",
-    "solhint": "^4.1.1",
-    "viem": "^1.21.4"
+    "solhint": "^4.1.1"
   }
 }

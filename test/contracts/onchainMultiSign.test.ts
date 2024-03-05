@@ -1,11 +1,13 @@
 import { expect } from "chai"
 import { ethers } from "ethers"
+
 import { deployMultiSigSmartAccount } from "../utils/deployments"
-import { MultiSigSmartAccount } from "../../src/typechain"
+import type { MultiSigSmartAccount } from "../../src/typechain"
 import { createRandomSchnorrSigner } from "../utils/helpers"
 import { getAllCombinedPubAddressXofY } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
-import { SchnorrSigner, Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
-import { ERC1271_MAGICVALUE_BYTES32, SIGNER_ROLE_HASH } from "../utils/config"
+import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
+import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
+import { ERC1271_MAGICVALUE_BYTES32, OWNER_ROLE_HASH } from "../utils/config"
 
 let contract: MultiSigSmartAccount
 let combinedAddresses: string[]
@@ -14,7 +16,7 @@ let signerTwo: SchnorrSigner
 let signerThree: SchnorrSigner
 let msg: string
 
-describe("Multi Sign Tests", function () {
+describe("Onchain Multi Sign Tests", function () {
   this.beforeEach("create signers and deploy contract", async function () {
     msg = "just a test message"
 
@@ -37,24 +39,22 @@ describe("Multi Sign Tests", function () {
   })
   it("should generate a schnorr musig2 and validate it on the blockchain", async function () {
     const combinedAddress = combinedAddresses[0]
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAddress)).to.be.eq(true)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAddress)).to.be.eq(true)
 
-    const msg = "just a test message"
     const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
-    const { signature: sigOne, challenge: e, finalPublicNonce } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
     const { signature: sigTwo } = signerTwo.signMultiSigMsg(msg, publicKeys, publicNonces)
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
     // the multisig px and parity
     const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
-    const combinedPublicAddress = "0x" + px.slice(px.length - 40, px.length)
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
@@ -64,19 +64,18 @@ describe("Multi Sign Tests", function () {
     const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
-    const { signature: sigOne, challenge: e, finalPublicNonce } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
     const { signature: sigTwo } = signerTwo.signMultiSigMsg(msg, publicKeys, publicNonces)
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
     // the multisig px and parity
     const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
-    const combinedPublicAddress = "0x" + px.slice(px.length - 40, px.length)
 
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
@@ -90,7 +89,7 @@ describe("Multi Sign Tests", function () {
     const publicNonces = [signerOne.getPubNonces(), _randomSigner.getPubNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
 
-    const { signature: sigOne, challenge: e } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
     const { signature: sigTwo } = _randomSigner.signMultiSigMsg(msg, publicKeys, publicNonces)
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
@@ -100,18 +99,17 @@ describe("Multi Sign Tests", function () {
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal("0xffffffff")
   })
 
   it("should fail if only one signature is provided", async function () {
-    const msg = "just a test message"
     const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
-    const { signature: sigOne, challenge: e } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
 
     // the multisig px and parity
     const px = combinedPublicKey.buffer.subarray(1, 33)
@@ -119,16 +117,16 @@ describe("Multi Sign Tests", function () {
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sigOne.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sigOne.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal("0xffffffff")
   })
 
-  it("should fail if a signer tries to sign twice with the same nonce", async function () {
+  it("should fail if a signer tries to sign twice with the same nonce", function () {
     const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
-    const { signature: s, challenge: e } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
     expect(signerOne.signMultiSigMsg.bind(signerOne, msg, publicKeys, publicNonces)).to.throw("Nonces should be exchanged before signing")
   })
 
@@ -137,7 +135,7 @@ describe("Multi Sign Tests", function () {
     const signerTwoNonces = signerTwo.getPubNonces()
     const publicNonces = [signerOne.getPubNonces(), signerTwoNonces]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
-    const { signature: sigOne, challenge: e } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
 
     // try to generate new signature with old signerTwo's nonces
     signerOne.generatePubNonces()
@@ -152,7 +150,7 @@ describe("Multi Sign Tests", function () {
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal("0xffffffff")
@@ -162,7 +160,7 @@ describe("Multi Sign Tests", function () {
     const publicKeys = [signerTwo.getPubKey(), signerOne.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
-    const { signature: sigOne, challenge: e } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
     const { signature: sigTwo } = signerTwo.signMultiSigMsg(msg, publicKeys, publicNonces)
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
@@ -172,30 +170,30 @@ describe("Multi Sign Tests", function () {
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
 
-  it("should throw error requirements for public keys when generating nonces and multi singatures", async function () {
+  it("should throw error requirements for public keys when generating nonces and multi singatures", function () {
     try {
       Schnorrkel.getCombinedPublicKey([signerTwo.getPubKey()])
-    } catch (e: any) {
-      expect(e.message).to.equal("At least 2 public keys should be provided")
+    } catch (error: any) {
+      expect(error.message).to.equal("At least 2 public keys should be provided")
     }
     try {
       Schnorrkel.getCombinedAddress([signerOne.getPubKey()])
-    } catch (e: any) {
-      expect(e.message).to.equal("At least 2 public keys should be provided")
+    } catch (error: any) {
+      expect(error.message).to.equal("At least 2 public keys should be provided")
     }
 
     const publicKeys = [signerOne.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     try {
       signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
-    } catch (e: any) {
-      expect(e.message).to.equal("At least 2 public keys should be provided")
+    } catch (error: any) {
+      expect(error.message).to.equal("At least 2 public keys should be provided")
     }
   })
 
@@ -204,7 +202,7 @@ describe("Multi Sign Tests", function () {
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
     const { signature: sigTwo } = signerTwo.signMultiSigMsg(msg, publicKeys, publicNonces)
-    const { signature: sigOne, challenge: e } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
     const sSummed = Schnorrkel.sumSigs([sigTwo, sigOne])
 
     // the multisig px and parity
@@ -213,7 +211,28 @@ describe("Multi Sign Tests", function () {
 
     // wrap the result
     const abiCoder = new ethers.utils.AbiCoder()
-    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, sSummed.buffer, parity])
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
+    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const result = await contract.isValidSignature(msgHash, sigData)
+    expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
+  })
+
+  it("should withdraw ONLY OWNER", async function () {
+    const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
+    const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
+    const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigTwo } = signerTwo.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
+
+    // the multisig px and parity
+    const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
+
+    const parity = combinedPublicKey.buffer[0] - 2 + 27
+
+    // wrap the result
+    const abiCoder = new ethers.utils.AbiCoder()
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
     const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)

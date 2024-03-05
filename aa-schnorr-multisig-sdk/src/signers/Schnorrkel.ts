@@ -1,7 +1,7 @@
 import secp256k1 from "secp256k1"
 
-import { Key, Nonces, PublicNonces, SchnorrSignature, NoncePairs } from "../types"
-
+import type { Nonces, PublicNonces, NoncePairs } from "../types"
+import { Key, SchnorrSignature } from "../types"
 import {
   _generateL,
   _aCoefficient,
@@ -16,8 +16,9 @@ import {
   _verifyHash,
   _multiSigSignHash,
 } from "../core"
-import { InternalNonces, InternalPublicNonces, InternalSignature } from "../core/types"
-import { Challenge, FinalPublicNonce, SignatureOutput } from "../types/signature"
+import type { HashFunction, InternalNonces, InternalPublicNonces, InternalSignature } from "../core/types"
+import type { SignatureOutput } from "../types/signature"
+import { Challenge, FinalPublicNonce } from "../types/signature"
 
 export class Schnorrkel {
   #nonces: Nonces = {}
@@ -43,6 +44,7 @@ export class Schnorrkel {
     const x = privateKey.buffer
     const hash = _hashPrivateKey(x)
 
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this.#nonces[hash]
   }
 
@@ -79,10 +81,8 @@ export class Schnorrkel {
     }
   }
 
-  static getCombinedPublicKey(publicKeys: Array<Key>): Key {
-    if (publicKeys.length < 2) {
-      throw Error("At least 2 public keys should be provided")
-    }
+  static getCombinedPublicKey(publicKeys: Key[]): Key {
+    if (publicKeys.length < 2) throw new Error("At least 2 public keys should be provided")
 
     const bufferPublicKeys = publicKeys.map((publicKey) => publicKey.buffer)
     const L = _generateL(bufferPublicKeys)
@@ -94,8 +94,8 @@ export class Schnorrkel {
     return new Key(Buffer.from(secp256k1.publicKeyCombine(modifiedKeys)))
   }
 
-  static getCombinedAddress(publicKeys: Array<Key>): string {
-    if (publicKeys.length < 2) throw Error("At least 2 public keys should be provided")
+  static getCombinedAddress(publicKeys: Key[]): string {
+    if (publicKeys.length < 2) throw new Error("At least 2 public keys should be provided")
 
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
     const px = _generatePk(combinedPublicKey.buffer)
@@ -132,7 +132,7 @@ export class Schnorrkel {
     msg: string,
     publicKeys: Key[],
     publicNonces: PublicNonces[],
-    hashFn: Function | null = null
+    hashFn: HashFunction | null = null
   ): SignatureOutput {
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
     const mappedPublicNonce = this.getMappedPublicNonces(publicNonces)
@@ -176,7 +176,7 @@ export class Schnorrkel {
     return this.getMultisigOutput(musigData)
   }
 
-  static sign(privateKey: Key, msg: string, hashFn: Function | null = null): SignatureOutput {
+  static sign(privateKey: Key, msg: string, hashFn: HashFunction | null = null): SignatureOutput {
     const output = _sign(privateKey.buffer, msg, hashFn)
 
     return {
@@ -207,7 +207,7 @@ export class Schnorrkel {
     msg: string,
     finalPublicNonce: FinalPublicNonce,
     publicKey: Key,
-    hashFn: Function | null = null
+    hashFn: HashFunction | null = null
   ): boolean {
     return _verify(signature.buffer, msg, finalPublicNonce.buffer, publicKey.buffer, hashFn)
   }

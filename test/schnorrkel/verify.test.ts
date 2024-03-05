@@ -13,17 +13,16 @@ describe("testing verify", () => {
 
     const publicKey = ethers.utils.arrayify(ethers.utils.computePublicKey(ethers.utils.computePublicKey(privateKey.buffer, false), true))
 
-    expect(signature).to.exist
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
     expect(signature.challenge.buffer).to.have.length(32)
-    const result = Schnorrkel.verify(signature.signature, msg, signature.finalPublicNonce, new Key(Buffer.from(publicKey)))
-    expect(result).to.be.equal(true)
+    const isValid = Schnorrkel.verify(signature.signature, msg, signature.finalPublicNonce, new Key(Buffer.from(publicKey)))
+    expect(isValid).to.be.equal(true)
 
     const secondMsg = "this is another msg"
     const secondSig = Schnorrkel.sign(privateKey, secondMsg)
-    const secondRes = Schnorrkel.verify(secondSig.signature, secondMsg, secondSig.finalPublicNonce, new Key(Buffer.from(publicKey)))
-    expect(secondRes).to.be.equal(true)
+    const isSecondValid = Schnorrkel.verify(secondSig.signature, secondMsg, secondSig.finalPublicNonce, new Key(Buffer.from(publicKey)))
+    expect(isSecondValid).to.be.equal(true)
   })
   it("should sum signatures and verify them", () => {
     const schnorrkelOne = new Schnorrkel()
@@ -45,9 +44,9 @@ describe("testing verify", () => {
 
     const signatures = [signatureOne.signature, signatureTwo.signature]
     const signaturesSummed = Schnorrkel.sumSigs(signatures)
-    const result = Schnorrkel.verify(signaturesSummed, msg, signatureTwo.finalPublicNonce, combinedPublicKey)
+    const isValid = Schnorrkel.verify(signaturesSummed, msg, signatureTwo.finalPublicNonce, combinedPublicKey)
 
-    expect(result).to.be.equal(true)
+    expect(isValid).to.be.equal(true)
   })
   it("should make sure private keys are not overwritten during signing", () => {
     const schnorrkelOne = new Schnorrkel()
@@ -78,9 +77,9 @@ describe("testing verify", () => {
 
     const signatures = [signatureOne.signature, signatureTwo.signature]
     const signaturesSummed = Schnorrkel.sumSigs(signatures)
-    const result = Schnorrkel.verify(signaturesSummed, msg, signatureTwo.finalPublicNonce, combinedPublicKey)
+    const isValid = Schnorrkel.verify(signaturesSummed, msg, signatureTwo.finalPublicNonce, combinedPublicKey)
 
-    expect(result).to.be.equal(true)
+    expect(isValid).to.be.equal(true)
   })
   it("should verify a schnorr signature with a custom hash function", () => {
     const privateKey = new Key(Buffer.from(ethers.utils.randomBytes(32)))
@@ -92,12 +91,11 @@ describe("testing verify", () => {
 
     const publicKey = ethers.utils.arrayify(ethers.utils.computePublicKey(ethers.utils.computePublicKey(privateKey.buffer, false), true))
 
-    expect(signature).to.exist
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
     expect(signature.challenge.buffer).to.have.length(32)
-    const result = Schnorrkel.verify(signature.signature, msg, signature.finalPublicNonce, new Key(Buffer.from(publicKey)), hashFn)
-    expect(result).to.be.equal(true)
+    const isValid = Schnorrkel.verify(signature.signature, msg, signature.finalPublicNonce, new Key(Buffer.from(publicKey)), hashFn)
+    expect(isValid).to.be.equal(true)
   })
   it("should sum the signatures and verify them using a custom hash function for the message", () => {
     const schnorrkelOne = new Schnorrkel()
@@ -121,9 +119,9 @@ describe("testing verify", () => {
 
     const signatures = [signatureOne.signature, signatureTwo.signature]
     const signaturesSummed = Schnorrkel.sumSigs(signatures)
-    const result = Schnorrkel.verify(signaturesSummed, msg, signatureTwo.finalPublicNonce, combinedPublicKey, hashFn)
+    const isValid = Schnorrkel.verify(signaturesSummed, msg, signatureTwo.finalPublicNonce, combinedPublicKey, hashFn)
 
-    expect(result).to.be.equal(true)
+    expect(isValid).to.be.equal(true)
   })
   it("should verify a signature hash", () => {
     const privateKey = new Key(Buffer.from(ethers.utils.randomBytes(32)))
@@ -134,12 +132,11 @@ describe("testing verify", () => {
 
     const publicKey = ethers.utils.arrayify(ethers.utils.computePublicKey(ethers.utils.computePublicKey(privateKey.buffer, false), true))
 
-    expect(signature).to.exist
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
     expect(signature.challenge.buffer).to.have.length(32)
-    const result = Schnorrkel.verifyHash(signature.signature, hash, signature.finalPublicNonce, new Key(Buffer.from(publicKey)))
-    expect(result).to.be.equal(true)
+    const isValid = Schnorrkel.verifyHash(signature.signature, hash, signature.finalPublicNonce, new Key(Buffer.from(publicKey)))
+    expect(isValid).to.be.equal(true)
   })
 
   it("should verify a multi signature hash", () => {
@@ -162,7 +159,7 @@ describe("testing verify", () => {
     const signaturesSummed = Schnorrkel.sumSigs(signatures)
 
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
-    const result = Schnorrkel.verifyHash(signaturesSummed, hash, signature.finalPublicNonce, combinedPublicKey)
-    expect(result).to.be.equal(true)
+    const isValid = Schnorrkel.verifyHash(signaturesSummed, hash, signature.finalPublicNonce, combinedPublicKey)
+    expect(isValid).to.be.equal(true)
   })
 })

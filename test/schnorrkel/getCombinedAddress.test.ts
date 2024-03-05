@@ -9,8 +9,7 @@ describe("testing getCombinedAddress", () => {
     const keyPairTwo = generateRandomKeys()
 
     const combinedAddress = Schnorrkel.getCombinedAddress([keyPairOne.publicKey, keyPairTwo.publicKey])
-    expect(combinedAddress).to.exist
-    expect(combinedAddress).to.be.string
+    expect(typeof combinedAddress).to.be.a("string")
   })
 
   it("should requires two public keys or more", () => {

@@ -1,5 +1,6 @@
-import { SchnorrSigner } from "../signers"
-import { Key, PublicNonces, SignatureOutput } from "."
+import type { SchnorrSigner } from "../signers"
+
+import type { Key, PublicNonces, SignatureOutput } from "."
 
 export interface MultiSigTx {
   signers: SchnorrSigner[]
@@ -7,14 +8,11 @@ export interface MultiSigTx {
   signatures: SignatureOutput[]
 }
 
-export type SignersSignatures = {
-  [signerAddress: string]: SignatureOutput
-}
+// signer address: SignatureOutput
+export type SignersSignatures = Record<string, SignatureOutput>
 
-export type SignersNonces = {
-  [signerAddress: string]: PublicNonces
-}
+// signer address: PublicNonces
+export type SignersNonces = Record<string, PublicNonces>
 
-export type SignersPubKeys = {
-  [signerAddress: string]: Key
-}
+// signer address: Key
+export type SignersPubKeys = Record<string, Key>

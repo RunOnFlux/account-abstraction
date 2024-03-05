@@ -17,6 +17,7 @@ export function generateAddress(pk: string) {
 
 export const getSalt = (salt: string) => ethers.utils.keccak256(ethers.utils.toUtf8Bytes(salt))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getEvent(tx: providers.TransactionResponse, contract: any, eventName: string) {
   const receipt = await contract.provider.getTransactionReceipt(tx.hash)
   const eventFragment = contract.interface.getEvent(eventName)

@@ -1,6 +1,6 @@
 {
   "name": "aa-schnorr-multisig",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",
@@ -35,9 +35,9 @@
     "export-deployments": "npm run export-deployments-mumbai",
     "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi  && npm run export-deployments",
     "build": "tsc --project tsconfig.build.json",
-    "deploy:mumbai": "hardhat deploy --network polygon-mumbai --tags FULL",
+    "deploy:mumbai": "hardhat deploy --network polygon-mumbai --tags ACCOUNT_FACTORY",
     "clean-full-deploy:mumbai": "hardhat clean && hardhat compile && npm run deploy:mumbai",
-    "verify": "npx hardhat verify --network polygon-mumbai <DEPLOYED_CONTRACT_ADDRESS> <ARGS>"
+    "verify": "npx hardhat verify --network polygon-mumbai <DEPLOYED_CONTRACT_ADDRESS> 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
   },
   "author": "",
   "license": "MIT",

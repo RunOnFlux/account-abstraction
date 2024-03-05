@@ -1,10 +1,12 @@
 import { ethers } from "ethers"
-import { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
-import { Hex } from "../types/misc"
+
+import type { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
+import type { Hex } from "../types/misc"
 import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
-import { SchnorrSigner, Schnorrkel } from "../signers"
-import { SignersNonces, SignersPubKeys, SignersSignatures } from "../types/multiSigTx"
-import { UserOperationRequest } from "../accountAbstraction"
+import type { SchnorrSigner } from "../signers"
+import { Schnorrkel } from "../signers"
+import type { SignersNonces, SignersPubKeys, SignersSignatures } from "../types/multiSigTx"
+import type { UserOperationRequest } from "../accountAbstraction"
 
 export class SchnorrMultiSigTx {
   readonly signers: SchnorrSigner[]
@@ -16,9 +18,7 @@ export class SchnorrMultiSigTx {
   signatures: SignersSignatures = {}
 
   constructor(signers: SchnorrSigner[], opHash: Hex, userOpRequest: UserOperationRequest) {
-    if (signers.length < 2) {
-      throw Error("At least 2 signers should be provided")
-    }
+    if (signers.length < 2) throw new Error("At least 2 signers should be provided")
 
     this.signers = signers
     this.opHash = opHash
@@ -28,9 +28,8 @@ export class SchnorrMultiSigTx {
       const _address = signer.getAddress()
 
       // generate and get public nonces
-      if (signer.hasNonces()) {
-        throw Error("Signer already has nonces")
-      }
+      if (signer.hasNonces()) throw new Error("Signer already has nonces")
+
       this.publicNonces[_address] = signer.generatePubNonces()
 
       // get public keys
@@ -58,9 +57,8 @@ export class SchnorrMultiSigTx {
   }
 
   getSummedSigData(): string {
-    if (!this.combinedPubKey || !this.signatures || this.signers.length < 2) {
-      throw Error("Summed signature input data is missing")
-    }
+    if (!this.combinedPubKey || !this.signatures || this.signers.length < 2) throw new Error("Summed signature input data is missing")
+
     const _signatureOutputs = this._getSignatures()
     const _sigs: SchnorrSignature[] = _signatureOutputs.map((sig) => sig.signature)
     const _challenges: Challenge[] = _signatureOutputs.map((sig) => sig.challenge)
@@ -69,14 +67,11 @@ export class SchnorrMultiSigTx {
     const _summed = sumSchnorrSigs(_sigs)
 
     // challenge for every signature must be the same - check and if so, assign first one
-    const allChallengesEqual = _challenges.every((e) => {
-      if (e.toHex() === _challenges[0].toHex()) {
-        return true
-      }
+    const isEveryChallengeEqual = _challenges.every((e) => {
+      if (e.toHex() === _challenges[0].toHex()) return true
     })
-    if (!allChallengesEqual) {
-      throw Error("Challenges for all signers should be the same")
-    }
+    if (!isEveryChallengeEqual) throw new Error("Challenges for all signers should be the same")
+
     const e = _challenges[0]
 
     // the multisig px and parity

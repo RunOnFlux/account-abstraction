@@ -25,7 +25,7 @@ export const getEntryPointByChainId = (chainId: string | undefined): string | un
       // mumbai
       return ENTRY_POINT_ALCHEMY_ADDRESS
     }
-    case "31337": {
+    case "1337": {
       // hardhat
       return ENTRY_POINT_ALCHEMY_ADDRESS
     }

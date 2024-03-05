@@ -8,9 +8,9 @@ import { generateAddress } from "../utils/helpers"
 import { Key } from "../../aa-schnorr-multisig-sdk/src/types"
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 
-describe("Single Sign Tests", function () {
+describe("Onchain Single Sign Tests", function () {
   it("should generate a schnorr signature and verify onchain", async function () {
-    const { address } = await generateAddress(pk1)
+    const { address } = generateAddress(pk1)
     const { schnorrAA: contract } = await deployMultiSigSmartAccount([address])
 
     // sign

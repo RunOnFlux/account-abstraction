@@ -1,18 +1,17 @@
-import fs from "fs";
-import path from "path";
+import fs from "fs"
+import path from "path"
 
 // solc js doesn't support typescript so we hack it
-let _solc: any = null;
+let _solc: any = null
 function getSolc(): any {
-  if (!_solc) {
-    _solc = require("solc");
-  }
-  return _solc;
+  if (!_solc) _solc = require("solc")
+
+  return _solc
 }
 
 interface Options {
-  fileName?: null | string;
-  contractsFolder?: null | string;
+  fileName?: null | string
+  contractsFolder?: null | string
 }
 
 // a function that compiles a contract at run time as long
@@ -23,17 +22,11 @@ interface Options {
 //   - fileName - if the name of the file is different than the name
 // of the contract, it should be passed along as we cannot guess it
 export function compile(contractName: string, options: Options = {}) {
-  const fileName = options.fileName ? options.fileName : contractName + ".sol";
-  const contractsFolder = options.contractsFolder
-    ? options.contractsFolder
-    : "contracts";
+  const fileName = options.fileName ? options.fileName : `${contractName}.sol`
+  const contractsFolder = options.contractsFolder ? options.contractsFolder : "contracts"
 
-  const contractPath = path.resolve(
-    __dirname + "../../",
-    contractsFolder,
-    fileName
-  );
-  const contractSource = fs.readFileSync(contractPath, { encoding: "utf8" });
+  const contractPath = path.resolve(`${__dirname}../../`, contractsFolder, fileName)
+  const contractSource = fs.readFileSync(contractPath, { encoding: "utf8" })
 
   const input = {
     language: "Solidity",
@@ -54,27 +47,19 @@ export function compile(contractName: string, options: Options = {}) {
         },
       },
     },
-  };
+  }
 
   function findImports(libPath: string) {
     return {
-      contents: fs.readFileSync(
-        path.resolve(__dirname + "../../../../", "contracts", libPath),
-        { encoding: "utf8" }
-      ),
-    };
+      contents: fs.readFileSync(path.resolve(`${__dirname}../../../../`, "contracts", libPath), { encoding: "utf8" }),
+    }
   }
 
-  const output = JSON.parse(
-    getSolc().compile(JSON.stringify(input), { import: findImports })
-  );
+  const output = JSON.parse(getSolc().compile(JSON.stringify(input), { import: findImports }))
 
   return {
     abi: output.contracts[contractName][contractName].abi,
-    bytecode:
-      "0x" + output.contracts[contractName][contractName].evm.bytecode.object, // bin
-    deployBytecode:
-      "0x" +
-      output.contracts[contractName][contractName].evm.deployedBytecode.object, // binRuntime
-  };
+    bytecode: `0x${output.contracts[contractName][contractName].evm.bytecode.object}`, // bin
+    deployBytecode: `0x${output.contracts[contractName][contractName].evm.deployedBytecode.object}`, // binRuntime
+  }
 }

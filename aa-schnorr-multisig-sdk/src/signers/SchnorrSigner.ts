@@ -1,6 +1,10 @@
 import { privateKeyVerify, publicKeyCreate } from "secp256k1"
-import { pubKey2Address } from "../helpers/schnorr-helpers"
-import { Key, KeyPair, PublicNonces, SignatureOutput } from "../types"
+
+import type { Key, PublicNonces, SignatureOutput } from "../types"
+import { pubKey2Address } from "../helpers/converters"
+import type { HashFunction } from "../core/types"
+import { KeyPair } from "../types"
+
 import { Schnorrkel } from "./Schnorrkel"
 
 export class SchnorrSigner extends Schnorrkel {
@@ -11,9 +15,8 @@ export class SchnorrSigner extends Schnorrkel {
     super()
     let privKeyBytes: Buffer
 
-    do {
-      privKeyBytes = Buffer.from(_privKey)
-    } while (!privateKeyVerify(privKeyBytes))
+    do privKeyBytes = Buffer.from(_privKey)
+    while (!privateKeyVerify(privKeyBytes))
 
     const pubKey = Buffer.from(publicKeyCreate(privKeyBytes))
 
@@ -28,7 +31,7 @@ export class SchnorrSigner extends Schnorrkel {
   }
 
   getAddress(): string {
-    return pubKey2Address(this.#publicKey)
+    return pubKey2Address(this.#publicKey.buffer)
   }
 
   getPubKey(): Key {
@@ -55,7 +58,7 @@ export class SchnorrSigner extends Schnorrkel {
     return this.multiSigSignHash(this.#privateKey, hash, publicKeys, publicNonces)
   }
 
-  signMessage(msg: string, hashFn: Function | null = null): SignatureOutput {
+  signMessage(msg: string, hashFn: HashFunction | null = null): SignatureOutput {
     return Schnorrkel.sign(this.#privateKey, msg, hashFn)
   }
 

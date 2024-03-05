@@ -14,5 +14,5 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "exclude": ["dist", "test", "jest.config.ts"]
+  "exclude": ["dist", "test", "deployments"]
 }

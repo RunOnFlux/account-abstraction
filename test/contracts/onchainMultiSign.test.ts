@@ -7,7 +7,7 @@ import { createRandomSchnorrSigner } from "../utils/helpers"
 import { getAllCombinedPubAddressXofY } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
 import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
-import { ERC1271_MAGICVALUE_BYTES32, SIGNER_ROLE_HASH } from "../utils/config"
+import { ERC1271_MAGICVALUE_BYTES32, OWNER_ROLE_HASH } from "../utils/config"
 
 let contract: MultiSigSmartAccount
 let combinedAddresses: string[]
@@ -16,7 +16,7 @@ let signerTwo: SchnorrSigner
 let signerThree: SchnorrSigner
 let msg: string
 
-describe("Multi Sign Tests", function () {
+describe("Onchain Multi Sign Tests", function () {
   this.beforeEach("create signers and deploy contract", async function () {
     msg = "just a test message"
 
@@ -39,7 +39,7 @@ describe("Multi Sign Tests", function () {
   })
   it("should generate a schnorr musig2 and validate it on the blockchain", async function () {
     const combinedAddress = combinedAddresses[0]
-    expect(await contract.hasRole(SIGNER_ROLE_HASH, combinedAddress)).to.be.eq(true)
+    expect(await contract.hasRole(OWNER_ROLE_HASH, combinedAddress)).to.be.eq(true)
 
     const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
@@ -207,6 +207,27 @@ describe("Multi Sign Tests", function () {
 
     // the multisig px and parity
     const px = combinedPublicKey.buffer.subarray(1, 33)
+    const parity = combinedPublicKey.buffer[0] - 2 + 27
+
+    // wrap the result
+    const abiCoder = new ethers.utils.AbiCoder()
+    const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
+    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const result = await contract.isValidSignature(msgHash, sigData)
+    expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
+  })
+
+  it("should withdraw ONLY OWNER", async function () {
+    const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
+    const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
+    const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
+    const { signature: sigOne, challenge } = signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const { signature: sigTwo } = signerTwo.signMultiSigMsg(msg, publicKeys, publicNonces)
+    const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
+
+    // the multisig px and parity
+    const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
+
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result

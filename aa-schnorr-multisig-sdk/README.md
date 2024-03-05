@@ -2,7 +2,7 @@
 A typescript library for creating ERC-4337 Account Abstraction which utilizes Schnorr Signatures for multi signatures.
 
 
-## Overview
+## About
 * ERC-4337 Account Abstraction
   * `MultiSigAccountAbstraction` class extends [Alchemys's](https://github.com/alchemyplatform/aa-sdk/tree/main/packages/core) `BaseSmartContractAccount`. It allows to interact with Smart Contract Account.
   * `MultiSigAccountSigner` class extends [Alchemys's](https://github.com/alchemyplatform/aa-sdk/tree/main/packages/ethers) `AccountSigner` and is designed to build and send multi-sig user operations.
@@ -55,7 +55,7 @@ If `MultiSigSmartAccountFactory` was deployed then deterministic Account address
 const predictedAddress = await predictAccountAddress(smartAccountFactory, signer, combinedPubAddress, salt)
 ```
 
-### 1. Create Schnorr Signers out of private keys. 
+### 1. Create Schnorr Signers out of private keys
 **Warning! Never disclose your private key!**
 ```
 const signer1 = createSchnorrSigner(hexToBytes(<PRIVATE_KEY_1>))
@@ -77,7 +77,6 @@ const accountProvider = EthersProviderAdapter.fromEthersProvider(alchemyProvider
 
 const accountSigner = accountProvider.connectToAccount((rpcClient) => {
   const smartAccount = new MultiSigAccountAbstraction({
-    entryPointAddress: <ENTRYPOINT_ADDRESS>,
     chain: <CHAIN>,
     accountAddress: <SMART_ACCOUNT_ADDRESS>,
     factoryAddress: <MUSIG_ACCOUNT_FACTORY_ADDRESS>,
@@ -129,7 +128,7 @@ Use `multiSigAccountSigner` to extends accountSigner with multi-signature method
 const multiSigAccountSigner = createMultiSigAccountSigner(accountSigner)
 ```
 
-### 4. Construct User Operation CallData. 
+### 4. Construct User Operation CallData
 [User Operation CallData](https://accountkit.alchemy.com/using-smart-accounts/send-user-operations.html#_2-construct-the-call-data) is just wrapped standard transaction calldata.
 - [encodeFunctionData](https://viem.sh/docs/contract/encodeFunctionData.html#encodefunctiondata) imported from [viem](https://www.npmjs.com/package/viem) encodes the function name and parameters into an ABI encoded value
 
@@ -147,9 +146,8 @@ const AlchemyTokenAbi = [
 ```
 
 ### CallData construction examples
-#### 1. ERC20 Transfer
+#### ERC20 Transfer
 
-In this example `UserOperationCallData` is encoded with ERC20's `transfer` function.
 ```
 const uoCallData: UserOperationCallData = encodeFunctionData({
         abi: ERC20_abi,
@@ -157,7 +155,7 @@ const uoCallData: UserOperationCallData = encodeFunctionData({
         functionName: "transfer",
       })
 ```
-#### 2. Transfer `amount` ETH to `toAddress`
+#### Transfer ETH
 ```
 const uoCallData: UserOperationCallData = {
   data: "0x",
@@ -165,7 +163,7 @@ const uoCallData: UserOperationCallData = {
   value: <amount>,
 }
 ```
-#### 3. Upgrade `MultiSigSmartAccount` contract to `newImplementationAddress`
+#### Upgrade MultiSigSmartAccount contract
 ```
 const newImplementation = <newImplementationAddress> as string
 const data = ""
@@ -175,7 +173,7 @@ const uoCallData: UserOperationCallData = encodeFunctionData({
   functionName: "upgradeToAndCall",
 })
 ```
-#### 4. Withdraw `MultiSigSmartAccount` deposit to `toAddress`
+#### Withdraw MultiSigSmartAccount deposit
 ```
 const uoCallData: UserOperationCallData = encodeFunctionData({
   abi: MultiSigSmartAccount_abi,
@@ -184,7 +182,7 @@ const uoCallData: UserOperationCallData = encodeFunctionData({
 })
 ```
 
-### 5. Build User Operation. 
+### 5. Build User Operation
 Use `MultiSigAccountSigner`'s method with gas estimator `buildUserOpWithGasEstimator()`.
 ```
 const { opHash, request } = await multiSigAccountSigner.buildUserOpWithGasEstimator(
@@ -199,20 +197,20 @@ const { opHash, request } = await multiSigAccountSigner.buildUserOpWithGasEstima
 ```
 `targetAddress` can be ERC20 Token address (e.g. for token transfer) or MultiSigSmartAccount address for upgrade call.
 
-### 6. Initialize Multi-Sig Schnorr Transaction.
+### 6. Initialize Multi-Sig Schnorr Transaction
 Use signers, opHash and request generated above.
 
-Every instance of `SchnorrMultiSigTx` is created once for single transaction and uses **one-time nonces**, so transaction can't be re-signed or reused! 
+Every instance of `SchnorrMultiSigTx` is created once for single transaction (and designed signers combination, like 2/3) and uses **one-time nonces**, so transaction can't be re-signed or reused! 
 ```
 const msTx = new SchnorrMultiSigTx([signer1, signer2], opHash, request)
 ```
 
-### 7. Sign the transaction with every defined signer.
+### 7. Sign the transaction with every defined signer
 ```
 msTx.signMultiSigHash(signer)
 ```
 
-### 8. Send the transaction.
+### 8. Send the transaction
 To do so use `MultiSigAccountSigner`'s method `sendMultiSigTransaction()`.
 
 In this step signatures signed before by every signer are collected and combined within `SchnorrMultiSigTx` instance. This "summed-signature" is then sent and validate on-chain. If it's ok - transaction can be finished.

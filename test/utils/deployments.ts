@@ -4,7 +4,7 @@ import type { MultiSigSmartAccount, MultiSigSmartAccountFactory } from "../../sr
 import { MultiSigSmartAccountFactory__factory, MultiSigSmartAccount__factory } from "../../src/typechain"
 import { getEntryPointByChainId } from "../../deploy/helpers/const"
 
-import { getEvent, getSalt } from "./helpers"
+import { getEvent, getSaltHash } from "./helpers"
 
 interface MultiSigSmartAccountSet {
   mssaFactory: MultiSigSmartAccountFactory
@@ -14,7 +14,7 @@ interface MultiSigSmartAccountSet {
 
 export async function deployMultiSigSmartAccount(combinedPubKeys: string[]): Promise<MultiSigSmartAccountSet> {
   const [deployer] = await ethers.getSigners()
-  const salt = getSalt("salt")
+  const salt = getSaltHash("salt")
   const chainId = await getChainId()
   const ENTRY_POINT_ADDRESS = getEntryPointByChainId(chainId)
   if (!ENTRY_POINT_ADDRESS) throw new Error("Entry Point undefined")

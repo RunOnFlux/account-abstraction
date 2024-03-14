@@ -20,6 +20,7 @@ async function exportDeploymentsAddresses(path_directory: string) {
 
   fs.stat(path_directory, (error, stat) => {
     if (!error && stat.isDirectory()) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let deployments: Record<string, any> = {}
       if (fs.existsSync(`${path_directory}/deployments.json`))
         deployments = JSON.parse(fs.readFileSync(`${path_directory}/deployments.json`, "utf8"))

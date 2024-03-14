@@ -5,9 +5,11 @@ import { Key } from "../types"
 import { _generatePk } from "../core"
 import { SchnorrSigner, Schnorrkel } from "../signers"
 import type { Challenge, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
+import type { Hex } from "../types/misc"
 
-export function createSchnorrSigner(_privKey: Uint8Array): SchnorrSigner {
-  return new SchnorrSigner(_privKey)
+export function createSchnorrSigner(privKey: Hex): SchnorrSigner {
+  const privKeyBuffer = new Key(Buffer.from(ethers.utils.arrayify(privKey))).buffer
+  return new SchnorrSigner(privKeyBuffer)
 }
 
 export function sumSchnorrSigs(signatures: SchnorrSignature[]): SchnorrSignature {
@@ -25,6 +27,7 @@ export function pKeyString2Key(pK: string): Key {
 }
 
 function _getCombos(arr: any[]): any[] {
+  // eslint-disable-next-line no-undefined
   if (arr[0] === undefined) return [arr]
   return _getCombos(arr.slice(1)).flatMap((element) => [element.concat(arr[0]), element])
 }

@@ -4,12 +4,12 @@ A typescript library for creating ERC-4337 Account Abstraction which utilizes Sc
 
 ## About
 * ERC-4337 Account Abstraction
-  * `MultiSigAccountAbstraction` class extends [Alchemys's](https://github.com/alchemyplatform/aa-sdk/tree/main/packages/core) `BaseSmartContractAccount`. It allows to interact with Smart Contract Account.
+  * `MultiSigAccountAbstraction` class extends [Alchemys's](https://github.com/alchemyplatform/aa-sdk/tree/main/packages/core) `BaseSmartContractAccount`. It allows to interact with the Smart Contract Account.
   * `MultiSigAccountSigner` class extends [Alchemys's](https://github.com/alchemyplatform/aa-sdk/tree/main/packages/ethers) `AccountSigner` and is designed to build and send multi-sig user operations.
 * Schnorr Signatures
-  * `Schnorkell` is the key element of the package. It manages signature's nonces and has methods for signing messeges, like: `sign()` and `multiSigSign()`.
+  * `Schnorkell` is the key element of the package. It manages signature's nonces and has methods for signing messages, like: `sign()` and `multiSigSign()`.
   * `SchnorrSigner` extends `Schnorkell` and manages key pairs (private and public) to generate Schnorr Signatures.
-  * `SchnorrMultiSigTx` class has te be used to create single multi-signature transaction. Signers, User Operation Hash and User Operation Request data have to be known upfront to initialize transaction signing process.
+  * `SchnorrMultiSigTx` class has to be used to create a single multi-signature transaction. Signers, User Operation Hash and User Operation Request data have to be known upfront to initialize the transaction signing process.
 
 ## Requirements:
 
@@ -31,7 +31,7 @@ npm i
 
 ## Example usage
 ### 0. Deploy MultiSigSmartAccountFactory and create Account Abstraction
-`MultiSigSmartAccountFactory` should be deployed first from [aa-schnorr-multisig package](https://www.npmjs.com/package/aa-schnorr-multisig). If already deployed, address can be found in `deployments` folder.
+`MultiSigSmartAccountFactory` should be deployed first from [aa-schnorr-multisig package](https://www.npmjs.com/package/aa-schnorr-multisig). If already deployed, the address can be found in the `deployments` folder.
 ```
 const smartAccountFactory = MultiSigSmartAccountFactory__factory.connect(
   <MUSIG_ACCOUNT_FACTORY_ADDRESS>,
@@ -50,16 +50,28 @@ const saltBytes = stringToBytes(<SALT_STRING>, { size: 32 })
 const _createTx = await smartAccountFactory.createAccount(combinedPubAddress, saltBytes)
 ```
 
-If `MultiSigSmartAccountFactory` was deployed then deterministic Account address can be predict with `predictAccountAddress`
+#### Smart Account Address prediction
+If `MultiSigSmartAccountFactory` was deployed then the deterministic Account address can be predict with [aa-schnorr-multisig's helpers](https://www.npmjs.com/package/aa-schnorr-multisig) in preffered way:
+* onchain with `predictAddressOnchain`
 ```
-const predictedAddress = await predictAccountAddress(smartAccountFactory, signer, combinedPubAddress, salt)
+const predictedAddress = await predictAddressOnchain(smartAccountFactory combinedPubAddress, salt, ethersSignerOrProvider)
+```
+* offchain with `predictAddressOffchain`
+```
+const predictedAddress = await predictAddressOffchain(smartAccountFactory, accountImplementationAddress, combinedPubAddress, salt)
+```
+`accountImplementationAddress` can be taken from `MultiSigSmartAccountFactory` contract by calling `accountImplementation()`. This is done also by the helper function which can be used as below:
+```
+const implementationAddress = await getAccountImplementationAddress(factoryAddress, ethersSignerOrProvider)
 ```
 
 ### 1. Create Schnorr Signers out of private keys
+The private key has to be hex value, so e.g. `0x123456...`. 
+
 **Warning! Never disclose your private key!**
 ```
-const signer1 = createSchnorrSigner(hexToBytes(<PRIVATE_KEY_1>))
-const signer2 = createSchnorrSigner(hexToBytes(<PRIVATE_KEY_2>))
+const signer1 = createSchnorrSigner(<PRIVATE_KEY_HEX_1>)
+const signer2 = createSchnorrSigner(<PRIVATE_KEY_HEX_2>)
 ```
 
 ### 2. Create Account Signer
@@ -105,7 +117,7 @@ const chain = getChain(chainId)
 const saltBytes = stringToBytes(<SALT_STRING>, { size: 32 })
 const _createTx = await smartAccountFactory.createAccount(combinedPubAddress, saltBytes)
 ```
-* `factoryAddress` is address of `MultiSigSmartAccountFactory`. If already deployed, can be found in `deployments` folder of `aa-schnorr-multisig` package
+* `factoryAddress` is the address of `MultiSigSmartAccountFactory`. If already deployed, can be found in `deployments` folder of `aa-schnorr-multisig` package
 * `combinedPubAddress` can be generated with `getAllCombinedPubAddressXofY()` function from schnorr-helpers. **Signers have to be the same as used for signing transactions.**
 
 ```
@@ -123,7 +135,7 @@ where [stringToBytes](https://viem.sh/docs/utilities/toBytes#stringtobytes) impo
 const entryPointAddress = getDefaultEntryPointAddress(chain)
 ```
 ### 3. Create MultiSig Account Signer out of Account Signer
-Use `multiSigAccountSigner` to extends accountSigner with multi-signature methods.
+Use `multiSigAccountSigner` to extend accountSigner with multi-signature methods.
 ```
 const multiSigAccountSigner = createMultiSigAccountSigner(accountSigner)
 ```
@@ -200,7 +212,7 @@ const { opHash, request } = await multiSigAccountSigner.buildUserOpWithGasEstima
 ### 6. Initialize Multi-Sig Schnorr Transaction
 Use signers, opHash and request generated above.
 
-Every instance of `SchnorrMultiSigTx` is created once for single transaction (and designed signers combination, like 2/3) and uses **one-time nonces**, so transaction can't be re-signed or reused! 
+Every instance of `SchnorrMultiSigTx` is created once for single transaction (and designed signers combination, like 2/3) and uses **one-time nonces**, so transactions can't be re-signed or reused! 
 ```
 const msTx = new SchnorrMultiSigTx([signer1, signer2], opHash, request)
 ```
@@ -213,7 +225,7 @@ msTx.signMultiSigHash(signer)
 ### 8. Send the transaction
 To do so use `MultiSigAccountSigner`'s method `sendMultiSigTransaction()`.
 
-In this step signatures signed before by every signer are collected and combined within `SchnorrMultiSigTx` instance. This "summed-signature" is then sent and validate on-chain. If it's ok - transaction can be finished.
+In this step signatures (signed before by each signer) are collected and combined within the `SchnorrMultiSigTx` instance. This "summed-signature" is then sent and validated on-chain. If it's ok - transaction can be finished.
 ```
 const txHash = await multiSigAccountSigner.sendMultiSigTransaction(msTx)
 ```

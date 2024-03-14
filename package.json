@@ -1,6 +1,6 @@
 {
   "name": "aa-schnorr-multisig",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",
@@ -33,7 +33,7 @@
     "generate-index": "ts-node scripts/build/generate-index.ts",
     "export-deployments-mumbai": "npx hardhat --network polygon-mumbai run scripts/build/export-deployments.ts",
     "export-deployments": "npm run export-deployments-mumbai",
-    "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi  && npm run export-deployments",
+    "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi && npm run generate-index && npm run export-deployments",
     "build": "tsc --project tsconfig.build.json",
     "deploy:mumbai": "hardhat deploy --network polygon-mumbai --tags ACCOUNT_FACTORY",
     "clean-full-deploy:mumbai": "hardhat clean && hardhat compile && npm run deploy:mumbai",

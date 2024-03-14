@@ -1,5 +1,4 @@
 import { expect } from "chai"
-import { ethers } from "ethers"
 
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, OWNER_ROLE_HASH, pk1, pk2, pk3 } from "../utils/config"
@@ -13,7 +12,6 @@ import {
   generateSingleSigDataAndHash,
   getAllCombinedPubAddressXofY,
 } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
-import { Key } from "../../aa-schnorr-multisig-sdk/src/types"
 import { hashMsgKeccak256 } from "../../aa-schnorr-multisig-sdk/src/helpers/converters"
 
 let contract: MultiSigSmartAccount
@@ -101,9 +99,9 @@ describe("Multi Sign Tests: 2 out of 3 signers", function () {
     msg = "just a test message"
 
     // create signers
-    signerOne = createSchnorrSigner(new Key(Buffer.from(ethers.utils.arrayify(pk1))).buffer)
-    signerTwo = createSchnorrSigner(new Key(Buffer.from(ethers.utils.arrayify(pk2))).buffer)
-    signerThree = createSchnorrSigner(new Key(Buffer.from(ethers.utils.arrayify(pk3))).buffer)
+    signerOne = createSchnorrSigner(pk1)
+    signerTwo = createSchnorrSigner(pk2)
+    signerThree = createSchnorrSigner(pk3)
 
     // generate pubNonces
     signerOne.generatePubNonces()

@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect } from "chai"
 import { ethers } from "ethers"
 
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import type { MultiSigSmartAccount } from "../../src/typechain"
 import { createRandomSchnorrSigner } from "../utils/helpers"
-import { getAllCombinedPubAddressXofY } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
+import { getAllCombinedAddrFromSigners } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
 import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { ERC1271_MAGICVALUE_BYTES32, OWNER_ROLE_HASH } from "../utils/config"
@@ -31,7 +32,7 @@ describe("Onchain Multi Sign Tests", function () {
     signerThree.generatePubNonces()
 
     // generate combined addresses for multisig 2/2
-    combinedAddresses = getAllCombinedPubAddressXofY([signerOne, signerTwo], 2)
+    combinedAddresses = getAllCombinedAddrFromSigners([signerOne, signerTwo], 2)
 
     // deploy contract with signers
     const schnorrAA = await deployMultiSigSmartAccount(combinedAddresses)

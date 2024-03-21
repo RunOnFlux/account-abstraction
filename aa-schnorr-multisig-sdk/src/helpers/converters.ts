@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
 
-export const hashMsgKeccak256 = (message: string): string => {
+export function hashMsgKeccak256(message: string): string {
   return ethers.utils.solidityKeccak256(["string"], [message])
 }
 

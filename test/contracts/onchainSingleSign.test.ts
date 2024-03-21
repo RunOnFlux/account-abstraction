@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { ethers } from "ethers"
 import secp256k1 from "secp256k1"
+import { randomBytes } from "ethers/lib/utils"
 
 import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, pk1 } from "../utils/config"
 import { deployMultiSigSmartAccount } from "../utils/deployments"
@@ -11,7 +12,8 @@ import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 describe("Onchain Single Sign Tests", function () {
   it("should generate a schnorr signature and verify onchain", async function () {
     const { address } = generateAddress(pk1)
-    const { schnorrAA: contract } = await deployMultiSigSmartAccount([address])
+    const salt = randomBytes(32).toString()
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([address], salt)
 
     // sign
     const msg = "just a test message"
@@ -29,8 +31,9 @@ describe("Onchain Single Sign Tests", function () {
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
   it("should fail if msgHash is different than msg signed", async function () {
-    const { address } = await generateAddress(pk1)
-    const { schnorrAA: contract } = await deployMultiSigSmartAccount([address])
+    const { address } = generateAddress(pk1)
+    const salt = randomBytes(32).toString()
+    const { schnorrAA: contract } = await deployMultiSigSmartAccount([address], salt)
 
     // sign
     const msg = "just a test message"

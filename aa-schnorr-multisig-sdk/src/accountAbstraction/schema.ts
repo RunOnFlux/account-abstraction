@@ -27,7 +27,7 @@ export const MultiSigSmartAccountParamsSchema = <
   TOwner extends SmartAccountSigner = SmartAccountSigner,
 >() =>
   createBaseSmartAccountParamsSchema<TTransport, TOwner>().extend({
-    combinedPubKeys: z.array(z.string()).optional(),
+    combinedAddress: z.array(z.string()).optional(),
     salt: z.string().optional(),
     factoryAddress: z.string().optional().describe("Optional override for the factory address."),
   })

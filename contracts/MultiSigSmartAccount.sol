@@ -16,8 +16,8 @@ import {Schnorr} from "./schnorr/Schnorr.sol";
 import {IMultiSigSmartAccount} from "./interfaces/IMultiSigSmartAccount.sol";
 
 /**
- * MultiSigSmartAccount
- * This contract was designed to integrate implementations of:
+ * @title MultiSigSmartAccount
+ * @notice This contract was designed to integrate implementations of:
  * - ERC4337 Account Abstraction
  * - Schnorr signature verifications for multisig
  */
@@ -51,15 +51,15 @@ contract MultiSigSmartAccount is
      * To upgrade EntryPoint a new implementation of SimpleAccount must be deployed with the new EntryPoint address,
      * then upgrading the implementation by calling `upgradeTo()`
      */
-    function initialize(address[] memory combinedPubAddress) public initializer {
+    function initialize(address[] memory combinedAddress) public initializer {
         // grant owner role for every schnorr's combinedPubKey
-        uint256 len = combinedPubAddress.length;
+        uint256 len = combinedAddress.length;
         if (len == 0) revert OwnerNotDefined();
         for (uint8 i = 0; i < len; i++) {
-            _grantRole(DEFAULT_ADMIN_ROLE, combinedPubAddress[i]);
-            _grantRole(OWNER_ROLE, combinedPubAddress[i]);
+            _grantRole(DEFAULT_ADMIN_ROLE, combinedAddress[i]);
+            _grantRole(OWNER_ROLE, combinedAddress[i]);
         }
-        emit MultiSigAccountInitialized(_entryPoint, combinedPubAddress.length);
+        emit MultiSigAccountInitialized(_entryPoint, combinedAddress.length);
     }
 
     /**

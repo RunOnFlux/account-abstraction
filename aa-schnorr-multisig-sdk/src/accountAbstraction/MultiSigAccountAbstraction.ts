@@ -6,7 +6,7 @@ import { utils } from "ethers"
 import { concatHex, encodeFunctionData, hexToBytes } from "viem"
 import type { FallbackTransport, Hex, Transport } from "viem"
 
-import { MultiSigSmartAccountFactory_abi, MultiSigSmartAccount_abi } from "../abi"
+import { MultiSigSmartAccountFactory_abi, MultiSigSmartAccount_abi } from "../generated/abi"
 
 import type { MultiSigAccountAbstractionParams } from "./schema"
 import { MultiSigSmartAccountParamsSchema } from "./schema"
@@ -16,7 +16,7 @@ export class MultiSigAccountAbstraction<TTransport extends Transport | FallbackT
   SmartAccountSigner
 > {
   protected owner: SmartAccountSigner
-  protected combinedPubKeys: Address[]
+  protected combinedAddress: Address[]
   protected factoryAddress: Address
   protected salt: BytesLike
 
@@ -25,7 +25,7 @@ export class MultiSigAccountAbstraction<TTransport extends Transport | FallbackT
 
     super(params)
     this.owner = params.owner
-    this.combinedPubKeys = params.combinedPubKeys?.map((key) => key as Hex) ?? []
+    this.combinedAddress = params.combinedAddress?.map((key) => key as Hex) ?? []
     this.salt = params.salt ?? utils.formatBytes32String("salt")
     this.factoryAddress = (params.factoryAddress ?? "0x") as Hex
     this.entryPointAddress = (params.entryPointAddress ?? getDefaultEntryPointAddress(params.chain)) as Hex
@@ -78,14 +78,14 @@ export class MultiSigAccountAbstraction<TTransport extends Transport | FallbackT
       encodeFunctionData({
         abi: MultiSigSmartAccountFactory_abi,
         functionName: "createAccount",
-        args: [this.combinedPubKeys, this.salt],
+        args: [this.combinedAddress, this.salt],
       }),
     ])
   }
 }
 
 export function createMultiSigAccountAbstraction(
-  params: Pick<MultiSigAccountAbstractionParams<Transport>, "chain" | "accountAddress" | "rpcClient" | "combinedPubKeys" | "salt">
+  params: Pick<MultiSigAccountAbstractionParams<Transport>, "chain" | "accountAddress" | "rpcClient" | "combinedAddress" | "salt">
 ): MultiSigAccountAbstraction {
   return new MultiSigAccountAbstraction(params)
 }

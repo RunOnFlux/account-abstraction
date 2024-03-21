@@ -1,6 +1,6 @@
 {
   "name": "aa-schnorr-multisig-sdk",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Account Abstraction Schnorr Multi-Signatures SDK",
   "keywords": [
     "Account Abstraction",
@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/RunOnFlux/account-abstraction/issues"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@alchemy/aa-core": "^2.3.1",
     "@alchemy/aa-ethers": "^2.3.1",
     "bigi": "^1.4.2",

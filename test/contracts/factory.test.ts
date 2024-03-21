@@ -1,13 +1,22 @@
 import { expect } from "chai"
-import { ethers } from "hardhat"
+import { ethers, deployments } from "hardhat"
+import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { type MultiSigSmartAccount, type MultiSigSmartAccountFactory } from "../../src/typechain"
 import { createRandomSchnorrSigner, getSaltHash } from "../utils/helpers"
-import { getAllCombinedPubAddressXofY } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
+import { getAllCombinedAddrFromSigners } from "../../aa-schnorr-multisig-sdk/src/helpers/schnorr-helpers"
 import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import type { Hex } from "../../aa-schnorr-multisig-sdk/src/types/misc"
-import { getAccountImplementationAddress, predictAddressOffchain, predictAddressOnchain, saltToHex } from "../../src/helpers/create2"
+import {
+  getAccountImplementationAddress,
+  predictAccountAddrOffchain,
+  predictAccountAddrOnchain,
+  predictAccountImplementationAddrOffchain,
+  predictFactoryAddrOffchain,
+  saltToHex,
+} from "../../aa-schnorr-multisig-sdk/src/helpers/create2"
+import { getEntryPointByChainId } from "../../deploy/helpers/const"
 
 let contract: MultiSigSmartAccount
 let combinedAddresses: string[]
@@ -15,9 +24,13 @@ let signerOne: SchnorrSigner
 let signerTwo: SchnorrSigner
 let saltHash: string
 let factory: MultiSigSmartAccountFactory
+let deployer: SignerWithAddress
 
-describe("AA Factory", function () {
+describe("Account Factory", function () {
   this.beforeEach("create signers and deploy contract", async function () {
+    // get deployer address
+    const signers = await ethers.getSigners()
+    deployer = signers[0]
     // create signers
     signerOne = createRandomSchnorrSigner()
     signerTwo = createRandomSchnorrSigner()
@@ -27,13 +40,44 @@ describe("AA Factory", function () {
     signerTwo.generatePubNonces()
 
     // generate combined addresses for multisig 2/2
-    combinedAddresses = getAllCombinedPubAddressXofY([signerOne, signerTwo], 2)
+    combinedAddresses = getAllCombinedAddrFromSigners([signerOne, signerTwo], 2)
 
     // deploy contract with signers
-    const { salt, schnorrAA, mssaFactory } = await deployMultiSigSmartAccount(combinedAddresses)
+    const { salt, schnorrAA, mssaFactory } = await deployMultiSigSmartAccount(combinedAddresses, undefined, deployer)
     contract = schnorrAA
     saltHash = salt
     factory = mssaFactory
+  })
+  it("should deploy Factory with deterministic address", async function () {
+    const ENTRY_POINT_ADDRESS = getEntryPointByChainId("1337")
+    const saltFactory = getSaltHash("factoryrandomsalt")
+    const { deterministic } = deployments
+    const { address: deployedAddress } = await deterministic("MultiSigSmartAccountFactory", {
+      from: deployer.address,
+      args: [ENTRY_POINT_ADDRESS, saltFactory],
+      salt: saltFactory,
+    })
+
+    const predictedAddr = predictFactoryAddrOffchain(saltFactory)
+    expect(predictedAddr).to.be.eql(deployedAddress)
+  })
+  it("should deploy Factory with deterministic account implemetation address", async function () {
+    const ENTRY_POINT_ADDRESS = getEntryPointByChainId("1337")
+    const saltFactory = getSaltHash("factoryrandomsalt")
+    const { deterministic } = deployments
+    const { address: deployedAddress } = await deterministic("MultiSigSmartAccountFactory", {
+      from: deployer.address,
+      args: [ENTRY_POINT_ADDRESS, saltFactory],
+      salt: saltFactory,
+    })
+
+    const Factory = await ethers.getContractFactory("MultiSigSmartAccountFactory")
+    const _factory = Factory.attach(deployedAddress)
+    const predictedAddrWithParams = predictAccountImplementationAddrOffchain(saltFactory, undefined, ENTRY_POINT_ADDRESS)
+    const predictedAddrWithFactoryAddr = predictAccountImplementationAddrOffchain(saltFactory, _factory.address)
+
+    expect(await _factory.accountImplementation()).to.be.eql(predictedAddrWithParams)
+    expect(await _factory.accountImplementation()).to.be.eql(predictedAddrWithFactoryAddr)
   })
   it("should generate AA with deterministic address", async function () {
     expect(await factory.getAccountAddress(combinedAddresses, saltHash)).to.be.eql(contract.address)
@@ -72,7 +116,7 @@ describe("AA Factory", function () {
     // check helper function
     const _factoryAddress = factory.address as Hex
     const provider = ethers.provider.getSigner()
-    const _predictedByHelper = await predictAddressOnchain(_factoryAddress, combinedAddresses, _salt, provider)
+    const _predictedByHelper = await predictAccountAddrOnchain(_factoryAddress, combinedAddresses, _salt, provider)
 
     expect(_predictedByHelper).to.be.eql(_predicted)
 
@@ -81,13 +125,13 @@ describe("AA Factory", function () {
       .withArgs(_predicted)
   })
   it("should predict AA address offchain", async function () {
-    const _salt = "randomSalt"
+    const _salt = "salt"
     const _saltHash = saltToHex(_salt)
     const predictedOnchain = await factory.getAccountAddress(combinedAddresses, _saltHash)
     const factoryAddress = factory.address as Hex
     const accountImplAddress = await factory.accountImplementation()
 
-    const predictedOffchain = predictAddressOffchain(factoryAddress, accountImplAddress, combinedAddresses, _salt)
+    const predictedOffchain = predictAccountAddrOffchain(factoryAddress, accountImplAddress, combinedAddresses, _salt)
 
     expect(predictedOnchain).to.be.eql(predictedOffchain)
   })

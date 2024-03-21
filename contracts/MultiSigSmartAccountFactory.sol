@@ -8,16 +8,21 @@ import {IEntryPoint} from "./erc4337/interfaces/IEntryPoint.sol";
 import {IMultiSigSmartAccountFactory} from "./interfaces/IMultiSigSmartAccountFactory.sol";
 
 /**
- * A sample factory contract for SimpleAccount
- * A UserOperations "initCode" holds the address of the factory, and a method call (to createAccount, in this sample factory).
- * The factory's createAccount returns the target account address even if it is already installed.
- * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
+ * @title MultiSigSmartAccountFactory
+ * @notice The Factory contract for MultiSigSmartAccount.
+ * An UserOperations "initCode" holds the address of the factory and a method call (to `createAccount`).
+ * The factory's `createAccount` returns the target account address even if it is already deployed.
+ * This way the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
 contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
     MultiSigSmartAccount public immutable accountImplementation;
 
-    constructor(IEntryPoint _entryPoint) {
-        accountImplementation = new MultiSigSmartAccount(_entryPoint);
+    /**
+     * @dev account implemetation address is deterministic
+     * see: https://docs.soliditylang.org/en/develop/control-structures.html#salted-contract-creations-create2
+     */
+    constructor(IEntryPoint _entryPoint, bytes32 _salt) {
+        accountImplementation = new MultiSigSmartAccount{salt: bytes32(_salt)}(_entryPoint);
     }
 
     /**
@@ -26,14 +31,11 @@ contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
      * @dev Note that during UserOperation execution, this method is called only if the account is not deployed.
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      *
-     * @param combinedPubAddress combined schnorr signers' public addresses used as contract owners
+     * @param combinedAddress combined Schnorr signers' public addresses used as contract owners
      * @param salt salt
      */
-    function createAccount(
-        address[] memory combinedPubAddress,
-        bytes32 salt
-    ) public returns (MultiSigSmartAccount ret) {
-        address addr = getAccountAddress(combinedPubAddress, salt);
+    function createAccount(address[] memory combinedAddress, bytes32 salt) public returns (MultiSigSmartAccount ret) {
+        address addr = getAccountAddress(combinedAddress, salt);
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
             return MultiSigSmartAccount(payable(addr));
@@ -42,7 +44,7 @@ contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
             payable(
                 new ERC1967Proxy{salt: salt}(
                     address(accountImplementation),
-                    abi.encodeCall(MultiSigSmartAccount.initialize, (combinedPubAddress))
+                    abi.encodeCall(MultiSigSmartAccount.initialize, (combinedAddress))
                 )
             )
         );
@@ -51,10 +53,10 @@ contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
 
     /**
      * Calculate the counterfactual address of this account as it would be returned by createAccount()
-     * @param combinedPubAddress combined schnorr signers' public addresses
+     * @param combinedAddress combined schnorr signers' public addresses
      * @param salt salt
      */
-    function getAccountAddress(address[] memory combinedPubAddress, bytes32 salt) public view returns (address) {
+    function getAccountAddress(address[] memory combinedAddress, bytes32 salt) public view returns (address) {
         return
             Create2.computeAddress(
                 salt,
@@ -63,7 +65,7 @@ contract MultiSigSmartAccountFactory is IMultiSigSmartAccountFactory {
                         type(ERC1967Proxy).creationCode,
                         abi.encode(
                             address(accountImplementation),
-                            abi.encodeCall(MultiSigSmartAccount.initialize, (combinedPubAddress))
+                            abi.encodeCall(MultiSigSmartAccount.initialize, (combinedAddress))
                         )
                     )
                 )

@@ -2,7 +2,7 @@ import type { Hex, UserOperationCallData } from "@alchemy/aa-core"
 import { deepHexlify, getUserOperationHash } from "@alchemy/aa-core"
 import { AccountSigner } from "@alchemy/aa-ethers"
 
-import type { SchnorrMultiSigTx } from "../transaction"
+import type { MultiSigUserOpWithSigners, MultiSigUserOp } from "../transaction"
 
 import type { MultiSigAccountAbstraction } from "./MultiSigAccountAbstraction"
 import type { GasEstimatorLimits, UserOperationTxData } from "./types"
@@ -11,10 +11,20 @@ export class MultiSigAccountSigner extends AccountSigner<MultiSigAccountAbstract
   constructor(accountSigner: AccountSigner<MultiSigAccountAbstraction>) {
     super(accountSigner.provider)
   }
-  async sendMultiSigTransaction(tx: SchnorrMultiSigTx): Promise<`0x${string}`> {
+  async sendMultiSigTransaction(tx: MultiSigUserOpWithSigners): Promise<`0x${string}`> {
     const _provider = this.provider.accountProvider
     const _summedSignature = tx.getSummedSigData()
     const _opRequest = tx.userOpRequest
+    _opRequest.signature = _summedSignature as Hex
+    const txHash = await _provider.rpcClient.sendUserOperation(_opRequest, _provider.getEntryPointAddress())
+    const txUserOp = await _provider.waitForUserOperationTransaction(txHash)
+    return txUserOp
+  }
+
+  async sendMultiSigUserOp(userOp: MultiSigUserOp): Promise<`0x${string}`> {
+    const _provider = this.provider.accountProvider
+    const _summedSignature = userOp.getSummedSigData()
+    const _opRequest = userOp.userOpRequest
     _opRequest.signature = _summedSignature as Hex
     const txHash = await _provider.rpcClient.sendUserOperation(_opRequest, _provider.getEntryPointAddress())
     const txUserOp = await _provider.waitForUserOperationTransaction(txHash)

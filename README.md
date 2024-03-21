@@ -8,7 +8,7 @@ Package contains two main contracts:
 * MultiSigSmartAccountFactory - factory contract for account abstraction
 
 Account Abstraction is [UUPS Upgradeable Proxy](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable) and implementation can be upgraded only by the Owner.
-[The Owner Role](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl) is granted for every Schnorr's combined public address - `combinedPubAddress` - passed during Account initialization (read more about the `combinedPubAddress` creation [here](https://www.npmjs.com/package/aa-schnorr-multisig-sdk#0-deploy-multisigsmartaccountfactory-and-create-account-abstraction) ). It means that the most crucial functions, such as upgrade or deposit withdrawal, can be done only if a transaction is signed with Schnorr Multi-signature algorithm. 
+[The Owner Role](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl) is granted for every Schnorr's combined public address - `combinedAddress` - passed during Account initialization (read more about the `combinedAddress` creation [here](https://www.npmjs.com/package/aa-schnorr-multisig-sdk#0-deploy-multisigsmartaccountfactory-and-create-account-abstraction) ). It means that the most crucial functions, such as upgrade or deposit withdrawal, can be done only if a transaction is signed with Schnorr Multi-signature algorithm. 
 
 
 ## Requirements:
@@ -59,7 +59,6 @@ npm run build
 The package contains the following folders:
 * `abi` - generated smart contracts' ABI json files
 * `deployments` - addresses of deployed contracts (if any) for every supported network
-* `helpers` - includes functions to check if a contract was deployed and predict an Account's address (onchain or offchain)
 * `typechain` - generated TypeScript typings based on the given ABI files
 
 ## Associated package

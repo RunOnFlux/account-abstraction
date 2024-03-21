@@ -1,6 +1,6 @@
 {
   "name": "aa-schnorr-multisig",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",
@@ -18,6 +18,7 @@
   "scripts": {
     "reinstall": "rm -rf node_modules/ && npm install",
     "clear": "rm -rf dist",
+    "compile": "hardhat compile && npm run copy-to-sdk",
     "prettier:format": "prettier --write \"deploy/**/*.ts\" \"scripts/**/*.ts\" \"test/**/*.ts\"",
     "prettier:fix": "prettier --config ./.prettierrc --ignore-path ./prettierignore --write .",
     "prettier:check": "prettier --check .",
@@ -33,7 +34,8 @@
     "generate-index": "ts-node scripts/build/generate-index.ts",
     "export-deployments-mumbai": "npx hardhat --network polygon-mumbai run scripts/build/export-deployments.ts",
     "export-deployments": "npm run export-deployments-mumbai",
-    "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi && npm run generate-index && npm run export-deployments",
+    "copy-to-sdk": "./scripts/copy.sh",
+    "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi && npm run generate-index && npm run export-deployments && npm run copy-to-sdk",
     "build": "tsc --project tsconfig.build.json",
     "deploy:mumbai": "hardhat deploy --network polygon-mumbai --tags ACCOUNT_FACTORY",
     "clean-full-deploy:mumbai": "hardhat clean && hardhat compile && npm run deploy:mumbai",
@@ -51,9 +53,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.1",
-    "@openzeppelin/contracts-upgradeable": "^5.0.1"
-  },
-  "peerDependencies": {
+    "@openzeppelin/contracts-upgradeable": "^5.0.1",
     "@alchemy/aa-core": "^2.3.1",
     "@alchemy/aa-ethers": "^2.3.1",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",

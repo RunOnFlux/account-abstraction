@@ -77,10 +77,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY ?? "",
       polygon: process.env.POLYGONSCAN_API_KEY ?? "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY ?? "",
-<<<<<<< HEAD
-=======
       polygonAmoy: process.env.POLYGONSCAN_API_KEY ?? "",
->>>>>>> develop
     },
   },
   namedAccounts: {

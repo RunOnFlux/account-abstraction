@@ -19,7 +19,7 @@ const deployFct: DeployFunction = async function (hre: HardhatRuntimeEnvironment
   const { provider } = ethers
 
   // salt can be changed to any different
-  const saltHex = saltToHex("aafactorysalttest")
+  const saltHex = saltToHex("aafactorysalt")
   const args = [ENTRY_POINT_ALCHEMY_ADDRESS, saltHex]
 
   const { deploy } = await deterministic(CONTRACT_NAME, {

@@ -9,6 +9,7 @@ import { getAllCombinedAddrFromSigners } from "../../aa-schnorr-multisig-sdk/src
 import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import type { Hex } from "../../aa-schnorr-multisig-sdk/src/types/misc"
 import {
+  createSmartAccount,
   getAccountImplementationAddress,
   predictAccountAddrOffchain,
   predictAccountAddrOnchain,
@@ -134,5 +135,20 @@ describe("Account Factory", function () {
     const predictedOffchain = predictAccountAddrOffchain(factoryAddress, accountImplAddress, combinedAddresses, _salt)
 
     expect(predictedOnchain).to.be.eql(predictedOffchain)
+  })
+  it("should create account with predicted address with helper", async function () {
+    const _salt = ""
+    const _saltHash = saltToHex(_salt)
+    const predictedOnchain = await factory.getAccountAddress(combinedAddresses, _saltHash)
+    const factoryAddress = factory.address as Hex
+    const accountImplAddress = await factory.accountImplementation()
+
+    const predictedOffchain = predictAccountAddrOffchain(factoryAddress, accountImplAddress, combinedAddresses, _salt)
+    expect(predictedOnchain).to.be.eql(predictedOffchain)
+
+    // use helper function to create account with default salt empty string
+    const createdAccount: Hex = await createSmartAccount(combinedAddresses, deployer, undefined, factoryAddress)
+    // check if addresses equals
+    expect(predictedOnchain).to.be.eql(createdAccount)
   })
 })

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Provider } from "@ethersproject/providers"
-import { ethers, type Signer } from "ethers"
+import type { providers, Signer } from "ethers"
+import { ethers } from "ethers"
 
 import { ERC1967Proxy__factory, MultiSigSmartAccount__factory, MultiSigSmartAccountFactory__factory } from "../generated/typechain"
 import { MultiSigSmartAccountFactory_abi } from "../generated/abi"
+import { deploymentManager } from "../generated/deployments/deploymentManager"
 
 // Proxy address contract used to deploy (using create2) new MultiSigSmartAccount Factory
 // see: https://github.com/Arachnid/deterministic-deployment-proxy
@@ -140,4 +142,51 @@ export const saltToHex = (salt: string): string => {
   if (ethers.utils.isHexString(saltString)) return saltString
 
   return ethers.utils.id(saltString)
+}
+
+/**
+ * Creates MultiSigSmartAccount with create2 and onchain data.
+ * @param combinedAddresses combined schnorr signers' public addresses used as contract owners
+ * @param ethersSignerOrProvider Signer or Provider type to call the Factory contract
+ * @param salt optional salt text (string or number)
+ * @param factoryAddress optional MultiSigSmartAccountFactory address - if not given, the deployed factory address will be taken
+ * @param chainId optional chainId number needed to get deployed factory address only if factoryAddress not given
+ * @returns predicted MultiSigSmartAccount address
+ */
+export async function createSmartAccount(
+  combinedAddresses: string[],
+  ethersSignerOrProvider: Signer | Provider,
+  salt?: string,
+  factoryAddress?: string,
+  chainId?: number
+): Promise<`0x${string}`> {
+  // create factory
+  const _factoryAddr: string =
+    factoryAddress ||
+    (await (async (): Promise<string> => {
+      const a = await deploymentManager.read()
+      return a[chainId].MultiSigSmartAccountFactory
+    })())
+
+  if (!_factoryAddr) throw new Error("Smart Account Factory address not found")
+  const smartAccountFactory = new ethers.Contract(_factoryAddr, MultiSigSmartAccountFactory_abi, ethersSignerOrProvider)
+
+  // generate salt hash - empty string by default
+  const _salt = salt ?? ""
+  const saltHash = saltToHex(_salt)
+  const createTx = await smartAccountFactory.createAccount(combinedAddresses, saltHash)
+  const event = await getEvent(createTx, smartAccountFactory, "MultiSigSmartAccountCreated")
+  const accountAddress = event.args[0]
+  return accountAddress
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getEvent(tx: providers.TransactionResponse, contract: any, eventName: string) {
+  const receipt = await contract.provider.getTransactionReceipt(tx.hash)
+  const eventFragment = contract.interface.getEvent(eventName)
+  const topic = contract.interface.getEventTopic(eventFragment)
+  const logs = receipt.logs?.filter((log) => log.topics.includes(topic)) ?? ""
+  if (logs.length === 0) throw new Error(`Event ${eventName} was not emmited`)
+
+  return contract.interface.parseLog(logs[0])
 }

@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IStakeManager,
   IStakeManagerInterface,
@@ -257,12 +256,12 @@ const _abi = [
 export class IStakeManager__factory {
   static readonly abi = _abi;
   static createInterface(): IStakeManagerInterface {
-    return new utils.Interface(_abi) as IStakeManagerInterface;
+    return new Interface(_abi) as IStakeManagerInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): IStakeManager {
-    return new Contract(address, _abi, signerOrProvider) as IStakeManager;
+    return new Contract(address, _abi, runner) as unknown as IStakeManager;
   }
 }

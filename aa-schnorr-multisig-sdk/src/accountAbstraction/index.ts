@@ -1,7 +1,5 @@
-export { MultiSigAccountAbstraction } from "./MultiSigAccountAbstraction"
-export { MultiSigAccountSigner, createMultiSigAccountSigner } from "./MultiSigAccountSigner"
-export type { MultiSigAccountAbstractionParams } from "./schema"
-export { MultiSigSmartAccountParamsSchema, createBaseSmartAccountParamsSchema } from "./schema"
+export type { CreateMultiSigSmartAccountParams, MultiSigSmartAccount } from "./multiSigSmartAccount"
+export { createMultiSigSmartAccount } from "./multiSigSmartAccount"
 export type {
   BatchUserOperationCallData,
   BigNumberish,

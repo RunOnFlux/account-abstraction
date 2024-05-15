@@ -1,17 +1,19 @@
 import { expect } from "chai"
-import { ethers } from "ethers"
+import { AbiCoder, ethers, SigningKey } from "ethers"
+
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { Key } from "../../aa-schnorr-multisig-sdk/src/types"
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 
 describe("testing verify", () => {
   it("should verify a normal schnorr signature and make sure sign does not overwrite the private key", () => {
-    const privateKey = new Key(Buffer.from(ethers.utils.randomBytes(32)))
+    const privateKey = new Key(Buffer.from(ethers.randomBytes(32)))
+    const signingKey = new SigningKey(privateKey.buffer)
 
     const msg = "test message"
     const signature = Schnorrkel.sign(privateKey, msg)
 
-    const publicKey = ethers.utils.arrayify(ethers.utils.computePublicKey(ethers.utils.computePublicKey(privateKey.buffer, false), true))
+    const publicKey = ethers.getBytes(SigningKey.computePublicKey(signingKey.privateKey, true))
 
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
@@ -82,14 +84,15 @@ describe("testing verify", () => {
     expect(isValid).to.be.equal(true)
   })
   it("should verify a schnorr signature with a custom hash function", () => {
-    const privateKey = new Key(Buffer.from(ethers.utils.randomBytes(32)))
+    const privateKey = new Key(Buffer.from(ethers.randomBytes(32)))
+    const signingKey = new SigningKey(privateKey.buffer)
 
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const msg = abiCoder.encode(["string"], ["test message"])
-    const hashFn = ethers.utils.keccak256
+    const hashFn = ethers.keccak256
     const signature = Schnorrkel.sign(privateKey, msg, hashFn)
 
-    const publicKey = ethers.utils.arrayify(ethers.utils.computePublicKey(ethers.utils.computePublicKey(privateKey.buffer, false), true))
+    const publicKey = ethers.getBytes(SigningKey.computePublicKey(signingKey.privateKey, true))
 
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
@@ -111,9 +114,9 @@ describe("testing verify", () => {
 
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
 
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const msg = abiCoder.encode(["string"], ["test message"])
-    const hashFn = ethers.utils.keccak256
+    const hashFn = ethers.keccak256
     const signatureOne = schnorrkelOne.multiSigSign(keyPairOne.privateKey, msg, publicKeys, publicNonces, hashFn)
     const signatureTwo = schnorrkelTwo.multiSigSign(keyPairTwo.privateKey, msg, publicKeys, publicNonces, hashFn)
 
@@ -124,13 +127,14 @@ describe("testing verify", () => {
     expect(isValid).to.be.equal(true)
   })
   it("should verify a signature hash", () => {
-    const privateKey = new Key(Buffer.from(ethers.utils.randomBytes(32)))
+    const privateKey = new Key(Buffer.from(ethers.randomBytes(32)))
+    const signingKey = new SigningKey(privateKey.buffer)
 
     const msg = "test message"
-    const hash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const hash = ethers.solidityPackedKeccak256(["string"], [msg])
     const signature = Schnorrkel.signHash(privateKey, hash)
 
-    const publicKey = ethers.utils.arrayify(ethers.utils.computePublicKey(ethers.utils.computePublicKey(privateKey.buffer, false), true))
+    const publicKey = ethers.getBytes(SigningKey.computePublicKey(signingKey.privateKey, true))
 
     expect(signature.finalPublicNonce.buffer).to.have.length(33)
     expect(signature.signature.buffer).to.have.length(32)
@@ -152,7 +156,7 @@ describe("testing verify", () => {
     const publicKeys = [keyPairOne.publicKey, keyPairTwo.publicKey]
 
     const msg = "test message"
-    const hash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const hash = ethers.solidityPackedKeccak256(["string"], [msg])
     const signature = schnorrkelOne.multiSigSignHash(keyPairOne.privateKey, hash, publicKeys, publicNonces)
     const signatureTwo = schnorrkelTwo.multiSigSignHash(keyPairTwo.privateKey, hash, publicKeys, publicNonces)
     const signatures = [signature.signature, signatureTwo.signature]

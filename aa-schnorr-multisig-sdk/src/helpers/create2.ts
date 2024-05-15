@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Provider } from "@ethersproject/providers"
-import type { providers, Signer } from "ethers"
-import { ethers } from "ethers"
+import type {Provider, Signer} from "ethers"
+import {AbiCoder, ethers, TransactionResponse} from "ethers"
 
 import { ERC1967Proxy__factory, MultiSigSmartAccount__factory, MultiSigSmartAccountFactory__factory } from "../generated/typechain"
 import { MultiSigSmartAccountFactory_abi } from "../generated/abi"
@@ -35,15 +34,16 @@ export function predictAccountAddrOffchain(
   const encodedInitializer = smartAccountInterface.encodeFunctionData("initialize", [combinedAddresses])
 
   // ERC1967Proxy takes two parameters while deploying: implementation and encoded init data
-  const encodedConstructorInitCode = ethers.utils.defaultAbiCoder.encode(
+  const coder = AbiCoder.defaultAbiCoder()
+  const encodedConstructorInitCode = coder.encode(
     ["address", "bytes"],
     [accountImplementationAddress, encodedInitializer]
   )
   // Calculating initCodeHash keccak256(contractByteCode+ConstructorCode)
-  const initByteCode = ethers.utils.solidityPack(["bytes", "bytes"], [erc1967ProxyBytecode, encodedConstructorInitCode])
-  const initCodeHash = ethers.utils.keccak256(initByteCode)
+  const initByteCode = ethers.solidityPacked(["bytes", "bytes"], [erc1967ProxyBytecode, encodedConstructorInitCode])
+  const initCodeHash = ethers.keccak256(initByteCode)
 
-  return ethers.utils.getCreate2Address(factoryAddress, saltToHex(salt), initCodeHash)
+  return ethers.getCreate2Address(factoryAddress, saltToHex(salt), initCodeHash)
 }
 
 /**
@@ -58,13 +58,14 @@ export function predictFactoryAddrOffchain(salt: string, entryPointAddress?: str
   const entryPointAddr = entryPointAddress ?? ENTRY_POINT_ALCHEMY_ADDRESS
 
   // Factory takes only one parameter while deploying: Entry Point address
-  const encodedConstructorInitCode = ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [entryPointAddr, saltHex])
+  const coder = AbiCoder.defaultAbiCoder()
+  const encodedConstructorInitCode = coder.encode(["address", "bytes32"], [entryPointAddr, saltHex])
 
   // Calculating initCodeHash keccak256(contractByteCode+ConstructorCode)
-  const initCode = ethers.utils.solidityPack(["bytes", "bytes"], [factoryBytecode, encodedConstructorInitCode])
-  const initCodeHash = ethers.utils.keccak256(initCode)
+  const initCode = ethers.solidityPacked(["bytes", "bytes"], [factoryBytecode, encodedConstructorInitCode])
+  const initCodeHash = ethers.keccak256(initCode)
 
-  return ethers.utils.getCreate2Address(PROXY_FACTORY_ADDRESS, saltHex, initCodeHash)
+  return ethers.getCreate2Address(PROXY_FACTORY_ADDRESS, saltHex, initCodeHash)
 }
 
 /**
@@ -81,12 +82,13 @@ export function predictAccountImplementationAddrOffchain(factorySalt: string, fa
   const smartAccountByteCode = MultiSigSmartAccount__factory.bytecode
 
   // Factory takes only one parameter while deploying: Entry Point address
-  const encodedConstructorInitCode = ethers.utils.defaultAbiCoder.encode(["address"], [entryPointAddr])
+  const coder = AbiCoder.defaultAbiCoder()
+  const encodedConstructorInitCode = coder.encode(["address"], [entryPointAddr])
 
   // Calculating initCodeHash keccak256(contractByteCode+ConstructorCode)
-  const initCode = ethers.utils.solidityPack(["bytes", "bytes"], [smartAccountByteCode, encodedConstructorInitCode])
-  const initCodeHash = ethers.utils.keccak256(initCode)
-  return ethers.utils.getCreate2Address(multiSigFactoryAddress, factorySalt, initCodeHash)
+  const initCode = ethers.solidityPacked(["bytes", "bytes"], [smartAccountByteCode, encodedConstructorInitCode])
+  const initCodeHash = ethers.keccak256(initCode)
+  return ethers.getCreate2Address(multiSigFactoryAddress, factorySalt, initCodeHash)
 }
 
 /**
@@ -139,9 +141,9 @@ export async function getAccountImplementationAddress(factoryAddress: string, et
  */
 export const saltToHex = (salt: string): string => {
   const saltString = salt.toString()
-  if (ethers.utils.isHexString(saltString)) return saltString
+  if (ethers.isHexString(saltString)) return saltString
 
-  return ethers.utils.id(saltString)
+  return ethers.id(saltString)
 }
 
 /**
@@ -181,7 +183,7 @@ export async function createSmartAccount(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getEvent(tx: providers.TransactionResponse, contract: any, eventName: string) {
+export async function getEvent(tx: TransactionResponse, contract: any, eventName: string) {
   const receipt = await contract.provider.getTransactionReceipt(tx.hash)
   const eventFragment = contract.interface.getEvent(eventName)
   const topic = contract.interface.getEventTopic(eventFragment)

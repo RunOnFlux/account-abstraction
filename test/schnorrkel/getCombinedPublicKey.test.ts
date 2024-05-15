@@ -1,4 +1,5 @@
 import { expect } from "chai"
+
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 import { Key } from "../../aa-schnorr-multisig-sdk/src/types"

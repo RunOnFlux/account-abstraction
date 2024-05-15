@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   StakeManager,
   StakeManagerInterface,
@@ -300,12 +299,12 @@ const _abi = [
 export class StakeManager__factory {
   static readonly abi = _abi;
   static createInterface(): StakeManagerInterface {
-    return new utils.Interface(_abi) as StakeManagerInterface;
+    return new Interface(_abi) as StakeManagerInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): StakeManager {
-    return new Contract(address, _abi, signerOrProvider) as StakeManager;
+    return new Contract(address, _abi, runner) as unknown as StakeManager;
   }
 }

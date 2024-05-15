@@ -25,6 +25,8 @@ describe("testing getCombinedAddress", () => {
 
     const combinedAddress = Schnorrkel.getCombinedAddress([keyPairOne.publicKey, keyPairTwo.publicKey])
     const helperAddress = getAllCombinedAddrFromKeys([keyPairOne.publicKey, keyPairTwo.publicKey], 2)[0]
+    console.log("combinedAddress", combinedAddress)
+    console.log("helperAddress", helperAddress)
     expect(combinedAddress).to.be.eql(helperAddress)
   })
 

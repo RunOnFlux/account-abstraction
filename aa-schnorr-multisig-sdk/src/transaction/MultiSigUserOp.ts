@@ -1,4 +1,4 @@
-import { ethers } from "ethers"
+import {AbiCoder, ethers} from "ethers"
 
 import type { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { Hex } from "../types/misc"
@@ -37,9 +37,10 @@ export class MultiSigUserOp {
     this.combinedPubKey = _combinedPubKey
 
     // create unique tx id
-    const _salt = Buffer.from(ethers.utils.randomBytes(32))
-    const encodedParams = ethers.utils.defaultAbiCoder.encode(["bytes", "bytes", "bytes"], [_combinedPubKey.buffer, opHash, _salt])
-    this.id = ethers.utils.keccak256(encodedParams)
+    const _salt = Buffer.from(ethers.randomBytes(32))
+    const coder = new AbiCoder()
+    const encodedParams = coder.encode(["bytes", "bytes", "bytes"], [_combinedPubKey.buffer, opHash, _salt])
+    this.id = ethers.keccak256(encodedParams)
   }
 
   getOpHash(): string {
@@ -75,11 +76,11 @@ export class MultiSigUserOp {
     const e = _challenges[0]
 
     // the multisig px and parity
-    const px = ethers.utils.hexlify(this.combinedPubKey.buffer.subarray(1, 33))
+    const px = ethers.hexlify(this.combinedPubKey.buffer.subarray(1, 33))
     const parity = this.combinedPubKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, e.buffer, _summed.buffer, parity])
     return sigData
   }

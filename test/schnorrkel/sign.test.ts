@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import { ethers } from "ethers"
+
 import { generateRandomKeys } from "../../aa-schnorr-multisig-sdk/src/core"
 import { Schnorrkel } from "../../aa-schnorr-multisig-sdk/src/signers"
 
@@ -19,7 +20,7 @@ describe("testing sign", () => {
     const keyPair = generateRandomKeys()
 
     const msg = "test message"
-    const hash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const hash = ethers.solidityPackedKeccak256(["string"], [msg])
     const signature = Schnorrkel.signHash(keyPair.privateKey, hash)
 
     expect(signature.finalPublicNonce.buffer).to.have.length(33)

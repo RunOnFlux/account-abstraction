@@ -8,6 +8,7 @@ import { saltToHex } from "../aa-schnorr-multisig-sdk/src/helpers/create2"
 
 import { verifyContract } from "./helpers/verify"
 import { ENTRY_POINT_ALCHEMY_ADDRESS, TAGS } from "./helpers/const"
+import {MultiSigSmartAccountFactory__factory} from "../src/typechain";
 
 const CONTRACT_NAME = "MultiSigSmartAccountFactory"
 
@@ -41,11 +42,10 @@ const deployFct: DeployFunction = async function (hre: HardhatRuntimeEnvironment
     await provider.waitForTransaction(deployResults.receipt?.transactionHash, 10)
     await verifyContract(deployedAddress, hre, args)
 
-    const Factory = await ethers.getContractFactory("MultiSigSmartAccountFactory")
-    const mssaFactory = Factory.attach(deployedAddress)
-    const accountImplAddr = await mssaFactory.accountImplementation()
-    console.log(`---> Account Implementation address: ${accountImplAddr}`)
-    await verifyContract(accountImplAddr, hre, [ENTRY_POINT_ALCHEMY_ADDRESS])
+    const Factory = MultiSigSmartAccountFactory__factory.connect(deployedAddress)
+    const accountImplementation = await Factory.accountImplementation()
+    console.log(`---> Account Implementation address: ${accountImplementation}`)
+    await verifyContract(accountImplementation, hre, [ENTRY_POINT_ALCHEMY_ADDRESS])
   }
   const deploys: Deployment = {
     MultiSigSmartAccountFactory: deployedAddress,

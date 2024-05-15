@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IPaymaster,
   IPaymasterInterface,
@@ -129,12 +128,9 @@ const _abi = [
 export class IPaymaster__factory {
   static readonly abi = _abi;
   static createInterface(): IPaymasterInterface {
-    return new utils.Interface(_abi) as IPaymasterInterface;
+    return new Interface(_abi) as IPaymasterInterface;
   }
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): IPaymaster {
-    return new Contract(address, _abi, signerOrProvider) as IPaymaster;
+  static connect(address: string, runner?: ContractRunner | null): IPaymaster {
+    return new Contract(address, _abi, runner) as unknown as IPaymaster;
   }
 }

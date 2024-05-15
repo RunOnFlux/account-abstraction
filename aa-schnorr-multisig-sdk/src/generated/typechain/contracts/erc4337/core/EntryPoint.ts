@@ -3,106 +3,101 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PayableOverrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
-} from "ethers";
-import type {
   FunctionFragment,
   Result,
+  Interface,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
+} from "ethers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../../../common";
 
 export type UserOperationStruct = {
-  sender: PromiseOrValue<string>;
-  nonce: PromiseOrValue<BigNumberish>;
-  initCode: PromiseOrValue<BytesLike>;
-  callData: PromiseOrValue<BytesLike>;
-  callGasLimit: PromiseOrValue<BigNumberish>;
-  verificationGasLimit: PromiseOrValue<BigNumberish>;
-  preVerificationGas: PromiseOrValue<BigNumberish>;
-  maxFeePerGas: PromiseOrValue<BigNumberish>;
-  maxPriorityFeePerGas: PromiseOrValue<BigNumberish>;
-  paymasterAndData: PromiseOrValue<BytesLike>;
-  signature: PromiseOrValue<BytesLike>;
+  sender: AddressLike;
+  nonce: BigNumberish;
+  initCode: BytesLike;
+  callData: BytesLike;
+  callGasLimit: BigNumberish;
+  verificationGasLimit: BigNumberish;
+  preVerificationGas: BigNumberish;
+  maxFeePerGas: BigNumberish;
+  maxPriorityFeePerGas: BigNumberish;
+  paymasterAndData: BytesLike;
+  signature: BytesLike;
 };
 
 export type UserOperationStructOutput = [
-  string,
-  BigNumber,
-  string,
-  string,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  string,
-  string
+  sender: string,
+  nonce: bigint,
+  initCode: string,
+  callData: string,
+  callGasLimit: bigint,
+  verificationGasLimit: bigint,
+  preVerificationGas: bigint,
+  maxFeePerGas: bigint,
+  maxPriorityFeePerGas: bigint,
+  paymasterAndData: string,
+  signature: string
 ] & {
   sender: string;
-  nonce: BigNumber;
+  nonce: bigint;
   initCode: string;
   callData: string;
-  callGasLimit: BigNumber;
-  verificationGasLimit: BigNumber;
-  preVerificationGas: BigNumber;
-  maxFeePerGas: BigNumber;
-  maxPriorityFeePerGas: BigNumber;
+  callGasLimit: bigint;
+  verificationGasLimit: bigint;
+  preVerificationGas: bigint;
+  maxFeePerGas: bigint;
+  maxPriorityFeePerGas: bigint;
   paymasterAndData: string;
   signature: string;
 };
 
 export declare namespace IStakeManager {
   export type DepositInfoStruct = {
-    deposit: PromiseOrValue<BigNumberish>;
-    staked: PromiseOrValue<boolean>;
-    stake: PromiseOrValue<BigNumberish>;
-    unstakeDelaySec: PromiseOrValue<BigNumberish>;
-    withdrawTime: PromiseOrValue<BigNumberish>;
+    deposit: BigNumberish;
+    staked: boolean;
+    stake: BigNumberish;
+    unstakeDelaySec: BigNumberish;
+    withdrawTime: BigNumberish;
   };
 
   export type DepositInfoStructOutput = [
-    BigNumber,
-    boolean,
-    BigNumber,
-    number,
-    number
+    deposit: bigint,
+    staked: boolean,
+    stake: bigint,
+    unstakeDelaySec: bigint,
+    withdrawTime: bigint
   ] & {
-    deposit: BigNumber;
+    deposit: bigint;
     staked: boolean;
-    stake: BigNumber;
-    unstakeDelaySec: number;
-    withdrawTime: number;
+    stake: bigint;
+    unstakeDelaySec: bigint;
+    withdrawTime: bigint;
   };
 }
 
 export declare namespace IEntryPoint {
   export type UserOpsPerAggregatorStruct = {
     userOps: UserOperationStruct[];
-    aggregator: PromiseOrValue<string>;
-    signature: PromiseOrValue<BytesLike>;
+    aggregator: AddressLike;
+    signature: BytesLike;
   };
 
   export type UserOpsPerAggregatorStructOutput = [
-    UserOperationStructOutput[],
-    string,
-    string
+    userOps: UserOperationStructOutput[],
+    aggregator: string,
+    signature: string
   ] & {
     userOps: UserOperationStructOutput[];
     aggregator: string;
@@ -112,85 +107,62 @@ export declare namespace IEntryPoint {
 
 export declare namespace EntryPoint {
   export type MemoryUserOpStruct = {
-    sender: PromiseOrValue<string>;
-    nonce: PromiseOrValue<BigNumberish>;
-    callGasLimit: PromiseOrValue<BigNumberish>;
-    verificationGasLimit: PromiseOrValue<BigNumberish>;
-    preVerificationGas: PromiseOrValue<BigNumberish>;
-    paymaster: PromiseOrValue<string>;
-    maxFeePerGas: PromiseOrValue<BigNumberish>;
-    maxPriorityFeePerGas: PromiseOrValue<BigNumberish>;
+    sender: AddressLike;
+    nonce: BigNumberish;
+    callGasLimit: BigNumberish;
+    verificationGasLimit: BigNumberish;
+    preVerificationGas: BigNumberish;
+    paymaster: AddressLike;
+    maxFeePerGas: BigNumberish;
+    maxPriorityFeePerGas: BigNumberish;
   };
 
   export type MemoryUserOpStructOutput = [
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string,
-    BigNumber,
-    BigNumber
+    sender: string,
+    nonce: bigint,
+    callGasLimit: bigint,
+    verificationGasLimit: bigint,
+    preVerificationGas: bigint,
+    paymaster: string,
+    maxFeePerGas: bigint,
+    maxPriorityFeePerGas: bigint
   ] & {
     sender: string;
-    nonce: BigNumber;
-    callGasLimit: BigNumber;
-    verificationGasLimit: BigNumber;
-    preVerificationGas: BigNumber;
+    nonce: bigint;
+    callGasLimit: bigint;
+    verificationGasLimit: bigint;
+    preVerificationGas: bigint;
     paymaster: string;
-    maxFeePerGas: BigNumber;
-    maxPriorityFeePerGas: BigNumber;
+    maxFeePerGas: bigint;
+    maxPriorityFeePerGas: bigint;
   };
 
   export type UserOpInfoStruct = {
     mUserOp: EntryPoint.MemoryUserOpStruct;
-    userOpHash: PromiseOrValue<BytesLike>;
-    prefund: PromiseOrValue<BigNumberish>;
-    contextOffset: PromiseOrValue<BigNumberish>;
-    preOpGas: PromiseOrValue<BigNumberish>;
+    userOpHash: BytesLike;
+    prefund: BigNumberish;
+    contextOffset: BigNumberish;
+    preOpGas: BigNumberish;
   };
 
   export type UserOpInfoStructOutput = [
-    EntryPoint.MemoryUserOpStructOutput,
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber
+    mUserOp: EntryPoint.MemoryUserOpStructOutput,
+    userOpHash: string,
+    prefund: bigint,
+    contextOffset: bigint,
+    preOpGas: bigint
   ] & {
     mUserOp: EntryPoint.MemoryUserOpStructOutput;
     userOpHash: string;
-    prefund: BigNumber;
-    contextOffset: BigNumber;
-    preOpGas: BigNumber;
+    prefund: bigint;
+    contextOffset: bigint;
+    preOpGas: bigint;
   };
 }
 
-export interface EntryPointInterface extends utils.Interface {
-  functions: {
-    "SIG_VALIDATION_FAILED()": FunctionFragment;
-    "_validateSenderAndPaymaster(bytes,address,bytes)": FunctionFragment;
-    "addStake(uint32)": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "depositTo(address)": FunctionFragment;
-    "deposits(address)": FunctionFragment;
-    "getDepositInfo(address)": FunctionFragment;
-    "getNonce(address,uint192)": FunctionFragment;
-    "getSenderAddress(bytes)": FunctionFragment;
-    "getUserOpHash((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))": FunctionFragment;
-    "handleAggregatedOps(((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes)[],address,bytes)[],address)": FunctionFragment;
-    "handleOps((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes)[],address)": FunctionFragment;
-    "incrementNonce(uint192)": FunctionFragment;
-    "innerHandleOp(bytes,((address,uint256,uint256,uint256,uint256,address,uint256,uint256),bytes32,uint256,uint256,uint256),bytes)": FunctionFragment;
-    "nonceSequenceNumber(address,uint192)": FunctionFragment;
-    "simulateHandleOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),address,bytes)": FunctionFragment;
-    "simulateValidation((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))": FunctionFragment;
-    "unlockStake()": FunctionFragment;
-    "withdrawStake(address)": FunctionFragment;
-    "withdrawTo(address,uint256)": FunctionFragment;
-  };
-
+export interface EntryPointInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "SIG_VALIDATION_FAILED"
       | "_validateSenderAndPaymaster"
       | "addStake"
@@ -213,45 +185,55 @@ export interface EntryPointInterface extends utils.Interface {
       | "withdrawTo"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "AccountDeployed"
+      | "BeforeExecution"
+      | "Deposited"
+      | "SignatureAggregatorChanged"
+      | "StakeLocked"
+      | "StakeUnlocked"
+      | "StakeWithdrawn"
+      | "UserOperationEvent"
+      | "UserOperationRevertReason"
+      | "Withdrawn"
+  ): EventFragment;
+
   encodeFunctionData(
     functionFragment: "SIG_VALIDATION_FAILED",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "_validateSenderAndPaymaster",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>
-    ]
+    values: [BytesLike, AddressLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "addStake",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "depositTo",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "deposits",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getDepositInfo",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getNonce",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getSenderAddress",
-    values: [PromiseOrValue<BytesLike>]
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getUserOpHash",
@@ -259,35 +241,27 @@ export interface EntryPointInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "handleAggregatedOps",
-    values: [IEntryPoint.UserOpsPerAggregatorStruct[], PromiseOrValue<string>]
+    values: [IEntryPoint.UserOpsPerAggregatorStruct[], AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "handleOps",
-    values: [UserOperationStruct[], PromiseOrValue<string>]
+    values: [UserOperationStruct[], AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "incrementNonce",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "innerHandleOp",
-    values: [
-      PromiseOrValue<BytesLike>,
-      EntryPoint.UserOpInfoStruct,
-      PromiseOrValue<BytesLike>
-    ]
+    values: [BytesLike, EntryPoint.UserOpInfoStruct, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "nonceSequenceNumber",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "simulateHandleOp",
-    values: [
-      UserOperationStruct,
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>
-    ]
+    values: [UserOperationStruct, AddressLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "simulateValidation",
@@ -299,11 +273,11 @@ export interface EntryPointInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawStake",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawTo",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [AddressLike, BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -365,852 +339,668 @@ export interface EntryPointInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdrawTo", data: BytesLike): Result;
-
-  events: {
-    "AccountDeployed(bytes32,address,address,address)": EventFragment;
-    "BeforeExecution()": EventFragment;
-    "Deposited(address,uint256)": EventFragment;
-    "SignatureAggregatorChanged(address)": EventFragment;
-    "StakeLocked(address,uint256,uint256)": EventFragment;
-    "StakeUnlocked(address,uint256)": EventFragment;
-    "StakeWithdrawn(address,address,uint256)": EventFragment;
-    "UserOperationEvent(bytes32,address,address,uint256,bool,uint256,uint256)": EventFragment;
-    "UserOperationRevertReason(bytes32,address,uint256,bytes)": EventFragment;
-    "Withdrawn(address,address,uint256)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "AccountDeployed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BeforeExecution"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Deposited"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SignatureAggregatorChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakeLocked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakeUnlocked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakeWithdrawn"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "UserOperationEvent"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "UserOperationRevertReason"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdrawn"): EventFragment;
 }
 
-export interface AccountDeployedEventObject {
-  userOpHash: string;
-  sender: string;
-  factory: string;
-  paymaster: string;
+export namespace AccountDeployedEvent {
+  export type InputTuple = [
+    userOpHash: BytesLike,
+    sender: AddressLike,
+    factory: AddressLike,
+    paymaster: AddressLike
+  ];
+  export type OutputTuple = [
+    userOpHash: string,
+    sender: string,
+    factory: string,
+    paymaster: string
+  ];
+  export interface OutputObject {
+    userOpHash: string;
+    sender: string;
+    factory: string;
+    paymaster: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type AccountDeployedEvent = TypedEvent<
-  [string, string, string, string],
-  AccountDeployedEventObject
->;
 
-export type AccountDeployedEventFilter = TypedEventFilter<AccountDeployedEvent>;
-
-export interface BeforeExecutionEventObject {}
-export type BeforeExecutionEvent = TypedEvent<[], BeforeExecutionEventObject>;
-
-export type BeforeExecutionEventFilter = TypedEventFilter<BeforeExecutionEvent>;
-
-export interface DepositedEventObject {
-  account: string;
-  totalDeposit: BigNumber;
+export namespace BeforeExecutionEvent {
+  export type InputTuple = [];
+  export type OutputTuple = [];
+  export interface OutputObject {}
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type DepositedEvent = TypedEvent<
-  [string, BigNumber],
-  DepositedEventObject
->;
 
-export type DepositedEventFilter = TypedEventFilter<DepositedEvent>;
-
-export interface SignatureAggregatorChangedEventObject {
-  aggregator: string;
+export namespace DepositedEvent {
+  export type InputTuple = [account: AddressLike, totalDeposit: BigNumberish];
+  export type OutputTuple = [account: string, totalDeposit: bigint];
+  export interface OutputObject {
+    account: string;
+    totalDeposit: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SignatureAggregatorChangedEvent = TypedEvent<
-  [string],
-  SignatureAggregatorChangedEventObject
->;
 
-export type SignatureAggregatorChangedEventFilter =
-  TypedEventFilter<SignatureAggregatorChangedEvent>;
-
-export interface StakeLockedEventObject {
-  account: string;
-  totalStaked: BigNumber;
-  unstakeDelaySec: BigNumber;
+export namespace SignatureAggregatorChangedEvent {
+  export type InputTuple = [aggregator: AddressLike];
+  export type OutputTuple = [aggregator: string];
+  export interface OutputObject {
+    aggregator: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type StakeLockedEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  StakeLockedEventObject
->;
 
-export type StakeLockedEventFilter = TypedEventFilter<StakeLockedEvent>;
-
-export interface StakeUnlockedEventObject {
-  account: string;
-  withdrawTime: BigNumber;
+export namespace StakeLockedEvent {
+  export type InputTuple = [
+    account: AddressLike,
+    totalStaked: BigNumberish,
+    unstakeDelaySec: BigNumberish
+  ];
+  export type OutputTuple = [
+    account: string,
+    totalStaked: bigint,
+    unstakeDelaySec: bigint
+  ];
+  export interface OutputObject {
+    account: string;
+    totalStaked: bigint;
+    unstakeDelaySec: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type StakeUnlockedEvent = TypedEvent<
-  [string, BigNumber],
-  StakeUnlockedEventObject
->;
 
-export type StakeUnlockedEventFilter = TypedEventFilter<StakeUnlockedEvent>;
-
-export interface StakeWithdrawnEventObject {
-  account: string;
-  withdrawAddress: string;
-  amount: BigNumber;
+export namespace StakeUnlockedEvent {
+  export type InputTuple = [account: AddressLike, withdrawTime: BigNumberish];
+  export type OutputTuple = [account: string, withdrawTime: bigint];
+  export interface OutputObject {
+    account: string;
+    withdrawTime: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type StakeWithdrawnEvent = TypedEvent<
-  [string, string, BigNumber],
-  StakeWithdrawnEventObject
->;
 
-export type StakeWithdrawnEventFilter = TypedEventFilter<StakeWithdrawnEvent>;
-
-export interface UserOperationEventEventObject {
-  userOpHash: string;
-  sender: string;
-  paymaster: string;
-  nonce: BigNumber;
-  success: boolean;
-  actualGasCost: BigNumber;
-  actualGasUsed: BigNumber;
+export namespace StakeWithdrawnEvent {
+  export type InputTuple = [
+    account: AddressLike,
+    withdrawAddress: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    account: string,
+    withdrawAddress: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    account: string;
+    withdrawAddress: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type UserOperationEventEvent = TypedEvent<
-  [string, string, string, BigNumber, boolean, BigNumber, BigNumber],
-  UserOperationEventEventObject
->;
 
-export type UserOperationEventEventFilter =
-  TypedEventFilter<UserOperationEventEvent>;
-
-export interface UserOperationRevertReasonEventObject {
-  userOpHash: string;
-  sender: string;
-  nonce: BigNumber;
-  revertReason: string;
+export namespace UserOperationEventEvent {
+  export type InputTuple = [
+    userOpHash: BytesLike,
+    sender: AddressLike,
+    paymaster: AddressLike,
+    nonce: BigNumberish,
+    success: boolean,
+    actualGasCost: BigNumberish,
+    actualGasUsed: BigNumberish
+  ];
+  export type OutputTuple = [
+    userOpHash: string,
+    sender: string,
+    paymaster: string,
+    nonce: bigint,
+    success: boolean,
+    actualGasCost: bigint,
+    actualGasUsed: bigint
+  ];
+  export interface OutputObject {
+    userOpHash: string;
+    sender: string;
+    paymaster: string;
+    nonce: bigint;
+    success: boolean;
+    actualGasCost: bigint;
+    actualGasUsed: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type UserOperationRevertReasonEvent = TypedEvent<
-  [string, string, BigNumber, string],
-  UserOperationRevertReasonEventObject
->;
 
-export type UserOperationRevertReasonEventFilter =
-  TypedEventFilter<UserOperationRevertReasonEvent>;
-
-export interface WithdrawnEventObject {
-  account: string;
-  withdrawAddress: string;
-  amount: BigNumber;
+export namespace UserOperationRevertReasonEvent {
+  export type InputTuple = [
+    userOpHash: BytesLike,
+    sender: AddressLike,
+    nonce: BigNumberish,
+    revertReason: BytesLike
+  ];
+  export type OutputTuple = [
+    userOpHash: string,
+    sender: string,
+    nonce: bigint,
+    revertReason: string
+  ];
+  export interface OutputObject {
+    userOpHash: string;
+    sender: string;
+    nonce: bigint;
+    revertReason: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WithdrawnEvent = TypedEvent<
-  [string, string, BigNumber],
-  WithdrawnEventObject
->;
 
-export type WithdrawnEventFilter = TypedEventFilter<WithdrawnEvent>;
+export namespace WithdrawnEvent {
+  export type InputTuple = [
+    account: AddressLike,
+    withdrawAddress: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    account: string,
+    withdrawAddress: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    account: string;
+    withdrawAddress: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
 
 export interface EntryPoint extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): EntryPoint;
+  waitForDeployment(): Promise<this>;
 
   interface: EntryPointInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    SIG_VALIDATION_FAILED(overrides?: CallOverrides): Promise<[BigNumber]>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    _validateSenderAndPaymaster(
-      initCode: PromiseOrValue<BytesLike>,
-      sender: PromiseOrValue<string>,
-      paymasterAndData: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[void]>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  SIG_VALIDATION_FAILED: TypedContractMethod<[], [bigint], "view">;
 
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean, BigNumber, number, number] & {
-        deposit: BigNumber;
-        staked: boolean;
-        stake: BigNumber;
-        unstakeDelaySec: number;
-        withdrawTime: number;
-      }
-    >;
-
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [IStakeManager.DepositInfoStructOutput] & {
-        info: IStakeManager.DepositInfoStructOutput;
-      }
-    >;
-
-    getNonce(
-      sender: PromiseOrValue<string>,
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { nonce: BigNumber }>;
-
-    getSenderAddress(
-      initCode: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    getUserOpHash(
-      userOp: UserOperationStruct,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    handleAggregatedOps(
-      opsPerAggregator: IEntryPoint.UserOpsPerAggregatorStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    handleOps(
-      ops: UserOperationStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    incrementNonce(
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    innerHandleOp(
-      callData: PromiseOrValue<BytesLike>,
-      opInfo: EntryPoint.UserOpInfoStruct,
-      context: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    nonceSequenceNumber(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    simulateHandleOp(
-      op: UserOperationStruct,
-      target: PromiseOrValue<string>,
-      targetCallData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    simulateValidation(
-      userOp: UserOperationStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    unlockStake(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-  };
-
-  SIG_VALIDATION_FAILED(overrides?: CallOverrides): Promise<BigNumber>;
-
-  _validateSenderAndPaymaster(
-    initCode: PromiseOrValue<BytesLike>,
-    sender: PromiseOrValue<string>,
-    paymasterAndData: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<void>;
-
-  addStake(
-    unstakeDelaySec: PromiseOrValue<BigNumberish>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  balanceOf(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  depositTo(
-    account: PromiseOrValue<string>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  deposits(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, boolean, BigNumber, number, number] & {
-      deposit: BigNumber;
-      staked: boolean;
-      stake: BigNumber;
-      unstakeDelaySec: number;
-      withdrawTime: number;
-    }
+  _validateSenderAndPaymaster: TypedContractMethod<
+    [initCode: BytesLike, sender: AddressLike, paymasterAndData: BytesLike],
+    [void],
+    "view"
   >;
 
-  getDepositInfo(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<IStakeManager.DepositInfoStructOutput>;
+  addStake: TypedContractMethod<
+    [unstakeDelaySec: BigNumberish],
+    [void],
+    "payable"
+  >;
 
-  getNonce(
-    sender: PromiseOrValue<string>,
-    key: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  balanceOf: TypedContractMethod<[account: AddressLike], [bigint], "view">;
 
-  getSenderAddress(
-    initCode: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  depositTo: TypedContractMethod<[account: AddressLike], [void], "payable">;
 
-  getUserOpHash(
-    userOp: UserOperationStruct,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  handleAggregatedOps(
-    opsPerAggregator: IEntryPoint.UserOpsPerAggregatorStruct[],
-    beneficiary: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  handleOps(
-    ops: UserOperationStruct[],
-    beneficiary: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  incrementNonce(
-    key: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  innerHandleOp(
-    callData: PromiseOrValue<BytesLike>,
-    opInfo: EntryPoint.UserOpInfoStruct,
-    context: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  nonceSequenceNumber(
-    arg0: PromiseOrValue<string>,
-    arg1: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  simulateHandleOp(
-    op: UserOperationStruct,
-    target: PromiseOrValue<string>,
-    targetCallData: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  simulateValidation(
-    userOp: UserOperationStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  unlockStake(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  withdrawStake(
-    withdrawAddress: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  withdrawTo(
-    withdrawAddress: PromiseOrValue<string>,
-    withdrawAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  callStatic: {
-    SIG_VALIDATION_FAILED(overrides?: CallOverrides): Promise<BigNumber>;
-
-    _validateSenderAndPaymaster(
-      initCode: PromiseOrValue<BytesLike>,
-      sender: PromiseOrValue<string>,
-      paymasterAndData: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean, BigNumber, number, number] & {
-        deposit: BigNumber;
+  deposits: TypedContractMethod<
+    [arg0: AddressLike],
+    [
+      [bigint, boolean, bigint, bigint, bigint] & {
+        deposit: bigint;
         staked: boolean;
-        stake: BigNumber;
-        unstakeDelaySec: number;
-        withdrawTime: number;
+        stake: bigint;
+        unstakeDelaySec: bigint;
+        withdrawTime: bigint;
       }
-    >;
+    ],
+    "view"
+  >;
 
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<IStakeManager.DepositInfoStructOutput>;
+  getDepositInfo: TypedContractMethod<
+    [account: AddressLike],
+    [IStakeManager.DepositInfoStructOutput],
+    "view"
+  >;
 
-    getNonce(
-      sender: PromiseOrValue<string>,
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+  getNonce: TypedContractMethod<
+    [sender: AddressLike, key: BigNumberish],
+    [bigint],
+    "view"
+  >;
 
-    getSenderAddress(
-      initCode: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  getSenderAddress: TypedContractMethod<
+    [initCode: BytesLike],
+    [void],
+    "nonpayable"
+  >;
 
-    getUserOpHash(
-      userOp: UserOperationStruct,
-      overrides?: CallOverrides
-    ): Promise<string>;
+  getUserOpHash: TypedContractMethod<
+    [userOp: UserOperationStruct],
+    [string],
+    "view"
+  >;
 
-    handleAggregatedOps(
+  handleAggregatedOps: TypedContractMethod<
+    [
       opsPerAggregator: IEntryPoint.UserOpsPerAggregatorStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+      beneficiary: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
 
-    handleOps(
-      ops: UserOperationStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  handleOps: TypedContractMethod<
+    [ops: UserOperationStruct[], beneficiary: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
-    incrementNonce(
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  incrementNonce: TypedContractMethod<
+    [key: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
-    innerHandleOp(
-      callData: PromiseOrValue<BytesLike>,
+  innerHandleOp: TypedContractMethod<
+    [
+      callData: BytesLike,
       opInfo: EntryPoint.UserOpInfoStruct,
-      context: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+      context: BytesLike
+    ],
+    [bigint],
+    "nonpayable"
+  >;
 
-    nonceSequenceNumber(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+  nonceSequenceNumber: TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
+    [bigint],
+    "view"
+  >;
 
-    simulateHandleOp(
-      op: UserOperationStruct,
-      target: PromiseOrValue<string>,
-      targetCallData: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  simulateHandleOp: TypedContractMethod<
+    [op: UserOperationStruct, target: AddressLike, targetCallData: BytesLike],
+    [void],
+    "nonpayable"
+  >;
 
-    simulateValidation(
-      userOp: UserOperationStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  simulateValidation: TypedContractMethod<
+    [userOp: UserOperationStruct],
+    [void],
+    "nonpayable"
+  >;
 
-    unlockStake(overrides?: CallOverrides): Promise<void>;
+  unlockStake: TypedContractMethod<[], [void], "nonpayable">;
 
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  withdrawStake: TypedContractMethod<
+    [withdrawAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-  };
+  withdrawTo: TypedContractMethod<
+    [withdrawAddress: AddressLike, withdrawAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "SIG_VALIDATION_FAILED"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "_validateSenderAndPaymaster"
+  ): TypedContractMethod<
+    [initCode: BytesLike, sender: AddressLike, paymasterAndData: BytesLike],
+    [void],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "addStake"
+  ): TypedContractMethod<[unstakeDelaySec: BigNumberish], [void], "payable">;
+  getFunction(
+    nameOrSignature: "balanceOf"
+  ): TypedContractMethod<[account: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "depositTo"
+  ): TypedContractMethod<[account: AddressLike], [void], "payable">;
+  getFunction(
+    nameOrSignature: "deposits"
+  ): TypedContractMethod<
+    [arg0: AddressLike],
+    [
+      [bigint, boolean, bigint, bigint, bigint] & {
+        deposit: bigint;
+        staked: boolean;
+        stake: bigint;
+        unstakeDelaySec: bigint;
+        withdrawTime: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getDepositInfo"
+  ): TypedContractMethod<
+    [account: AddressLike],
+    [IStakeManager.DepositInfoStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getNonce"
+  ): TypedContractMethod<
+    [sender: AddressLike, key: BigNumberish],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getSenderAddress"
+  ): TypedContractMethod<[initCode: BytesLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "getUserOpHash"
+  ): TypedContractMethod<[userOp: UserOperationStruct], [string], "view">;
+  getFunction(
+    nameOrSignature: "handleAggregatedOps"
+  ): TypedContractMethod<
+    [
+      opsPerAggregator: IEntryPoint.UserOpsPerAggregatorStruct[],
+      beneficiary: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "handleOps"
+  ): TypedContractMethod<
+    [ops: UserOperationStruct[], beneficiary: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "incrementNonce"
+  ): TypedContractMethod<[key: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "innerHandleOp"
+  ): TypedContractMethod<
+    [
+      callData: BytesLike,
+      opInfo: EntryPoint.UserOpInfoStruct,
+      context: BytesLike
+    ],
+    [bigint],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "nonceSequenceNumber"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "simulateHandleOp"
+  ): TypedContractMethod<
+    [op: UserOperationStruct, target: AddressLike, targetCallData: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "simulateValidation"
+  ): TypedContractMethod<[userOp: UserOperationStruct], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "unlockStake"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdrawStake"
+  ): TypedContractMethod<[withdrawAddress: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdrawTo"
+  ): TypedContractMethod<
+    [withdrawAddress: AddressLike, withdrawAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  getEvent(
+    key: "AccountDeployed"
+  ): TypedContractEvent<
+    AccountDeployedEvent.InputTuple,
+    AccountDeployedEvent.OutputTuple,
+    AccountDeployedEvent.OutputObject
+  >;
+  getEvent(
+    key: "BeforeExecution"
+  ): TypedContractEvent<
+    BeforeExecutionEvent.InputTuple,
+    BeforeExecutionEvent.OutputTuple,
+    BeforeExecutionEvent.OutputObject
+  >;
+  getEvent(
+    key: "Deposited"
+  ): TypedContractEvent<
+    DepositedEvent.InputTuple,
+    DepositedEvent.OutputTuple,
+    DepositedEvent.OutputObject
+  >;
+  getEvent(
+    key: "SignatureAggregatorChanged"
+  ): TypedContractEvent<
+    SignatureAggregatorChangedEvent.InputTuple,
+    SignatureAggregatorChangedEvent.OutputTuple,
+    SignatureAggregatorChangedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StakeLocked"
+  ): TypedContractEvent<
+    StakeLockedEvent.InputTuple,
+    StakeLockedEvent.OutputTuple,
+    StakeLockedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StakeUnlocked"
+  ): TypedContractEvent<
+    StakeUnlockedEvent.InputTuple,
+    StakeUnlockedEvent.OutputTuple,
+    StakeUnlockedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StakeWithdrawn"
+  ): TypedContractEvent<
+    StakeWithdrawnEvent.InputTuple,
+    StakeWithdrawnEvent.OutputTuple,
+    StakeWithdrawnEvent.OutputObject
+  >;
+  getEvent(
+    key: "UserOperationEvent"
+  ): TypedContractEvent<
+    UserOperationEventEvent.InputTuple,
+    UserOperationEventEvent.OutputTuple,
+    UserOperationEventEvent.OutputObject
+  >;
+  getEvent(
+    key: "UserOperationRevertReason"
+  ): TypedContractEvent<
+    UserOperationRevertReasonEvent.InputTuple,
+    UserOperationRevertReasonEvent.OutputTuple,
+    UserOperationRevertReasonEvent.OutputObject
+  >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
+  >;
 
   filters: {
-    "AccountDeployed(bytes32,address,address,address)"(
-      userOpHash?: PromiseOrValue<BytesLike> | null,
-      sender?: PromiseOrValue<string> | null,
-      factory?: null,
-      paymaster?: null
-    ): AccountDeployedEventFilter;
-    AccountDeployed(
-      userOpHash?: PromiseOrValue<BytesLike> | null,
-      sender?: PromiseOrValue<string> | null,
-      factory?: null,
-      paymaster?: null
-    ): AccountDeployedEventFilter;
+    "AccountDeployed(bytes32,address,address,address)": TypedContractEvent<
+      AccountDeployedEvent.InputTuple,
+      AccountDeployedEvent.OutputTuple,
+      AccountDeployedEvent.OutputObject
+    >;
+    AccountDeployed: TypedContractEvent<
+      AccountDeployedEvent.InputTuple,
+      AccountDeployedEvent.OutputTuple,
+      AccountDeployedEvent.OutputObject
+    >;
 
-    "BeforeExecution()"(): BeforeExecutionEventFilter;
-    BeforeExecution(): BeforeExecutionEventFilter;
+    "BeforeExecution()": TypedContractEvent<
+      BeforeExecutionEvent.InputTuple,
+      BeforeExecutionEvent.OutputTuple,
+      BeforeExecutionEvent.OutputObject
+    >;
+    BeforeExecution: TypedContractEvent<
+      BeforeExecutionEvent.InputTuple,
+      BeforeExecutionEvent.OutputTuple,
+      BeforeExecutionEvent.OutputObject
+    >;
 
-    "Deposited(address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      totalDeposit?: null
-    ): DepositedEventFilter;
-    Deposited(
-      account?: PromiseOrValue<string> | null,
-      totalDeposit?: null
-    ): DepositedEventFilter;
+    "Deposited(address,uint256)": TypedContractEvent<
+      DepositedEvent.InputTuple,
+      DepositedEvent.OutputTuple,
+      DepositedEvent.OutputObject
+    >;
+    Deposited: TypedContractEvent<
+      DepositedEvent.InputTuple,
+      DepositedEvent.OutputTuple,
+      DepositedEvent.OutputObject
+    >;
 
-    "SignatureAggregatorChanged(address)"(
-      aggregator?: PromiseOrValue<string> | null
-    ): SignatureAggregatorChangedEventFilter;
-    SignatureAggregatorChanged(
-      aggregator?: PromiseOrValue<string> | null
-    ): SignatureAggregatorChangedEventFilter;
+    "SignatureAggregatorChanged(address)": TypedContractEvent<
+      SignatureAggregatorChangedEvent.InputTuple,
+      SignatureAggregatorChangedEvent.OutputTuple,
+      SignatureAggregatorChangedEvent.OutputObject
+    >;
+    SignatureAggregatorChanged: TypedContractEvent<
+      SignatureAggregatorChangedEvent.InputTuple,
+      SignatureAggregatorChangedEvent.OutputTuple,
+      SignatureAggregatorChangedEvent.OutputObject
+    >;
 
-    "StakeLocked(address,uint256,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      totalStaked?: null,
-      unstakeDelaySec?: null
-    ): StakeLockedEventFilter;
-    StakeLocked(
-      account?: PromiseOrValue<string> | null,
-      totalStaked?: null,
-      unstakeDelaySec?: null
-    ): StakeLockedEventFilter;
+    "StakeLocked(address,uint256,uint256)": TypedContractEvent<
+      StakeLockedEvent.InputTuple,
+      StakeLockedEvent.OutputTuple,
+      StakeLockedEvent.OutputObject
+    >;
+    StakeLocked: TypedContractEvent<
+      StakeLockedEvent.InputTuple,
+      StakeLockedEvent.OutputTuple,
+      StakeLockedEvent.OutputObject
+    >;
 
-    "StakeUnlocked(address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      withdrawTime?: null
-    ): StakeUnlockedEventFilter;
-    StakeUnlocked(
-      account?: PromiseOrValue<string> | null,
-      withdrawTime?: null
-    ): StakeUnlockedEventFilter;
+    "StakeUnlocked(address,uint256)": TypedContractEvent<
+      StakeUnlockedEvent.InputTuple,
+      StakeUnlockedEvent.OutputTuple,
+      StakeUnlockedEvent.OutputObject
+    >;
+    StakeUnlocked: TypedContractEvent<
+      StakeUnlockedEvent.InputTuple,
+      StakeUnlockedEvent.OutputTuple,
+      StakeUnlockedEvent.OutputObject
+    >;
 
-    "StakeWithdrawn(address,address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): StakeWithdrawnEventFilter;
-    StakeWithdrawn(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): StakeWithdrawnEventFilter;
+    "StakeWithdrawn(address,address,uint256)": TypedContractEvent<
+      StakeWithdrawnEvent.InputTuple,
+      StakeWithdrawnEvent.OutputTuple,
+      StakeWithdrawnEvent.OutputObject
+    >;
+    StakeWithdrawn: TypedContractEvent<
+      StakeWithdrawnEvent.InputTuple,
+      StakeWithdrawnEvent.OutputTuple,
+      StakeWithdrawnEvent.OutputObject
+    >;
 
-    "UserOperationEvent(bytes32,address,address,uint256,bool,uint256,uint256)"(
-      userOpHash?: PromiseOrValue<BytesLike> | null,
-      sender?: PromiseOrValue<string> | null,
-      paymaster?: PromiseOrValue<string> | null,
-      nonce?: null,
-      success?: null,
-      actualGasCost?: null,
-      actualGasUsed?: null
-    ): UserOperationEventEventFilter;
-    UserOperationEvent(
-      userOpHash?: PromiseOrValue<BytesLike> | null,
-      sender?: PromiseOrValue<string> | null,
-      paymaster?: PromiseOrValue<string> | null,
-      nonce?: null,
-      success?: null,
-      actualGasCost?: null,
-      actualGasUsed?: null
-    ): UserOperationEventEventFilter;
+    "UserOperationEvent(bytes32,address,address,uint256,bool,uint256,uint256)": TypedContractEvent<
+      UserOperationEventEvent.InputTuple,
+      UserOperationEventEvent.OutputTuple,
+      UserOperationEventEvent.OutputObject
+    >;
+    UserOperationEvent: TypedContractEvent<
+      UserOperationEventEvent.InputTuple,
+      UserOperationEventEvent.OutputTuple,
+      UserOperationEventEvent.OutputObject
+    >;
 
-    "UserOperationRevertReason(bytes32,address,uint256,bytes)"(
-      userOpHash?: PromiseOrValue<BytesLike> | null,
-      sender?: PromiseOrValue<string> | null,
-      nonce?: null,
-      revertReason?: null
-    ): UserOperationRevertReasonEventFilter;
-    UserOperationRevertReason(
-      userOpHash?: PromiseOrValue<BytesLike> | null,
-      sender?: PromiseOrValue<string> | null,
-      nonce?: null,
-      revertReason?: null
-    ): UserOperationRevertReasonEventFilter;
+    "UserOperationRevertReason(bytes32,address,uint256,bytes)": TypedContractEvent<
+      UserOperationRevertReasonEvent.InputTuple,
+      UserOperationRevertReasonEvent.OutputTuple,
+      UserOperationRevertReasonEvent.OutputObject
+    >;
+    UserOperationRevertReason: TypedContractEvent<
+      UserOperationRevertReasonEvent.InputTuple,
+      UserOperationRevertReasonEvent.OutputTuple,
+      UserOperationRevertReasonEvent.OutputObject
+    >;
 
-    "Withdrawn(address,address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): WithdrawnEventFilter;
-    Withdrawn(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): WithdrawnEventFilter;
-  };
-
-  estimateGas: {
-    SIG_VALIDATION_FAILED(overrides?: CallOverrides): Promise<BigNumber>;
-
-    _validateSenderAndPaymaster(
-      initCode: PromiseOrValue<BytesLike>,
-      sender: PromiseOrValue<string>,
-      paymasterAndData: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getNonce(
-      sender: PromiseOrValue<string>,
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getSenderAddress(
-      initCode: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getUserOpHash(
-      userOp: UserOperationStruct,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    handleAggregatedOps(
-      opsPerAggregator: IEntryPoint.UserOpsPerAggregatorStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    handleOps(
-      ops: UserOperationStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    incrementNonce(
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    innerHandleOp(
-      callData: PromiseOrValue<BytesLike>,
-      opInfo: EntryPoint.UserOpInfoStruct,
-      context: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    nonceSequenceNumber(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    simulateHandleOp(
-      op: UserOperationStruct,
-      target: PromiseOrValue<string>,
-      targetCallData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    simulateValidation(
-      userOp: UserOperationStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    unlockStake(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    SIG_VALIDATION_FAILED(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    _validateSenderAndPaymaster(
-      initCode: PromiseOrValue<BytesLike>,
-      sender: PromiseOrValue<string>,
-      paymasterAndData: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getNonce(
-      sender: PromiseOrValue<string>,
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getSenderAddress(
-      initCode: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getUserOpHash(
-      userOp: UserOperationStruct,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    handleAggregatedOps(
-      opsPerAggregator: IEntryPoint.UserOpsPerAggregatorStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    handleOps(
-      ops: UserOperationStruct[],
-      beneficiary: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    incrementNonce(
-      key: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    innerHandleOp(
-      callData: PromiseOrValue<BytesLike>,
-      opInfo: EntryPoint.UserOpInfoStruct,
-      context: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    nonceSequenceNumber(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    simulateHandleOp(
-      op: UserOperationStruct,
-      target: PromiseOrValue<string>,
-      targetCallData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    simulateValidation(
-      userOp: UserOperationStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    unlockStake(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
+    "Withdrawn(address,address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
   };
 }

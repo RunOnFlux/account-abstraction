@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IMultiSigSmartAccountFactory,
   IMultiSigSmartAccountFactoryInterface,
@@ -28,16 +27,16 @@ const _abi = [
 export class IMultiSigSmartAccountFactory__factory {
   static readonly abi = _abi;
   static createInterface(): IMultiSigSmartAccountFactoryInterface {
-    return new utils.Interface(_abi) as IMultiSigSmartAccountFactoryInterface;
+    return new Interface(_abi) as IMultiSigSmartAccountFactoryInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): IMultiSigSmartAccountFactory {
     return new Contract(
       address,
       _abi,
-      signerOrProvider
-    ) as IMultiSigSmartAccountFactory;
+      runner
+    ) as unknown as IMultiSigSmartAccountFactory;
   }
 }

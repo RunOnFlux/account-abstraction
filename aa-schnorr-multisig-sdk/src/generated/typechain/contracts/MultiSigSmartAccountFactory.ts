@@ -3,42 +3,36 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
-} from "ethers";
-import type {
   FunctionFragment,
   Result,
+  Interface,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
+} from "ethers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../common";
 
-export interface MultiSigSmartAccountFactoryInterface extends utils.Interface {
-  functions: {
-    "accountImplementation()": FunctionFragment;
-    "createAccount(address[],bytes32)": FunctionFragment;
-    "getAccountAddress(address[],bytes32)": FunctionFragment;
-  };
-
+export interface MultiSigSmartAccountFactoryInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "accountImplementation"
       | "createAccount"
       | "getAccountAddress"
   ): FunctionFragment;
+
+  getEvent(
+    nameOrSignatureOrTopic: "MultiSigSmartAccountCreated"
+  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "accountImplementation",
@@ -46,11 +40,11 @@ export interface MultiSigSmartAccountFactoryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createAccount",
-    values: [PromiseOrValue<string>[], PromiseOrValue<BytesLike>]
+    values: [AddressLike[], BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getAccountAddress",
-    values: [PromiseOrValue<string>[], PromiseOrValue<BytesLike>]
+    values: [AddressLike[], BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -65,139 +59,117 @@ export interface MultiSigSmartAccountFactoryInterface extends utils.Interface {
     functionFragment: "getAccountAddress",
     data: BytesLike
   ): Result;
-
-  events: {
-    "MultiSigSmartAccountCreated(address)": EventFragment;
-  };
-
-  getEvent(
-    nameOrSignatureOrTopic: "MultiSigSmartAccountCreated"
-  ): EventFragment;
 }
 
-export interface MultiSigSmartAccountCreatedEventObject {
-  smartAccount: string;
+export namespace MultiSigSmartAccountCreatedEvent {
+  export type InputTuple = [smartAccount: AddressLike];
+  export type OutputTuple = [smartAccount: string];
+  export interface OutputObject {
+    smartAccount: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type MultiSigSmartAccountCreatedEvent = TypedEvent<
-  [string],
-  MultiSigSmartAccountCreatedEventObject
->;
-
-export type MultiSigSmartAccountCreatedEventFilter =
-  TypedEventFilter<MultiSigSmartAccountCreatedEvent>;
 
 export interface MultiSigSmartAccountFactory extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): MultiSigSmartAccountFactory;
+  waitForDeployment(): Promise<this>;
 
   interface: MultiSigSmartAccountFactoryInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    accountImplementation(overrides?: CallOverrides): Promise<[string]>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    createAccount(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    getAccountAddress(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-  };
+  accountImplementation: TypedContractMethod<[], [string], "view">;
 
-  accountImplementation(overrides?: CallOverrides): Promise<string>;
+  createAccount: TypedContractMethod<
+    [combinedAddress: AddressLike[], salt: BytesLike],
+    [string],
+    "nonpayable"
+  >;
 
-  createAccount(
-    combinedAddress: PromiseOrValue<string>[],
-    salt: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  getAccountAddress: TypedContractMethod<
+    [combinedAddress: AddressLike[], salt: BytesLike],
+    [string],
+    "view"
+  >;
 
-  getAccountAddress(
-    combinedAddress: PromiseOrValue<string>[],
-    salt: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
 
-  callStatic: {
-    accountImplementation(overrides?: CallOverrides): Promise<string>;
+  getFunction(
+    nameOrSignature: "accountImplementation"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "createAccount"
+  ): TypedContractMethod<
+    [combinedAddress: AddressLike[], salt: BytesLike],
+    [string],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getAccountAddress"
+  ): TypedContractMethod<
+    [combinedAddress: AddressLike[], salt: BytesLike],
+    [string],
+    "view"
+  >;
 
-    createAccount(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    getAccountAddress(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-  };
+  getEvent(
+    key: "MultiSigSmartAccountCreated"
+  ): TypedContractEvent<
+    MultiSigSmartAccountCreatedEvent.InputTuple,
+    MultiSigSmartAccountCreatedEvent.OutputTuple,
+    MultiSigSmartAccountCreatedEvent.OutputObject
+  >;
 
   filters: {
-    "MultiSigSmartAccountCreated(address)"(
-      smartAccount?: null
-    ): MultiSigSmartAccountCreatedEventFilter;
-    MultiSigSmartAccountCreated(
-      smartAccount?: null
-    ): MultiSigSmartAccountCreatedEventFilter;
-  };
-
-  estimateGas: {
-    accountImplementation(overrides?: CallOverrides): Promise<BigNumber>;
-
-    createAccount(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getAccountAddress(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    accountImplementation(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    createAccount(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getAccountAddress(
-      combinedAddress: PromiseOrValue<string>[],
-      salt: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    "MultiSigSmartAccountCreated(address)": TypedContractEvent<
+      MultiSigSmartAccountCreatedEvent.InputTuple,
+      MultiSigSmartAccountCreatedEvent.OutputTuple,
+      MultiSigSmartAccountCreatedEvent.OutputObject
+    >;
+    MultiSigSmartAccountCreated: TypedContractEvent<
+      MultiSigSmartAccountCreatedEvent.InputTuple,
+      MultiSigSmartAccountCreatedEvent.OutputTuple,
+      MultiSigSmartAccountCreatedEvent.OutputObject
+    >;
   };
 }

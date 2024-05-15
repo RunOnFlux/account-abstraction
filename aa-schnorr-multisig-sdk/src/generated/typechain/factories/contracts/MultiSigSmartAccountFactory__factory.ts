@@ -2,15 +2,19 @@
 /* tslint:disable */
 /* eslint-disable */
 import {
-  Signer,
-  utils,
   Contract,
   ContractFactory,
-  BytesLike,
-  Overrides,
+  ContractTransactionResponse,
+  Interface,
 } from "ethers";
-import type { Provider, TransactionRequest } from "@ethersproject/providers";
-import type { PromiseOrValue } from "../../common";
+import type {
+  Signer,
+  BytesLike,
+  AddressLike,
+  ContractDeployTransaction,
+  ContractRunner,
+} from "ethers";
+import type { NonPayableOverrides } from "../../common";
 import type {
   MultiSigSmartAccountFactory,
   MultiSigSmartAccountFactoryInterface,
@@ -129,44 +133,43 @@ export class MultiSigSmartAccountFactory__factory extends ContractFactory {
     }
   }
 
-  override deploy(
-    _entryPoint: PromiseOrValue<string>,
-    _salt: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<MultiSigSmartAccountFactory> {
-    return super.deploy(
-      _entryPoint,
-      _salt,
-      overrides || {}
-    ) as Promise<MultiSigSmartAccountFactory>;
-  }
   override getDeployTransaction(
-    _entryPoint: PromiseOrValue<string>,
-    _salt: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): TransactionRequest {
+    _entryPoint: AddressLike,
+    _salt: BytesLike,
+    overrides?: NonPayableOverrides & { from?: string }
+  ): Promise<ContractDeployTransaction> {
     return super.getDeployTransaction(_entryPoint, _salt, overrides || {});
   }
-  override attach(address: string): MultiSigSmartAccountFactory {
-    return super.attach(address) as MultiSigSmartAccountFactory;
+  override deploy(
+    _entryPoint: AddressLike,
+    _salt: BytesLike,
+    overrides?: NonPayableOverrides & { from?: string }
+  ) {
+    return super.deploy(_entryPoint, _salt, overrides || {}) as Promise<
+      MultiSigSmartAccountFactory & {
+        deploymentTransaction(): ContractTransactionResponse;
+      }
+    >;
   }
-  override connect(signer: Signer): MultiSigSmartAccountFactory__factory {
-    return super.connect(signer) as MultiSigSmartAccountFactory__factory;
+  override connect(
+    runner: ContractRunner | null
+  ): MultiSigSmartAccountFactory__factory {
+    return super.connect(runner) as MultiSigSmartAccountFactory__factory;
   }
 
   static readonly bytecode = _bytecode;
   static readonly abi = _abi;
   static createInterface(): MultiSigSmartAccountFactoryInterface {
-    return new utils.Interface(_abi) as MultiSigSmartAccountFactoryInterface;
+    return new Interface(_abi) as MultiSigSmartAccountFactoryInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): MultiSigSmartAccountFactory {
     return new Contract(
       address,
       _abi,
-      signerOrProvider
-    ) as MultiSigSmartAccountFactory;
+      runner
+    ) as unknown as MultiSigSmartAccountFactory;
   }
 }

@@ -22,8 +22,8 @@ const generatorPoint = ec.g
  * @returns InternalNoncePairs
  */
 const _generateNonce = (): InternalNoncePairs => {
-  const k = Buffer.from(ethers.utils.randomBytes(32))
-  const kTwo = Buffer.from(ethers.utils.randomBytes(32))
+  const k = Buffer.from(ethers.randomBytes(32))
+  const kTwo = Buffer.from(ethers.randomBytes(32))
   const kPublic = Buffer.from(secp256k1.publicKeyCreate(k))
   const kTwoPublic = Buffer.from(secp256k1.publicKeyCreate(kTwo))
 
@@ -42,8 +42,8 @@ const _bCoefficient = (combinedPublicKey: Buffer, msgHash: string, publicNonces:
   const kTwoPublicNonces = secp256k1.publicKeyCombine(arrayColumn(publicNonces, "kTwoPublic"))
 
   return Buffer.from(
-    ethers.utils.arrayify(
-      ethers.utils.solidityKeccak256(["bytes", "bytes32", "bytes", "bytes"], [combinedPublicKey, msgHash, kPublicNonces, kTwoPublicNonces])
+    ethers.getBytes(
+      ethers.solidityPackedKeccak256(["bytes", "bytes32", "bytes", "bytes"], [combinedPublicKey, msgHash, kPublicNonces, kTwoPublicNonces])
     )
   )
 }
@@ -61,14 +61,14 @@ const areBuffersSame = (buf1: Buffer, buf2: Buffer): boolean => {
 const challenge = (R: Buffer, msgHash: string, publicKey: Buffer): Buffer => {
   // convert R to address
   const R_uncomp = secp256k1.publicKeyConvert(R, false)
-  const R_addr = ethers.utils.arrayify(ethers.utils.keccak256(R_uncomp.slice(1, 65))).slice(12, 32)
+  const R_addr = ethers.getBytes(ethers.keccak256(R_uncomp.slice(1, 65))).slice(12, 32)
 
   // e = keccak256(address(R) || compressed publicKey || msgHash)
   return Buffer.from(
-    ethers.utils.arrayify(
-      ethers.utils.solidityKeccak256(
+    ethers.getBytes(
+      ethers.solidityPackedKeccak256(
         ["address", "uint8", "bytes32", "bytes32"],
-        [R_addr, publicKey[0] + 27 - 2, publicKey.slice(1, 33), msgHash]
+        [ethers.hexlify(R_addr), publicKey[0] + 27 - 2, publicKey.slice(1, 33), msgHash]
       )
     )
   )
@@ -86,7 +86,7 @@ const internalSign = (privateKey: Buffer, hash: string): InternalSignature => {
   const publicKey = Buffer.from(secp256k1.publicKeyCreate(localPk))
 
   // R = G * k
-  const k = ethers.utils.randomBytes(32)
+  const k = ethers.randomBytes(32)
   const R = Buffer.from(secp256k1.publicKeyCreate(k))
 
   // e = h(address(R) || compressed pubkey || m)
@@ -174,7 +174,7 @@ const internalMultiSigSign = (
  */
 const internalVerify = (s: Buffer, hash: string, R: Buffer, publicKey: Buffer): boolean => {
   const eC = challenge(R, hash, publicKey)
-  const sG = generatorPoint.mul(ethers.utils.arrayify(s))
+  const sG = generatorPoint.mul(ethers.getBytes(s))
   const P = ec.keyFromPublic(publicKey).getPublic()
   const bnEC = new BN(Buffer.from(eC).toString("hex"), "hex")
   const Pe = P.mul(bnEC)
@@ -190,15 +190,15 @@ export const _concatTypedArrays = (publicKeys: Buffer[]): Buffer => {
 }
 
 export const _generateL = (publicKeys: Buffer[]) => {
-  return ethers.utils.keccak256(_concatTypedArrays(publicKeys.sort(Buffer.compare)))
+  return ethers.keccak256(_concatTypedArrays(publicKeys.sort(Buffer.compare)))
 }
 export const _aCoefficient = (publicKey: Buffer, L: string): Buffer => {
-  return Buffer.from(ethers.utils.arrayify(ethers.utils.solidityKeccak256(["bytes", "bytes"], [L, publicKey])))
+  return Buffer.from(ethers.getBytes(ethers.solidityPackedKeccak256(["bytes", "bytes"], [L, publicKey])))
 }
 
 export const generateRandomKeys = () => {
   let privKeyBytes: Buffer
-  do privKeyBytes = Buffer.from(ethers.utils.randomBytes(32))
+  do privKeyBytes = Buffer.from(ethers.randomBytes(32))
   while (!secp256k1.privateKeyVerify(privKeyBytes))
 
   const pubKey = Buffer.from(secp256k1.publicKeyCreate(privKeyBytes))
@@ -212,11 +212,11 @@ export const generateRandomKeys = () => {
 }
 
 export const _hashPrivateKey = (privateKey: Buffer): string => {
-  return ethers.utils.keccak256(privateKey)
+  return ethers.keccak256(privateKey)
 }
 
 export const _hashMessage = (message: string): string => {
-  return ethers.utils.solidityKeccak256(["string"], [message])
+  return ethers.solidityPackedKeccak256(["string"], [message])
 }
 
 export const _generatePublicNonces = (
@@ -287,7 +287,7 @@ export const _verifyHash = (s: Buffer, hash: string, R: Buffer, publicKey: Buffe
 }
 
 export const _generatePk = (combinedPublicKey: Buffer): string => {
-  const px = ethers.utils.hexlify(combinedPublicKey.subarray(1, 33))
+  const px = ethers.hexlify(combinedPublicKey.subarray(1, 33))
   return `0x${px.slice(-40, px.length)}`
 }
 

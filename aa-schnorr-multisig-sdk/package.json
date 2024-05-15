@@ -31,11 +31,11 @@
     "url": "https://github.com/RunOnFlux/account-abstraction/issues"
   },
   "dependencies": {
-    "@alchemy/aa-core": "^2.3.1",
-    "@alchemy/aa-ethers": "^2.3.1",
+    "@alchemy/aa-core": "^3.12.3",
+    "@alchemy/aa-ethers": "^3.12.3",
     "bigi": "^1.4.2",
     "ecurve": "^1.0.6",
-    "ethers": "^5.7.2",
+    "ethers": "^6.11.1",
     "secp256k1": "^5.0.0"
   }
 }

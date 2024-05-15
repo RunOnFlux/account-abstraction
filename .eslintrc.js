@@ -58,7 +58,7 @@ module.exports = {
         "@typescript-eslint/no-loop-func": "error",
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-useless-empty-export": "error",
-        "@typescript-eslint/require-await": "error",
+        "@typescript-eslint/require-await": "off",
         "@typescript-eslint/no-shadow": ["error", { ignoreTypeValueShadow: true, ignoreFunctionTypeParameterNameValueShadow: true }],
         "@typescript-eslint/naming-convention": [
           "error",

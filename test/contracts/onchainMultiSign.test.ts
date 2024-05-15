@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect } from "chai"
-import { ethers } from "ethers"
+import { AbiCoder, ethers } from "ethers"
 
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import type { MultiSigSmartAccount } from "../../src/typechain"
@@ -50,13 +50,13 @@ describe("Onchain Multi Sign Tests", function () {
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
     // the multisig px and parity
-    const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
+    const px = ethers.hexlify(combinedPublicKey.buffer.subarray(1, 33))
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
@@ -70,14 +70,14 @@ describe("Onchain Multi Sign Tests", function () {
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
     // the multisig px and parity
-    const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
+    const px = ethers.hexlify(combinedPublicKey.buffer.subarray(1, 33))
 
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
@@ -99,9 +99,9 @@ describe("Onchain Multi Sign Tests", function () {
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal("0xffffffff")
   })
@@ -117,9 +117,9 @@ describe("Onchain Multi Sign Tests", function () {
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sigOne.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal("0xffffffff")
   })
@@ -150,9 +150,9 @@ describe("Onchain Multi Sign Tests", function () {
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal("0xffffffff")
   })
@@ -170,9 +170,9 @@ describe("Onchain Multi Sign Tests", function () {
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
@@ -211,9 +211,9 @@ describe("Onchain Multi Sign Tests", function () {
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })
@@ -227,14 +227,14 @@ describe("Onchain Multi Sign Tests", function () {
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 
     // the multisig px and parity
-    const px = ethers.utils.hexlify(combinedPublicKey.buffer.subarray(1, 33))
+    const px = ethers.hexlify(combinedPublicKey.buffer.subarray(1, 33))
 
     const parity = combinedPublicKey.buffer[0] - 2 + 27
 
     // wrap the result
-    const abiCoder = new ethers.utils.AbiCoder()
+    const abiCoder = new AbiCoder()
     const sigData = abiCoder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [px, challenge.buffer, sSummed.buffer, parity])
-    const msgHash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const msgHash = ethers.solidityPackedKeccak256(["string"], [msg])
     const result = await contract.isValidSignature(msgHash, sigData)
     expect(result).to.equal(ERC1271_MAGICVALUE_BYTES32)
   })

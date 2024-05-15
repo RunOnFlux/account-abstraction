@@ -1,17 +1,1 @@
-{
-  "1": {
-    "MultiSigSmartAccountFactory": ""
-  },
-  "137": {
-    "MultiSigSmartAccountFactory": ""
-  },
-  "80001": {
-    "MultiSigSmartAccountFactory": "0x9f0b89c7AEF51Af9F9579c2C873C828b887CBFBd"
-  },
-  "80002": {
-    "MultiSigSmartAccountFactory": ""
-  },
-  "11155111": {
-    "MultiSigSmartAccountFactory": ""
-  }
-}
+{"1":{"MultiSigSmartAccountFactory":""},"137":{"MultiSigSmartAccountFactory":""},"80001":{"MultiSigSmartAccountFactory":"0x9f0b89c7AEF51Af9F9579c2C873C828b887CBFBd"},"80002":{"MultiSigSmartAccountFactory":""},"11155111":{"MultiSigSmartAccountFactory":"0xAe6165de8B5Af939C5352bCBA75eE6FEdF1EEb4F"}}

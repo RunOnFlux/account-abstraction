@@ -8,6 +8,7 @@ import { BN } from "bn.js"
 import { KeyPair } from "../types"
 
 import type { HashFunction, InternalNoncePairs, InternalNonces, InternalPublicNonces, InternalSignature } from "./types"
+import {Hex} from "../accountAbstraction";
 
 const curve = ecurve.getCurveByName("secp256k1")
 const n = curve?.n
@@ -118,6 +119,7 @@ const internalMultiSigSign = (
 
   const localPk = Buffer.from(privateKey)
   const xHashed = _hashPrivateKey(localPk)
+
   if (!(xHashed in nonces) || Object.keys(nonces[xHashed]).length === 0) throw new Error("Nonces should be exchanged before signing")
 
   const publicKey = Buffer.from(secp256k1.publicKeyCreate(localPk))
@@ -286,7 +288,7 @@ export const _verifyHash = (s: Buffer, hash: string, R: Buffer, publicKey: Buffe
   return internalVerify(s, hash, R, publicKey)
 }
 
-export const _generatePk = (combinedPublicKey: Buffer): string => {
+export const _generatePk = (combinedPublicKey: Buffer): Hex => {
   const px = ethers.hexlify(combinedPublicKey.subarray(1, 33))
   return `0x${px.slice(-40, px.length)}`
 }

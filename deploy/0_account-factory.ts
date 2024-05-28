@@ -2,13 +2,11 @@ import type { DeployFunction } from "hardhat-deploy/types"
 import type { HardhatRuntimeEnvironment } from "hardhat/types"
 
 import { KNOWN_ACCOUNT } from "../config/networks"
-import type { Deployment } from "../src/deployments/deploymentManager"
-import { deploymentManager } from "../src/deployments/deploymentManager"
 import { saltToHex } from "../aa-schnorr-multisig-sdk/src/helpers/create2"
+import { MultiSigSmartAccountFactory__factory } from "../src/typechain"
 
 import { verifyContract } from "./helpers/verify"
 import { ENTRY_POINT_ALCHEMY_ADDRESS, TAGS } from "./helpers/const"
-import {MultiSigSmartAccountFactory__factory} from "../src/typechain";
 
 const CONTRACT_NAME = "MultiSigSmartAccountFactory"
 
@@ -38,8 +36,6 @@ const deployFct: DeployFunction = async function (hre: HardhatRuntimeEnvironment
   console.log(`---> ${CONTRACT_NAME} salt used: ${saltHex}`)
 
   if (deployResults.receipt?.transactionHash) {
-    // workaround for verification error
-    await provider.waitForTransaction(deployResults.receipt?.transactionHash, 10)
     await verifyContract(deployedAddress, hre, args)
 
     const Factory = MultiSigSmartAccountFactory__factory.connect(deployedAddress)
@@ -47,10 +43,6 @@ const deployFct: DeployFunction = async function (hre: HardhatRuntimeEnvironment
     console.log(`---> Account Implementation address: ${accountImplementation}`)
     await verifyContract(accountImplementation, hre, [ENTRY_POINT_ALCHEMY_ADDRESS])
   }
-  const deploys: Deployment = {
-    MultiSigSmartAccountFactory: deployedAddress,
-  }
-  await deploymentManager.write(chainId, deploys)
 }
 
 deployFct.tags = [TAGS.FULL, TAGS.ACCOUNT_FACTORY]

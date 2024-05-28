@@ -1,9 +1,9 @@
 import type {
-  SmartAccountSigner,
-  SmartContractAccountWithSigner,
-  ToSmartContractAccountParams,
   UpgradeToAndCallParams,
   Address,
+  EntryPointParameter,
+  SmartContractAccount,
+  ToSmartContractAccountParams,
 } from "@alchemy/aa-core"
 import {
   createBundlerClient,
@@ -12,25 +12,28 @@ import {
   getEntryPoint,
   toSmartContractAccount,
 } from "@alchemy/aa-core"
-import type { Hex, SignTypedDataParameters, Transport } from "viem"
+import type { Chain, Hex, Transport } from "viem"
 import { concatHex, encodeFunctionData } from "viem"
-import { ethers } from "ethers/lib.esm"
+import { ethers } from "ethers"
 
 import { deployments } from "../generated/deployments"
 import { MultiSigSmartAccount_abi } from "../generated/abi"
+import { MultiSigSmartAccountFactory_abi } from "../abi"
 
-export type MultiSigSmartAccount = SmartContractAccountWithSigner<"MultiSigSmartAccount">
+export const MULTISIG_ACCOUNT_SOURCE = "MultiSigSmartAccount"
 
-export type CreateMultiSigSmartAccountParams<TTransport extends Transport = Transport> = Pick<
-  ToSmartContractAccountParams<"MultiSigSmartAccount", TTransport>,
-  "transport" | "chain" | "entryPoint" | "accountAddress"
+export type MultiSigSmartAccount = SmartContractAccount<typeof MULTISIG_ACCOUNT_SOURCE, "0.6.0">
+
+export type CreateMultiSigSmartAccountParams<TTransport extends Transport = Transport, TEntryPointVersion extends "0.6.0" = "0.6.0"> = Pick<
+  ToSmartContractAccountParams<typeof MULTISIG_ACCOUNT_SOURCE, TTransport, Chain, TEntryPointVersion>,
+  "transport" | "chain"
 > & {
-  signer: SmartAccountSigner
-  combinedAddress: Address[]
   salt?: Hex
   factoryAddress?: Address
   initCode?: Hex
-}
+  combinedAddress?: Address[]
+  accountAddress?: Address
+} & EntryPointParameter<TEntryPointVersion, Chain>
 
 export async function createMultiSigSmartAccount<TTransport extends Transport = Transport>(
   config: CreateMultiSigSmartAccountParams<TTransport>
@@ -39,11 +42,9 @@ export async function createMultiSigSmartAccount<TTransport extends Transport = 
 export async function createMultiSigSmartAccount({
   transport,
   chain,
-  signer,
-  initCode,
   entryPoint = getEntryPoint(chain, { version: "0.6.0" }),
   accountAddress,
-  combinedAddress,
+  combinedAddress = [],
   salt: _salt,
 }: CreateMultiSigSmartAccountParams): Promise<MultiSigSmartAccount> {
   const client = createBundlerClient({
@@ -53,12 +54,10 @@ export async function createMultiSigSmartAccount({
   const salt = _salt ?? ethers.encodeBytes32String("salt")
 
   const getAccountInitCode = async () => {
-    if (initCode) return initCode
-
     return concatHex([
       deployments[chain.id]?.MultiSigSmartAccountFactory as Address,
       encodeFunctionData({
-        abi: MultiSigSmartAccount_abi,
+        abi: MultiSigSmartAccountFactory_abi,
         functionName: "createAccount",
         args: [combinedAddress, salt],
       }),
@@ -123,14 +122,14 @@ export async function createMultiSigSmartAccount({
         args: [targets, values, datas],
       })
     },
-    signUserOperationHash: async (uoHash: Hex) => {
-      return signer.signMessage({ raw: uoHash })
+    signUserOperationHash: async () => {
+      throw new Error("Use Schnorr Signer to get user operation hash signature")
     },
-    async signMessage({ message }) {
-      return signer.signMessage(message)
+    async signMessage() {
+      throw new Error("Use Schnorr Signer to sign message")
     },
-    async signTypedData(params) {
-      return signer.signTypedData(params as unknown as SignTypedDataParameters)
+    async signTypedData() {
+      throw new Error("Use Schnorr Signer to sign message")
     },
     getDummySignature: () => {
       return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
@@ -141,6 +140,5 @@ export async function createMultiSigSmartAccount({
   return {
     ...account,
     source: "MultiSigSmartAccount",
-    getSigner: () => signer,
   }
 }

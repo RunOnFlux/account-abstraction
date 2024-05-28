@@ -34,6 +34,7 @@ contract MultiSigSmartAccount is
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
     bytes4 internal constant ERC1271_MAGICVALUE_BYTES32 = 0x1626ba7e;
+    bytes internal constant DUMMY_SIGNATURE = hex"fffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c";
     // AccessControl contract roles
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     IEntryPoint private immutable _entryPoint;
@@ -120,6 +121,7 @@ contract MultiSigSmartAccount is
      * @param signature signature
      */
     function isValidSignature(bytes32 hash, bytes memory signature) public view override returns (bytes4) {
+        require(signature.length == 128, "MultiSigSmartAccount: invalid signature length");
         address recovered = _verifySchnorr(hash, signature);
         if (hasRole(OWNER_ROLE, recovered)) {
             return ERC1271_MAGICVALUE_BYTES32;
@@ -144,6 +146,13 @@ contract MultiSigSmartAccount is
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
+
+        bytes memory signature = userOp.signature;
+        if (keccak256(signature) == keccak256(DUMMY_SIGNATURE)) return SIG_VALIDATION_FAILED;
+
+        require(userOp.signature.length == 128, "MultiSigSmartAccount: invalid signature length");
+
+
         address recovered = _verifySchnorr(userOpHash, userOp.signature);
         if (!hasRole(OWNER_ROLE, recovered)) return SIG_VALIDATION_FAILED;
         return 0;

@@ -17,7 +17,8 @@
     "./deploy",
     "./shared",
     "./config",
-    "./aa-schnorr-multisig-sdk/src"
+    "./aa-schnorr-multisig-sdk/src",
+    "./aa-schnorr-multisig-sdk/docs"
   ],
   "exclude": ["node_modules", "**/*.spec.ts"],
   "files": ["hardhat.config.ts"]

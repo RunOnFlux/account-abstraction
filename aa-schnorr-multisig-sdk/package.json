@@ -1,6 +1,6 @@
 {
-  "name": "aa-schnorr-multisig-sdk",
-  "version": "1.0.6",
+  "name": "@rumblefishdev/aa-schnorr-multisig-sdk",
+  "version": "1.0.7",
   "description": "Account Abstraction Schnorr Multi-Signatures SDK",
   "keywords": [
     "Account Abstraction",
@@ -32,10 +32,13 @@
   },
   "dependencies": {
     "@alchemy/aa-core": "^3.12.3",
-    "@alchemy/aa-ethers": "^3.12.3",
     "bigi": "^1.4.2",
     "ecurve": "^1.0.6",
     "ethers": "^6.11.1",
     "secp256k1": "^5.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "ts-node": "^10.9.2"
   }
 }

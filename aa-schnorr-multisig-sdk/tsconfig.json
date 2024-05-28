@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
-    "incremental": true,
-    "target": "es2020",
+    "target": "esnext",
     "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": ".",
     "noEmit": true,
     "strict": true,
     "noImplicitAny": false,
@@ -15,5 +12,9 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
+  "include": [
+    "src/**/*",
+    "examples/**/*"
+  ],
   "exclude": ["dist", "node_modules"]
 }

@@ -5,8 +5,9 @@ export function hashMsgKeccak256(message: string): string {
 }
 
 export function pubKey2Address(publicKeyBuffer: Buffer): string {
-  const px = ethers.dataSlice(publicKeyBuffer,1, 33)
+  const publicKeyHash = Buffer.from(ethers.getBytes(ethers.keccak256(publicKeyBuffer.subarray(1))))
 
-  const address = `0x${px.slice(-40, px.length)}`
+  const address = `0x${publicKeyHash.subarray(-20).toString("hex")}`
+
   return address
 }

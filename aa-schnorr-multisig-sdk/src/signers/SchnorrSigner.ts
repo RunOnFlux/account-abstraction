@@ -10,28 +10,32 @@ import { Schnorrkel } from "./Schnorrkel"
 export class SchnorrSigner extends Schnorrkel {
   #privateKey: Key
   #publicKey: Key
+  #address: `${string}`
 
   constructor(_privKey: Uint8Array) {
     super()
-    let privKeyBytes: Buffer
 
-    do privKeyBytes = Buffer.from(_privKey)
-    while (!privateKeyVerify(privKeyBytes))
+    const privKey = Buffer.from(_privKey)
+    if (!privateKeyVerify(privKey)) throw new Error("Invalid private key")
 
-    const pubKey = Buffer.from(publicKeyCreate(privKeyBytes))
+    const pubKey = Buffer.from(publicKeyCreate(privKey))
 
     const data = {
       publicKey: pubKey,
-      privateKey: privKeyBytes,
+      privateKey: privKey,
     }
+
+    const pubKeyUncompressed = Buffer.from(publicKeyCreate(privKey, false))
+    const address = pubKey2Address(pubKeyUncompressed)
 
     const keys = new KeyPair(data)
     this.#privateKey = keys.privateKey
     this.#publicKey = keys.publicKey
+    this.#address = address
   }
 
   getAddress(): string {
-    return pubKey2Address(this.#publicKey.buffer)
+    return this.#address
   }
 
   getPubKey(): Key {

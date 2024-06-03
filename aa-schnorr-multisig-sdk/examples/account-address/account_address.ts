@@ -3,8 +3,9 @@ import "dotenv/config"
 import { JsonRpcProvider, randomBytes } from "ethers"
 import { http } from "viem"
 import type { Address } from "@alchemy/aa-core"
-import { getEntryPoint, sepolia } from "@alchemy/aa-core"
+import { getEntryPoint } from "@alchemy/aa-core"
 import secp256k1 from "secp256k1"
+import { polygon } from "viem/chains"
 
 import {
   predictAccountAddrOffchain,
@@ -13,18 +14,21 @@ import {
   saltToHex,
 } from "../../src/helpers/create2"
 import { ENTRY_POINT_ALCHEMY_ADDRESS } from "../../../deploy/helpers/const"
+import { deployments } from "../../src/generated/deployments"
 import { createMultiSigSmartAccount } from "../../src/accountAbstraction"
 import { createSchnorrSigner, getAllCombinedAddrFromKeys } from "../../src/helpers/schnorr-helpers"
 
+const CHAIN = polygon
+
 async function getAddressOnChain(combinedAddresses: string[], salt: string) {
-  const factoryAddress = "0xA76f98D25C9775F67DCf8B9EF9618d454D287467"
+  const factoryAddress = deployments[polygon.id]?.MultiSigSmartAccountFactory
   const provider = new JsonRpcProvider(process.env.ALCHEMY_RPC_URL)
   return predictAccountAddrOnchain(factoryAddress, combinedAddresses, salt, provider)
 }
 
 function getAddressOffChain(combinedAddresses: string[], salt: string) {
   const factorySalt = "aafactorysalt"
-  const factoryAddress = "0xA76f98D25C9775F67DCf8B9EF9618d454D287467"
+  const factoryAddress = deployments[polygon.id]?.MultiSigSmartAccountFactory
   const accountImplementationAddress = predictAccountImplementationAddrOffchain(factorySalt, factoryAddress, ENTRY_POINT_ALCHEMY_ADDRESS)
 
   return predictAccountAddrOffchain(factoryAddress, accountImplementationAddress, combinedAddresses, salt)
@@ -35,10 +39,10 @@ async function getAddressAlchemyAASDK(combinedAddresses: Address[], salt: string
   const transport = http(rpcUrl)
   const multiSigSmartAccount = await createMultiSigSmartAccount({
     transport,
-    chain: sepolia,
+    chain: CHAIN,
     combinedAddress: combinedAddresses,
     salt: saltToHex(salt),
-    entryPoint: getEntryPoint(sepolia),
+    entryPoint: getEntryPoint(CHAIN),
   })
 
   return multiSigSmartAccount.address

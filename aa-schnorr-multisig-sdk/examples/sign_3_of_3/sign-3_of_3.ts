@@ -1,19 +1,35 @@
 import "dotenv/config"
 
 import type { Address } from "@alchemy/aa-core"
-import { createSmartAccountClient, deepHexlify, getEntryPoint, sepolia } from "@alchemy/aa-core"
-import type { Hex } from "viem"
-import { encodeFunctionData, http, parseUnits } from "viem"
-import { randomBytes } from "ethers"
+import { createSmartAccountClient, deepHexlify, getEntryPoint } from "@alchemy/aa-core"
+import { http, parseUnits } from "viem"
+import { randomBytes, JsonRpcProvider, Wallet } from "ethers"
 import secp256k1 from "secp256k1"
+import { polygon } from "viem/chains"
 
-import ERC20MintableAbi from "../abi/ERC20Mintable.json"
 import { createMultiSigSmartAccount } from "../../src/accountAbstraction"
 import { createSchnorrSigner, getAllCombinedAddrFromKeys } from "../../src/helpers/schnorr-helpers"
 import { saltToHex } from "../../src/helpers/create2"
 import { MultiSigUserOp } from "../../src/userOperation"
 
+const CHAIN = polygon
+const CLIENT_OPT = {
+  feeOptions: {
+    maxPriorityFeePerGas: { multiplier: 1.5 },
+    maxFeePerGas: { multiplier: 1.5 },
+    preVerificationGas: { multiplier: 1.5 },
+  },
+
+  txMaxRetries: 5,
+  txRetryMultiplier: 3,
+}
 async function main() {
+  /**
+   * Wallet to cover initial transaction costs/prefund smart account
+   */
+  const provider = new JsonRpcProvider(process.env.ALCHEMY_RPC_URL)
+  const wallet = new Wallet(process.env.PRIVATE_KEY, provider)
+
   /**
    * Precondition:
    * 3 Participants sharing they Public Key's
@@ -69,36 +85,33 @@ async function main() {
   const transport = http(rpcUrl)
   const multiSigSmartAccount = await createMultiSigSmartAccount({
     transport,
-    chain: sepolia,
+    chain: CHAIN,
     combinedAddress: combinedAddresses,
     salt: saltToHex(salt),
-    entryPoint: getEntryPoint(sepolia),
+    entryPoint: getEntryPoint(CHAIN),
   })
+
+  /**
+   * Prefund smart account
+   */
+  const initTransactionCost = parseUnits("0.05", 18)
+  const addBalanceToSmartAccountTransaction = await wallet.sendTransaction({ to: multiSigSmartAccount.address, value: initTransactionCost })
+  await addBalanceToSmartAccountTransaction.wait()
 
   const smartAccountClient = createSmartAccountClient({
     transport,
-    chain: sepolia,
+    chain: CHAIN,
     account: multiSigSmartAccount,
 
-    opts: {
-      txMaxRetries: 5,
-      txRetryMultiplier: 3,
-    },
-  })
-
-  const amount = parseUnits("10", 18)
-
-  const uoCallData: Hex = encodeFunctionData({
-    abi: ERC20MintableAbi,
-    functionName: "mintTo",
-    args: [multiSigSmartAccount.address, amount],
+    opts: CLIENT_OPT,
   })
 
   const uoStruct = await smartAccountClient.buildUserOperation({
     account: multiSigSmartAccount,
     uo: {
-      data: uoCallData,
-      target: "0xdA9A5ACCAF66bf4Db0E839Dd0d49330F88f25044",
+      value: 0n,
+      data: "0x",
+      target: multiSigSmartAccount.address,
     },
   })
   const uoStructHash = multiSigSmartAccount.getEntryPoint().getUserOperationHash(deepHexlify(uoStruct))

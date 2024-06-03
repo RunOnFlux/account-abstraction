@@ -8,11 +8,11 @@ import { http } from "viem"
 import { createSmartAccountClient, deepHexlify, getEntryPoint } from "@alchemy/aa-core"
 import { polygon } from "viem/chains"
 
-import { ERC20__factory } from "../../../src/typechain"
-import { createSchnorrSigner, getAllCombinedAddrFromKeys } from "../../src/helpers/schnorr-helpers"
-import { createMultiSigSmartAccount } from "../../src/accountAbstraction"
-import { saltToHex } from "../../src/helpers/create2"
-import { MultiSigUserOp } from "../../src/userOperation"
+import { ERC20__factory } from "../../../../src/typechain"
+import { createSchnorrSigner, getAllCombinedAddrFromKeys } from "../../../src/helpers/schnorr-helpers"
+import { createMultiSigSmartAccount } from "../../../src/accountAbstraction"
+import { saltToHex } from "../../../src/helpers/create2"
+import { MultiSigUserOp } from "../../../src/userOperation"
 
 const CHAIN = polygon
 

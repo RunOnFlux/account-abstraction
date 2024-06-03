@@ -1,7 +1,7 @@
 ## ERC20 transfer with User Operation 
 
 > [!NOTE]
-> Current demo extends demo [Sign 3 of 3](../sign_3_of_3/sign-3_of_3.md). Please refer to docs.
+> Current demo extends demo [Sign 3 of 3](../../sign_3_of_3/sign-3_of_3.md). Please refer to docs.
 
 #### Requirements
 Account `Private Key`:
@@ -74,4 +74,4 @@ const uoStruct = await smartAccountClient.buildUserOperation({
 })
 ```
   
-For next step's refer to [sign-3_of_3](../sign_3_of_3/sign-3_of_3.md)
+For next step's refer to [sign-3_of_3](../../sign_3_of_3/sign-3_of_3.md)

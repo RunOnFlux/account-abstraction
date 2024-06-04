@@ -50,7 +50,7 @@ const config: HardhatUserConfig = {
       chainId: CHAIN_IDS[CHAIN_NAMES.ETHEREUM_SEPOLIA],
     },
     [KNOWN_NETWORK.POLYGON_MAINNET]: {
-      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.POLYGON_MAINNET_ALCHEMY_API_KEY}`,
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.POLYGON_MAINNET_ALCHEMY_API_KEY}`,
       accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
       chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_MAINNET],
     },

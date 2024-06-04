@@ -30,13 +30,13 @@ npm run test
 ```
 
 # Deployment
+[Deployments](./deployments.md)
 
 Make sure to include the `deployments` folder in the repository and add the `env` file as in the `env.sample` file.
 
-To deploy MultiSigSmartAccount Factory on Polygon Mumbai Testnet run command: 
-
+To deploy MultiSigSmartAccount Factory on Ethereum Sepolia Testnet run command: 
 ```bash
-npm run deploy:mumbai
+npm run deploy:sepolia
 ```
 
 To deploy on any different supported network run
@@ -47,7 +47,6 @@ List of supported network names:
   * mainnet,
   * sepolia,
   * polygon-mainnet,
-  * polygon-mumbai,
 
 
 ## Build package

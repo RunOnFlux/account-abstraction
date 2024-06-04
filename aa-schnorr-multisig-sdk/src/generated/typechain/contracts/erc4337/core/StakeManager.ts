@@ -3,69 +3,53 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PayableOverrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
-} from "ethers";
-import type {
   FunctionFragment,
   Result,
+  Interface,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
+} from "ethers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../../../common";
 
 export declare namespace IStakeManager {
   export type DepositInfoStruct = {
-    deposit: PromiseOrValue<BigNumberish>;
-    staked: PromiseOrValue<boolean>;
-    stake: PromiseOrValue<BigNumberish>;
-    unstakeDelaySec: PromiseOrValue<BigNumberish>;
-    withdrawTime: PromiseOrValue<BigNumberish>;
+    deposit: BigNumberish;
+    staked: boolean;
+    stake: BigNumberish;
+    unstakeDelaySec: BigNumberish;
+    withdrawTime: BigNumberish;
   };
 
   export type DepositInfoStructOutput = [
-    BigNumber,
-    boolean,
-    BigNumber,
-    number,
-    number
+    deposit: bigint,
+    staked: boolean,
+    stake: bigint,
+    unstakeDelaySec: bigint,
+    withdrawTime: bigint
   ] & {
-    deposit: BigNumber;
+    deposit: bigint;
     staked: boolean;
-    stake: BigNumber;
-    unstakeDelaySec: number;
-    withdrawTime: number;
+    stake: bigint;
+    unstakeDelaySec: bigint;
+    withdrawTime: bigint;
   };
 }
 
-export interface StakeManagerInterface extends utils.Interface {
-  functions: {
-    "addStake(uint32)": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "depositTo(address)": FunctionFragment;
-    "deposits(address)": FunctionFragment;
-    "getDepositInfo(address)": FunctionFragment;
-    "unlockStake()": FunctionFragment;
-    "withdrawStake(address)": FunctionFragment;
-    "withdrawTo(address,uint256)": FunctionFragment;
-  };
-
+export interface StakeManagerInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "addStake"
       | "balanceOf"
       | "depositTo"
@@ -76,25 +60,34 @@ export interface StakeManagerInterface extends utils.Interface {
       | "withdrawTo"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "Deposited"
+      | "StakeLocked"
+      | "StakeUnlocked"
+      | "StakeWithdrawn"
+      | "Withdrawn"
+  ): EventFragment;
+
   encodeFunctionData(
     functionFragment: "addStake",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "depositTo",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "deposits",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getDepositInfo",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "unlockStake",
@@ -102,11 +95,11 @@ export interface StakeManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawStake",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawTo",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [AddressLike, BigNumberish]
   ): string;
 
   decodeFunctionResult(functionFragment: "addStake", data: BytesLike): Result;
@@ -126,390 +119,326 @@ export interface StakeManagerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdrawTo", data: BytesLike): Result;
-
-  events: {
-    "Deposited(address,uint256)": EventFragment;
-    "StakeLocked(address,uint256,uint256)": EventFragment;
-    "StakeUnlocked(address,uint256)": EventFragment;
-    "StakeWithdrawn(address,address,uint256)": EventFragment;
-    "Withdrawn(address,address,uint256)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "Deposited"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakeLocked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakeUnlocked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakeWithdrawn"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdrawn"): EventFragment;
 }
 
-export interface DepositedEventObject {
-  account: string;
-  totalDeposit: BigNumber;
+export namespace DepositedEvent {
+  export type InputTuple = [account: AddressLike, totalDeposit: BigNumberish];
+  export type OutputTuple = [account: string, totalDeposit: bigint];
+  export interface OutputObject {
+    account: string;
+    totalDeposit: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type DepositedEvent = TypedEvent<
-  [string, BigNumber],
-  DepositedEventObject
->;
 
-export type DepositedEventFilter = TypedEventFilter<DepositedEvent>;
-
-export interface StakeLockedEventObject {
-  account: string;
-  totalStaked: BigNumber;
-  unstakeDelaySec: BigNumber;
+export namespace StakeLockedEvent {
+  export type InputTuple = [
+    account: AddressLike,
+    totalStaked: BigNumberish,
+    unstakeDelaySec: BigNumberish
+  ];
+  export type OutputTuple = [
+    account: string,
+    totalStaked: bigint,
+    unstakeDelaySec: bigint
+  ];
+  export interface OutputObject {
+    account: string;
+    totalStaked: bigint;
+    unstakeDelaySec: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type StakeLockedEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  StakeLockedEventObject
->;
 
-export type StakeLockedEventFilter = TypedEventFilter<StakeLockedEvent>;
-
-export interface StakeUnlockedEventObject {
-  account: string;
-  withdrawTime: BigNumber;
+export namespace StakeUnlockedEvent {
+  export type InputTuple = [account: AddressLike, withdrawTime: BigNumberish];
+  export type OutputTuple = [account: string, withdrawTime: bigint];
+  export interface OutputObject {
+    account: string;
+    withdrawTime: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type StakeUnlockedEvent = TypedEvent<
-  [string, BigNumber],
-  StakeUnlockedEventObject
->;
 
-export type StakeUnlockedEventFilter = TypedEventFilter<StakeUnlockedEvent>;
-
-export interface StakeWithdrawnEventObject {
-  account: string;
-  withdrawAddress: string;
-  amount: BigNumber;
+export namespace StakeWithdrawnEvent {
+  export type InputTuple = [
+    account: AddressLike,
+    withdrawAddress: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    account: string,
+    withdrawAddress: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    account: string;
+    withdrawAddress: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type StakeWithdrawnEvent = TypedEvent<
-  [string, string, BigNumber],
-  StakeWithdrawnEventObject
->;
 
-export type StakeWithdrawnEventFilter = TypedEventFilter<StakeWithdrawnEvent>;
-
-export interface WithdrawnEventObject {
-  account: string;
-  withdrawAddress: string;
-  amount: BigNumber;
+export namespace WithdrawnEvent {
+  export type InputTuple = [
+    account: AddressLike,
+    withdrawAddress: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    account: string,
+    withdrawAddress: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    account: string;
+    withdrawAddress: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WithdrawnEvent = TypedEvent<
-  [string, string, BigNumber],
-  WithdrawnEventObject
->;
-
-export type WithdrawnEventFilter = TypedEventFilter<WithdrawnEvent>;
 
 export interface StakeManager extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): StakeManager;
+  waitForDeployment(): Promise<this>;
 
   interface: StakeManagerInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean, BigNumber, number, number] & {
-        deposit: BigNumber;
-        staked: boolean;
-        stake: BigNumber;
-        unstakeDelaySec: number;
-        withdrawTime: number;
-      }
-    >;
-
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [IStakeManager.DepositInfoStructOutput] & {
-        info: IStakeManager.DepositInfoStructOutput;
-      }
-    >;
-
-    unlockStake(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-  };
-
-  addStake(
-    unstakeDelaySec: PromiseOrValue<BigNumberish>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  balanceOf(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  depositTo(
-    account: PromiseOrValue<string>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  deposits(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, boolean, BigNumber, number, number] & {
-      deposit: BigNumber;
-      staked: boolean;
-      stake: BigNumber;
-      unstakeDelaySec: number;
-      withdrawTime: number;
-    }
+  addStake: TypedContractMethod<
+    [unstakeDelaySec: BigNumberish],
+    [void],
+    "payable"
   >;
 
-  getDepositInfo(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<IStakeManager.DepositInfoStructOutput>;
+  balanceOf: TypedContractMethod<[account: AddressLike], [bigint], "view">;
 
-  unlockStake(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  depositTo: TypedContractMethod<[account: AddressLike], [void], "payable">;
 
-  withdrawStake(
-    withdrawAddress: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  withdrawTo(
-    withdrawAddress: PromiseOrValue<string>,
-    withdrawAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  callStatic: {
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean, BigNumber, number, number] & {
-        deposit: BigNumber;
+  deposits: TypedContractMethod<
+    [arg0: AddressLike],
+    [
+      [bigint, boolean, bigint, bigint, bigint] & {
+        deposit: bigint;
         staked: boolean;
-        stake: BigNumber;
-        unstakeDelaySec: number;
-        withdrawTime: number;
+        stake: bigint;
+        unstakeDelaySec: bigint;
+        withdrawTime: bigint;
       }
-    >;
+    ],
+    "view"
+  >;
 
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<IStakeManager.DepositInfoStructOutput>;
+  getDepositInfo: TypedContractMethod<
+    [account: AddressLike],
+    [IStakeManager.DepositInfoStructOutput],
+    "view"
+  >;
 
-    unlockStake(overrides?: CallOverrides): Promise<void>;
+  unlockStake: TypedContractMethod<[], [void], "nonpayable">;
 
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+  withdrawStake: TypedContractMethod<
+    [withdrawAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-  };
+  withdrawTo: TypedContractMethod<
+    [withdrawAddress: AddressLike, withdrawAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "addStake"
+  ): TypedContractMethod<[unstakeDelaySec: BigNumberish], [void], "payable">;
+  getFunction(
+    nameOrSignature: "balanceOf"
+  ): TypedContractMethod<[account: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "depositTo"
+  ): TypedContractMethod<[account: AddressLike], [void], "payable">;
+  getFunction(
+    nameOrSignature: "deposits"
+  ): TypedContractMethod<
+    [arg0: AddressLike],
+    [
+      [bigint, boolean, bigint, bigint, bigint] & {
+        deposit: bigint;
+        staked: boolean;
+        stake: bigint;
+        unstakeDelaySec: bigint;
+        withdrawTime: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getDepositInfo"
+  ): TypedContractMethod<
+    [account: AddressLike],
+    [IStakeManager.DepositInfoStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "unlockStake"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdrawStake"
+  ): TypedContractMethod<[withdrawAddress: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdrawTo"
+  ): TypedContractMethod<
+    [withdrawAddress: AddressLike, withdrawAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  getEvent(
+    key: "Deposited"
+  ): TypedContractEvent<
+    DepositedEvent.InputTuple,
+    DepositedEvent.OutputTuple,
+    DepositedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StakeLocked"
+  ): TypedContractEvent<
+    StakeLockedEvent.InputTuple,
+    StakeLockedEvent.OutputTuple,
+    StakeLockedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StakeUnlocked"
+  ): TypedContractEvent<
+    StakeUnlockedEvent.InputTuple,
+    StakeUnlockedEvent.OutputTuple,
+    StakeUnlockedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StakeWithdrawn"
+  ): TypedContractEvent<
+    StakeWithdrawnEvent.InputTuple,
+    StakeWithdrawnEvent.OutputTuple,
+    StakeWithdrawnEvent.OutputObject
+  >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
+  >;
 
   filters: {
-    "Deposited(address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      totalDeposit?: null
-    ): DepositedEventFilter;
-    Deposited(
-      account?: PromiseOrValue<string> | null,
-      totalDeposit?: null
-    ): DepositedEventFilter;
+    "Deposited(address,uint256)": TypedContractEvent<
+      DepositedEvent.InputTuple,
+      DepositedEvent.OutputTuple,
+      DepositedEvent.OutputObject
+    >;
+    Deposited: TypedContractEvent<
+      DepositedEvent.InputTuple,
+      DepositedEvent.OutputTuple,
+      DepositedEvent.OutputObject
+    >;
 
-    "StakeLocked(address,uint256,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      totalStaked?: null,
-      unstakeDelaySec?: null
-    ): StakeLockedEventFilter;
-    StakeLocked(
-      account?: PromiseOrValue<string> | null,
-      totalStaked?: null,
-      unstakeDelaySec?: null
-    ): StakeLockedEventFilter;
+    "StakeLocked(address,uint256,uint256)": TypedContractEvent<
+      StakeLockedEvent.InputTuple,
+      StakeLockedEvent.OutputTuple,
+      StakeLockedEvent.OutputObject
+    >;
+    StakeLocked: TypedContractEvent<
+      StakeLockedEvent.InputTuple,
+      StakeLockedEvent.OutputTuple,
+      StakeLockedEvent.OutputObject
+    >;
 
-    "StakeUnlocked(address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      withdrawTime?: null
-    ): StakeUnlockedEventFilter;
-    StakeUnlocked(
-      account?: PromiseOrValue<string> | null,
-      withdrawTime?: null
-    ): StakeUnlockedEventFilter;
+    "StakeUnlocked(address,uint256)": TypedContractEvent<
+      StakeUnlockedEvent.InputTuple,
+      StakeUnlockedEvent.OutputTuple,
+      StakeUnlockedEvent.OutputObject
+    >;
+    StakeUnlocked: TypedContractEvent<
+      StakeUnlockedEvent.InputTuple,
+      StakeUnlockedEvent.OutputTuple,
+      StakeUnlockedEvent.OutputObject
+    >;
 
-    "StakeWithdrawn(address,address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): StakeWithdrawnEventFilter;
-    StakeWithdrawn(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): StakeWithdrawnEventFilter;
+    "StakeWithdrawn(address,address,uint256)": TypedContractEvent<
+      StakeWithdrawnEvent.InputTuple,
+      StakeWithdrawnEvent.OutputTuple,
+      StakeWithdrawnEvent.OutputObject
+    >;
+    StakeWithdrawn: TypedContractEvent<
+      StakeWithdrawnEvent.InputTuple,
+      StakeWithdrawnEvent.OutputTuple,
+      StakeWithdrawnEvent.OutputObject
+    >;
 
-    "Withdrawn(address,address,uint256)"(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): WithdrawnEventFilter;
-    Withdrawn(
-      account?: PromiseOrValue<string> | null,
-      withdrawAddress?: null,
-      amount?: null
-    ): WithdrawnEventFilter;
-  };
-
-  estimateGas: {
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    unlockStake(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    addStake(
-      unstakeDelaySec: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    depositTo(
-      account: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getDepositInfo(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    unlockStake(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawStake(
-      withdrawAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawTo(
-      withdrawAddress: PromiseOrValue<string>,
-      withdrawAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
+    "Withdrawn(address,address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
   };
 }

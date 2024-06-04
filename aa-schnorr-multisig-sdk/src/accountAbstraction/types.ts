@@ -1,13 +1,5 @@
 import type { Address, Hash } from "viem"
 
-export enum UserOperationMethods {
-  EstimateUserOperationGas = "eth_estimateUserOperationGas",
-  SendUserOperation = "eth_sendUserOperation",
-  GetUserOperationByHash = "eth_getUserOperationByHash",
-  GetUserOperationReceipt = "eth_getUserOperationReceipt",
-  SupportedEntryPoints = "eth_supportedEntryPoints",
-  MaxPriorityFeePerGas = "eth_maxPriorityFeePerGas",
-}
 export type Hex = `0x${string}`
 export type EmptyHex = `0x`
 
@@ -27,7 +19,7 @@ export interface UserOperationCallData {
 
 export interface UserOperationRequest {
   /* the origin of the request */
-  sender: Address
+  sender: string
   /* nonce (as hex) of the transaction, returned from the entrypoint for this Address */
   nonce: Hex
   /* the initCode for creating the sender if it does not exist yet, otherwise "0x" */

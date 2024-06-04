@@ -11,7 +11,7 @@ export async function predictAccountAddress(
   salt: string
 ): Promise<`0x${string}`> {
   const smartAccountFactory = new ethers.Contract(factoryAddress, MultiSigSmartAccountFactory_abi, signer)
-  const saltHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(salt))
+  const saltHash = ethers.keccak256(ethers.toUtf8Bytes(salt))
   const predictedAccount = await smartAccountFactory.getAccountAddress(combinedPubKeys, saltHash)
   return predictedAccount as Hex
 }

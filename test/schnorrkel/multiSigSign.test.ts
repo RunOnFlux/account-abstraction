@@ -62,7 +62,7 @@ describe("testing multiSigSign", () => {
     const publicKeys = [keyPairOne.publicKey, keyPairTwo.publicKey]
 
     const msg = "test message"
-    const hash = ethers.utils.solidityKeccak256(["string"], [msg])
+    const hash = ethers.solidityPackedKeccak256(["string"], [msg])
     const signature = schnorrkelOne.multiSigSignHash(keyPairOne.privateKey, hash, publicKeys, publicNonces)
 
     expect(signature.finalPublicNonce.buffer).to.have.length(33)

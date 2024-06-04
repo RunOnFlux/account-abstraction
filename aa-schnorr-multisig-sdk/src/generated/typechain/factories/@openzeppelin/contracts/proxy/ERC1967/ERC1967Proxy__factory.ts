@@ -2,15 +2,19 @@
 /* tslint:disable */
 /* eslint-disable */
 import {
-  Signer,
-  utils,
   Contract,
   ContractFactory,
-  PayableOverrides,
-  BytesLike,
+  ContractTransactionResponse,
+  Interface,
 } from "ethers";
-import type { Provider, TransactionRequest } from "@ethersproject/providers";
-import type { PromiseOrValue } from "../../../../../common";
+import type {
+  Signer,
+  BytesLike,
+  AddressLike,
+  ContractDeployTransaction,
+  ContractRunner,
+} from "ethers";
+import type { PayableOverrides } from "../../../../../common";
 import type {
   ERC1967Proxy,
   ERC1967ProxyInterface,
@@ -104,40 +108,37 @@ export class ERC1967Proxy__factory extends ContractFactory {
     }
   }
 
-  override deploy(
-    implementation: PromiseOrValue<string>,
-    _data: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ERC1967Proxy> {
-    return super.deploy(
-      implementation,
-      _data,
-      overrides || {}
-    ) as Promise<ERC1967Proxy>;
-  }
   override getDeployTransaction(
-    implementation: PromiseOrValue<string>,
-    _data: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): TransactionRequest {
+    implementation: AddressLike,
+    _data: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractDeployTransaction> {
     return super.getDeployTransaction(implementation, _data, overrides || {});
   }
-  override attach(address: string): ERC1967Proxy {
-    return super.attach(address) as ERC1967Proxy;
+  override deploy(
+    implementation: AddressLike,
+    _data: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
+  ) {
+    return super.deploy(implementation, _data, overrides || {}) as Promise<
+      ERC1967Proxy & {
+        deploymentTransaction(): ContractTransactionResponse;
+      }
+    >;
   }
-  override connect(signer: Signer): ERC1967Proxy__factory {
-    return super.connect(signer) as ERC1967Proxy__factory;
+  override connect(runner: ContractRunner | null): ERC1967Proxy__factory {
+    return super.connect(runner) as ERC1967Proxy__factory;
   }
 
   static readonly bytecode = _bytecode;
   static readonly abi = _abi;
   static createInterface(): ERC1967ProxyInterface {
-    return new utils.Interface(_abi) as ERC1967ProxyInterface;
+    return new Interface(_abi) as ERC1967ProxyInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): ERC1967Proxy {
-    return new Contract(address, _abi, signerOrProvider) as ERC1967Proxy;
+    return new Contract(address, _abi, runner) as unknown as ERC1967Proxy;
   }
 }

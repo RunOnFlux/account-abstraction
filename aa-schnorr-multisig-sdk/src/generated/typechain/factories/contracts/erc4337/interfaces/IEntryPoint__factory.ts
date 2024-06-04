@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IEntryPoint,
   IEntryPointInterface,
@@ -1121,12 +1120,9 @@ const _abi = [
 export class IEntryPoint__factory {
   static readonly abi = _abi;
   static createInterface(): IEntryPointInterface {
-    return new utils.Interface(_abi) as IEntryPointInterface;
+    return new Interface(_abi) as IEntryPointInterface;
   }
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): IEntryPoint {
-    return new Contract(address, _abi, signerOrProvider) as IEntryPoint;
+  static connect(address: string, runner?: ContractRunner | null): IEntryPoint {
+    return new Contract(address, _abi, runner) as unknown as IEntryPoint;
   }
 }

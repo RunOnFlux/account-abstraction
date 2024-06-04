@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { randomBytes } from "ethers/lib/utils"
+import { randomBytes } from "ethers"
 
 import { deployMultiSigSmartAccount } from "../utils/deployments"
 import { ERC1271_INVALID_SIGNATURE, ERC1271_MAGICVALUE_BYTES32, OWNER_ROLE_HASH, pk1, pk2, pk3 } from "../utils/config"

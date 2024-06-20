@@ -8,7 +8,7 @@ Package contains two main contracts:
 * MultiSigSmartAccountFactory - factory contract for account abstraction
 
 Account Abstraction is [UUPS Upgradeable Proxy](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable) and implementation can be upgraded only by the Owner.
-[The Owner Role](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl) is granted for every Schnorr's combined public address - `combinedAddress` - passed during Account initialization (read more about the `combinedAddress` creation [here](https://www.npmjs.com/package/aa-schnorr-multisig-sdk#0-deploy-multisigsmartaccountfactory-and-create-account-abstraction) ). It means that the most crucial functions, such as upgrade or deposit withdrawal, can be done only if a transaction is signed with Schnorr Multi-signature algorithm. 
+[The Owner Role](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl) is granted for every Schnorr's combined public address - `combinedAddress` - passed during Account initialization (read more about the `combinedAddress` creation [here](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig-sdk#0-deploy-multisigsmartaccountfactory-and-create-account-abstraction) ). It means that the most crucial functions, such as upgrade or deposit withdrawal, can be done only if a transaction is signed with Schnorr Multi-signature algorithm. 
 
 
 ## Requirements:
@@ -61,4 +61,4 @@ The package contains the following folders:
 * `typechain` - generated TypeScript typings based on the given ABI files
 
 ## Associated package
-* [MultiSig Schnorr Signature SDK](https://www.npmjs.com/package/aa-schnorr-multisig-sdk)
+* [MultiSig Schnorr Signature SDK](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig-sdk)

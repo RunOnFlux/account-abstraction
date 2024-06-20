@@ -1,6 +1,6 @@
 {
-  "name": "@rumblefishdev/aa-schnorr-multisig",
-  "version": "1.0.7",
+  "name": "@runonflux/aa-schnorr-multisig",
+  "version": "1.0.0",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",

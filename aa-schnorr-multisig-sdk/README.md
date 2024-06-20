@@ -30,4 +30,4 @@ PRIVATE_KEY="0x"
 
 
 ## Associated package
-* [MultiSig Smart Account - ERC-4337 Smart Contracts](https://www.npmjs.com/package/aa-schnorr-multisig)
+* [MultiSig Smart Account - ERC-4337 Smart Contracts](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig)

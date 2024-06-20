@@ -1,5 +1,5 @@
 {
-  "name": "@runonflux/aa-schnorr-multisig",
+  "name": "@runonflux/account-abstraction",
   "version": "1.0.0",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
@@ -30,7 +30,7 @@
     "generate-typechain": "hardhat typechain",
     "export-contract-abi": "hardhat export-abi --no-compile",
     "generate-exported-abi-index": "ts-node scripts/build/generate-exported-abi-index.ts",
-    "generate-contract-abi": "npm run export-contract-abi && npm run generate-exported-abi-index",
+    "generate-contract-abi": "npm cd run export-contract-abi && npm run generate-exported-abi-index",
     "generate-index": "ts-node scripts/build/generate-index.ts",
     "export-deployments-sepolia": "npx hardhat --network sepolia run scripts/build/export-deployments.ts",
     "export-deployments": "npm run export-deployments-sepolia",

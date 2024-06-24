@@ -22,7 +22,7 @@ const generatorPoint = ec.g
  *
  * @returns InternalNoncePairs
  */
-const _generateNonce = (): InternalNoncePairs => {
+export const _generateNonce = (): InternalNoncePairs => {
   const k = Buffer.from(ethers.randomBytes(32))
   const kTwo = Buffer.from(ethers.randomBytes(32))
   const kPublic = Buffer.from(secp256k1.publicKeyCreate(k))

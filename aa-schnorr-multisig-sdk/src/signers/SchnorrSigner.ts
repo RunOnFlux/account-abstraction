@@ -50,6 +50,10 @@ export class SchnorrSigner extends Schnorrkel {
     return this.generatePublicNonces(this.#privateKey)
   }
 
+  restorePubNonces(kPrivateKey: Key, kTwoPrivateKey: Key): PublicNonces {
+    return this.restorePublicNonces(this.#privateKey, kPrivateKey, kTwoPrivateKey)
+  }
+
   hasNonces(): boolean {
     return this.hasNonce(this.#publicKey)
   }

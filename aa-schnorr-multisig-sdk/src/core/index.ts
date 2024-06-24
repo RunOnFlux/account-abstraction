@@ -6,9 +6,9 @@ import bigi from "bigi"
 import { BN } from "bn.js"
 
 import { KeyPair } from "../types"
+import type { Hex } from "../accountAbstraction"
 
 import type { HashFunction, InternalNoncePairs, InternalNonces, InternalPublicNonces, InternalSignature } from "./types"
-import {Hex} from "../accountAbstraction";
 
 const curve = ecurve.getCurveByName("secp256k1")
 const n = curve?.n
@@ -25,6 +25,26 @@ const generatorPoint = ec.g
 const _generateNonce = (): InternalNoncePairs => {
   const k = Buffer.from(ethers.randomBytes(32))
   const kTwo = Buffer.from(ethers.randomBytes(32))
+  const kPublic = Buffer.from(secp256k1.publicKeyCreate(k))
+  const kTwoPublic = Buffer.from(secp256k1.publicKeyCreate(kTwo))
+
+  return {
+    k,
+    kTwo,
+    kPublic,
+    kTwoPublic,
+  }
+}
+
+/**
+ * Restore a pair of nonces (k and kTwo) needed for `internalMultiSigSign` given privateKeys
+ * Schnorr signature scheme is linear where `k` and `kTwo` are function parameters.
+ *
+ * @returns InternalNoncePairs
+ */
+const _restoreNonce = (kPrivateKey: Buffer, kTwoPrivateKey: Buffer): InternalNoncePairs => {
+  const k = kPrivateKey
+  const kTwo = kTwoPrivateKey
   const kPublic = Buffer.from(secp256k1.publicKeyCreate(k))
   const kTwoPublic = Buffer.from(secp256k1.publicKeyCreate(kTwo))
 
@@ -230,6 +250,31 @@ export const _generatePublicNonces = (
 } => {
   const hash = _hashPrivateKey(privateKey)
   const nonce = _generateNonce()
+
+  return {
+    hash,
+    privateNonceData: {
+      k: nonce.k,
+      kTwo: nonce.kTwo,
+    },
+    publicNonceData: {
+      kPublic: nonce.kPublic,
+      kTwoPublic: nonce.kTwoPublic,
+    },
+  }
+}
+
+export const _restorePublicNonces = (
+  privateKey: Buffer,
+  kPrivateKey: Buffer,
+  kTwoPrivateKey: Buffer
+): {
+  privateNonceData: Pick<InternalNoncePairs, "k" | "kTwo">
+  publicNonceData: InternalPublicNonces
+  hash: string
+} => {
+  const hash = _hashPrivateKey(privateKey)
+  const nonce = _restoreNonce(kPrivateKey, kTwoPrivateKey)
 
   return {
     hash,

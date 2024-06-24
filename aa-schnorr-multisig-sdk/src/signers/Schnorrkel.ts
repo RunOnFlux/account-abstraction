@@ -15,6 +15,7 @@ import {
   _signHash,
   _verifyHash,
   _multiSigSignHash,
+  _restorePublicNonces,
 } from "../core"
 import type { HashFunction, InternalNonces, InternalPublicNonces, InternalSignature } from "../core/types"
 import type { SignatureOutput } from "../types/signature"
@@ -25,6 +26,23 @@ export class Schnorrkel {
 
   private _setNonce(privateKey: Buffer): string {
     const { publicNonceData, privateNonceData, hash } = _generatePublicNonces(privateKey)
+
+    const mappedPublicNonce: PublicNonces = {
+      kPublic: new Key(Buffer.from(publicNonceData.kPublic)),
+      kTwoPublic: new Key(Buffer.from(publicNonceData.kTwoPublic)),
+    }
+
+    const mappedPrivateNonce: Pick<NoncePairs, "k" | "kTwo"> = {
+      k: new Key(Buffer.from(privateNonceData.k)),
+      kTwo: new Key(Buffer.from(privateNonceData.kTwo)),
+    }
+
+    this.#nonces[hash] = { ...mappedPrivateNonce, ...mappedPublicNonce }
+    return hash
+  }
+
+  private _restoreNonce(privateKey: Buffer, kPrivateKey, kTwoPrivateKey): string {
+    const { publicNonceData, privateNonceData, hash } = _restorePublicNonces(privateKey, kPrivateKey, kTwoPrivateKey)
 
     const mappedPublicNonce: PublicNonces = {
       kPublic: new Key(Buffer.from(publicNonceData.kPublic)),
@@ -104,6 +122,17 @@ export class Schnorrkel {
 
   generatePublicNonces(privateKey: Key): PublicNonces {
     const hash = this._setNonce(privateKey.buffer)
+    const nonce = this.#nonces[hash]
+
+    return {
+      kPublic: nonce.kPublic,
+      kTwoPublic: nonce.kTwoPublic,
+    }
+  }
+
+  // bucket system for nonces as signers may share nonces between each other before transaction construction
+  restorePublicNonces(privateKey: Key, kPrivateKey: Key, kTwoPrivateKey: Key): PublicNonces {
+    const hash = this._restoreNonce(privateKey.buffer, kPrivateKey.buffer, kTwoPrivateKey.buffer)
     const nonce = this.#nonces[hash]
 
     return {

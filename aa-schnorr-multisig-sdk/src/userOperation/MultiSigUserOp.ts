@@ -1,13 +1,13 @@
-import {AbiCoder, ethers} from "ethers"
+import { AbiCoder, ethers } from "ethers"
 
-import type { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
+import { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { Hex } from "../types/misc"
 import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
 import type { SchnorrSigner } from "../signers"
 import { Schnorrkel } from "../signers"
 import type { SignersNonces, SignersPubKeys, SignersSignatures } from "../types"
 import { pubKey2Address } from "../helpers/converters"
-import {UserOperationStruct} from "@alchemy/aa-core";
+import { UserOperationStruct } from "@alchemy/aa-core"
 
 export class MultiSigUserOp {
   readonly id: string
@@ -112,6 +112,98 @@ export class MultiSigUserOp {
   _getPublicKeys(): Key[] {
     return Object.entries(this.publicKeys).map(([, pk]) => {
       return pk
+    })
+  }
+
+  static serialize(instance: MultiSigUserOp): string {
+    const obj = {
+      ...instance,
+      combinedPubKey: instance.combinedPubKey.toHex(),
+      publicKeys: Object.fromEntries(
+        Object.entries(instance.publicKeys).map(([address, key]) => [
+          address,
+          key.toHex()
+        ])
+      ),
+      publicNonces: Object.fromEntries(
+        Object.entries(instance.publicNonces).map(([address, nonces]) => [
+          address,
+          {
+            kPublic: nonces.kPublic.toHex(),
+            kTwoPublic: nonces.kTwoPublic.toHex()
+          }
+        ])
+      ),
+      signatures: Object.fromEntries(
+        Object.entries(instance.signatures).map(([address, output]) => [
+          address,
+          {
+            finalPublicNonce: output.finalPublicNonce.toHex(),
+            challenge: output.challenge.toHex(),
+            signature: output.signature.toHex()
+          }
+        ])
+      ),
+    }
+
+    return JSON.stringify(obj, (_, v) => typeof v === 'bigint' ? v.toString() + 'bigint' : v)
+  }
+
+  static deserialize = (serialized: string) => {
+    const obj: {
+      id: string
+      opHash: string
+      userOpRequest: UserOperationStruct
+      combinedPubKey: string
+      publicNonces: Record<string, {
+        kPublic: string
+        kTwoPublic: string
+      }>
+      publicKeys: Record<string, string>
+      signatures: Record<string, {
+        finalPublicNonce: string
+        challenge: string
+        signature: string
+      }>
+    } = JSON.parse(serialized, (_, v) => typeof v === 'string' && v.endsWith('bigint') ? BigInt(v.slice(0, -6)) : v)
+
+    const combinedPubKey = Key.fromHex(obj.combinedPubKey)
+
+    const publicNonces = Object.fromEntries(
+      Object.entries(obj.publicNonces).map(([address, nonces]) => [
+        address,
+        {
+          kPublic: Key.fromHex(nonces.kPublic),
+          kTwoPublic: Key.fromHex(nonces.kTwoPublic)
+        }
+      ])
+    )
+
+    const publicKeys = Object.fromEntries(
+      Object.entries(obj.publicKeys).map(([address, key]) => [
+        address,
+        Key.fromHex(key)
+      ])
+    )
+
+    const signatures = Object.fromEntries(
+      Object.entries(obj.signatures).map(([address, output]) => [
+        address,
+        {
+          finalPublicNonce: Key.fromHex(output.finalPublicNonce),
+          challenge: Key.fromHex(output.challenge),
+          signature: Key.fromHex(output.signature)
+        }
+      ])
+    )
+
+    const instance = Object.create(MultiSigUserOp.prototype)
+    return Object.assign(instance, {
+      ...obj,
+      combinedPubKey,
+      publicNonces,
+      publicKeys,
+      signatures,
     })
   }
 }

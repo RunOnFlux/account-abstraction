@@ -1,24 +1,54 @@
 import { AbiCoder, ethers } from "ethers"
 
-import { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
+import { BigNumber, Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { Hex } from "../types/misc"
 import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
 import type { SchnorrSigner } from "../signers"
 import { Schnorrkel } from "../signers"
 import type { SignersNonces, SignersPubKeys, SignersSignatures } from "../types"
 import { pubKey2Address } from "../helpers/converters"
-import { UserOperationStruct } from "@alchemy/aa-core"
+import { UserOperationStruct_v6 } from "@alchemy/aa-core"
+import Ajv from "ajv"
+
+interface SerializedMultiSigOp {
+  id: string
+  opHash: string
+  userOpRequest: {
+    sender: string
+    nonce: string
+    initCode: string
+    callData: string
+    callGasLimit: string
+    verificationGasLimit: string
+    preVerificationGas: string
+    maxFeePerGas: string
+    maxPriorityFeePerGas: string
+    paymasterAndData: string
+    signature: string
+  }
+  combinedPubKey: string
+  publicNonces: Record<string, {
+    kPublic: string
+    kTwoPublic: string
+  }>
+  publicKeys: Record<string, string>
+  signatures: Record<string, {
+    finalPublicNonce: string
+    challenge: string
+    signature: string
+  }>
+}
 
 export class MultiSigUserOp {
   readonly id: string
   readonly opHash: Hex
-  readonly userOpRequest: UserOperationStruct
+  readonly userOpRequest: UserOperationStruct_v6
   combinedPubKey: Key
   publicNonces: SignersNonces = {}
   publicKeys: SignersPubKeys = {}
   signatures: SignersSignatures = {}
 
-  constructor(publicKeys: Key[], publicNonces: PublicNonces[], opHash: Hex, userOpRequest: UserOperationStruct) {
+  constructor(publicKeys: Key[], publicNonces: PublicNonces[], opHash: Hex, userOpRequest: UserOperationStruct_v6) {
     if (publicKeys.length < 2) throw new Error("At least 2 signers should be provided")
 
     this.opHash = opHash
@@ -115,18 +145,32 @@ export class MultiSigUserOp {
     })
   }
 
-  static serialize(instance: MultiSigUserOp): string {
+  toJson(): string {
     const obj = {
-      ...instance,
-      combinedPubKey: instance.combinedPubKey.toHex(),
+      id: this.id,
+      opHash: this.opHash,
+      userOpRequest: {
+        sender: this.userOpRequest.sender,
+        nonce: new BigNumber(this.userOpRequest.nonce).toString(),
+        initCode: this.userOpRequest.initCode,
+        callData: this.userOpRequest.callData,
+        callGasLimit: this.userOpRequest.callGasLimit,
+        verificationGasLimit: this.userOpRequest.verificationGasLimit,
+        preVerificationGas: new BigNumber(this.userOpRequest.preVerificationGas).toString(),
+        maxFeePerGas: new BigNumber(this.userOpRequest.maxFeePerGas).toString(),
+        maxPriorityFeePerGas: new BigNumber(this.userOpRequest.maxPriorityFeePerGas).toString(),
+        paymasterAndData: this.userOpRequest.paymasterAndData,
+        signature: this.userOpRequest.signature,
+      },
+      combinedPubKey: this.combinedPubKey.toHex(),
       publicKeys: Object.fromEntries(
-        Object.entries(instance.publicKeys).map(([address, key]) => [
+        Object.entries(this.publicKeys).map(([address, key]) => [
           address,
           key.toHex()
         ])
       ),
       publicNonces: Object.fromEntries(
-        Object.entries(instance.publicNonces).map(([address, nonces]) => [
+        Object.entries(this.publicNonces).map(([address, nonces]) => [
           address,
           {
             kPublic: nonces.kPublic.toHex(),
@@ -135,7 +179,7 @@ export class MultiSigUserOp {
         ])
       ),
       signatures: Object.fromEntries(
-        Object.entries(instance.signatures).map(([address, output]) => [
+        Object.entries(this.signatures).map(([address, output]) => [
           address,
           {
             finalPublicNonce: output.finalPublicNonce.toHex(),
@@ -146,31 +190,101 @@ export class MultiSigUserOp {
       ),
     }
 
-    return JSON.stringify(obj, (_, v) => typeof v === 'bigint' ? v.toString() + 'bigint' : v)
+    return JSON.stringify(obj)
   }
 
-  static deserialize = (serialized: string) => {
-    const obj: {
-      id: string
-      opHash: string
-      userOpRequest: UserOperationStruct
-      combinedPubKey: string
-      publicNonces: Record<string, {
-        kPublic: string
-        kTwoPublic: string
-      }>
-      publicKeys: Record<string, string>
-      signatures: Record<string, {
-        finalPublicNonce: string
-        challenge: string
-        signature: string
-      }>
-    } = JSON.parse(serialized, (_, v) => typeof v === 'string' && v.endsWith('bigint') ? BigInt(v.slice(0, -6)) : v)
+  static fromJson = (serialized: any) => {
+    const schema = {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        opHash: { type: 'string' },
+        userOpRequest: {
+          type: 'object',
+          properties: {
+            sender: { type: 'string' },
+            nonce: { type: 'string' },
+            initCode: { type: 'string' },
+            callData: { type: 'string' },
+            callGasLimit: { type: 'string' },
+            verificationGasLimit: { type: 'string' },
+            preVerificationGas: { type: 'string' },
+            maxFeePerGas: { type: 'string' },
+            maxPriorityFeePerGas: { type: 'string' },
+            paymasterAndData: { type: 'string' },
+            signature: { type: 'string' }
+          },
+          required: ['sender', 'nonce', 'initCode', 'callData', 'callGasLimit', 'verificationGasLimit', 'preVerificationGas', 'maxFeePerGas', 'maxPriorityFeePerGas', 'paymasterAndData', 'signature']
+        },
+        combinedPubKey: { type: 'string' },
+        publicNonces: {
+          type: 'object',
+          patternProperties: {
+            '.*': {
+              type: 'object',
+              properties: {
+                kPublic: { type: 'string' },
+                kTwoPublic: { type: 'string' }
+              },
+              required: ['kPublic', 'kTwoPublic']
+            }
+          }
+        },
+        publicKeys: {
+          type: 'object',
+          patternProperties: {
+            '.*': { type: 'string' }
+          }
+        },
+        signatures: {
+          type: 'object',
+          patternProperties: {
+            '.*': {
+              type: 'object',
+              properties: {
+                finalPublicNonce: { type: 'string' },
+                challenge: { type: 'string' },
+                signature: { type: 'string' }
+              },
+              required: ['finalPublicNonce', 'challenge', 'signature']
+            }
+          }
+        }
+      }
+    }
 
-    const combinedPubKey = Key.fromHex(obj.combinedPubKey)
+    const ajv = new Ajv()
+
+    const validate = ajv.compile<SerializedMultiSigOp>(schema)
+    const valid = validate(serialized)
+
+    if (!valid) {
+      console.error(validate.errors)
+      throw new Error("[MultiSigUserOP]: Invalid JSON format")
+    }
+
+    const id = serialized.id
+
+    const opHash = serialized.opHash
+
+    const userOpRequest = {
+      sender: serialized.userOpRequest.sender,
+      nonce: BigNumber.fromString(serialized.userOpRequest.nonce).number,
+      initCode: serialized.userOpRequest.initCode,
+      callData: serialized.userOpRequest.callData,
+      callGasLimit: serialized.userOpRequest.callGasLimit,
+      verificationGasLimit: serialized.userOpRequest.verificationGasLimit,
+      preVerificationGas: BigNumber.fromString(serialized.userOpRequest.preVerificationGas).number,
+      maxFeePerGas: BigNumber.fromString(serialized.userOpRequest.maxFeePerGas).number,
+      maxPriorityFeePerGas: BigNumber.fromString(serialized.userOpRequest.maxPriorityFeePerGas).number,
+      paymasterAndData: serialized.userOpRequest.paymasterAndData,
+      signature: serialized.userOpRequest.signature
+    }
+
+    const combinedPubKey = Key.fromHex(serialized.combinedPubKey)
 
     const publicNonces = Object.fromEntries(
-      Object.entries(obj.publicNonces).map(([address, nonces]) => [
+      Object.entries(serialized.publicNonces).map(([address, nonces]) => [
         address,
         {
           kPublic: Key.fromHex(nonces.kPublic),
@@ -180,14 +294,14 @@ export class MultiSigUserOp {
     )
 
     const publicKeys = Object.fromEntries(
-      Object.entries(obj.publicKeys).map(([address, key]) => [
+      Object.entries(serialized.publicKeys).map(([address, key]) => [
         address,
         Key.fromHex(key)
       ])
     )
 
     const signatures = Object.fromEntries(
-      Object.entries(obj.signatures).map(([address, output]) => [
+      Object.entries(serialized.signatures).map(([address, output]) => [
         address,
         {
           finalPublicNonce: Key.fromHex(output.finalPublicNonce),
@@ -199,7 +313,9 @@ export class MultiSigUserOp {
 
     const instance = Object.create(MultiSigUserOp.prototype)
     return Object.assign(instance, {
-      ...obj,
+      id,
+      opHash,
+      userOpRequest,
       combinedPubKey,
       publicNonces,
       publicKeys,

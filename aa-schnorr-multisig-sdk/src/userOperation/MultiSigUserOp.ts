@@ -1,14 +1,17 @@
+import Ajv from "ajv"
+
+import { UserOperationStruct_v6 } from "@alchemy/aa-core"
 import { AbiCoder, ethers } from "ethers"
 
-import { BigNumber, Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
-import type { Hex } from "../types/misc"
-import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
-import type { SchnorrSigner } from "../signers"
-import { Schnorrkel } from "../signers"
+import { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { SignersNonces, SignersPubKeys, SignersSignatures } from "../types"
+import type { Hex } from "../types/misc"
+import { BigNumberSerializer } from "../serializers"
+import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
 import { pubKey2Address } from "../helpers/converters"
-import { UserOperationStruct_v6 } from "@alchemy/aa-core"
-import Ajv from "ajv"
+import { Schnorrkel } from "../signers"
+import type { SchnorrSigner } from "../signers"
+import { ValidationError } from "../errors"
 
 interface SerializedMultiSigOp {
   id: string
@@ -145,22 +148,22 @@ export class MultiSigUserOp {
     })
   }
 
-  toJson(): string {
-    const obj = {
+  toJson(): SerializedMultiSigOp {
+    return {
       id: this.id,
       opHash: this.opHash,
       userOpRequest: {
         sender: this.userOpRequest.sender,
-        nonce: new BigNumber(this.userOpRequest.nonce).toString(),
-        initCode: this.userOpRequest.initCode,
-        callData: this.userOpRequest.callData,
-        callGasLimit: this.userOpRequest.callGasLimit,
-        verificationGasLimit: this.userOpRequest.verificationGasLimit,
-        preVerificationGas: new BigNumber(this.userOpRequest.preVerificationGas).toString(),
-        maxFeePerGas: new BigNumber(this.userOpRequest.maxFeePerGas).toString(),
-        maxPriorityFeePerGas: new BigNumber(this.userOpRequest.maxPriorityFeePerGas).toString(),
-        paymasterAndData: this.userOpRequest.paymasterAndData,
-        signature: this.userOpRequest.signature,
+        nonce: new BigNumberSerializer(this.userOpRequest.nonce).toString(),
+        initCode: this.userOpRequest.initCode.toString(),
+        callData: this.userOpRequest.callData.toString(),
+        callGasLimit: new BigNumberSerializer(this.userOpRequest.callGasLimit).toString(),
+        verificationGasLimit: new BigNumberSerializer(this.userOpRequest.verificationGasLimit).toString(),
+        preVerificationGas: new BigNumberSerializer(this.userOpRequest.preVerificationGas).toString(),
+        maxFeePerGas: new BigNumberSerializer(this.userOpRequest.maxFeePerGas).toString(),
+        maxPriorityFeePerGas: new BigNumberSerializer(this.userOpRequest.maxPriorityFeePerGas).toString(),
+        paymasterAndData: this.userOpRequest.paymasterAndData.toString(),
+        signature: this.userOpRequest.signature.toString(),
       },
       combinedPubKey: this.combinedPubKey.toHex(),
       publicKeys: Object.fromEntries(
@@ -189,8 +192,6 @@ export class MultiSigUserOp {
         ])
       ),
     }
-
-    return JSON.stringify(obj)
   }
 
   static fromJson = (serialized: any) => {
@@ -259,8 +260,7 @@ export class MultiSigUserOp {
     const valid = validate(serialized)
 
     if (!valid) {
-      console.error(validate.errors)
-      throw new Error("[MultiSigUserOP]: Invalid JSON format")
+      throw new ValidationError('[MultiSigUserOP]: Invalid JSON format', validate.errors)
     }
 
     const id = serialized.id
@@ -269,16 +269,16 @@ export class MultiSigUserOp {
 
     const userOpRequest = {
       sender: serialized.userOpRequest.sender,
-      nonce: BigNumber.fromString(serialized.userOpRequest.nonce).number,
+      nonce: BigNumberSerializer.fromString(serialized.userOpRequest.nonce).number,
       initCode: serialized.userOpRequest.initCode,
       callData: serialized.userOpRequest.callData,
       callGasLimit: serialized.userOpRequest.callGasLimit,
       verificationGasLimit: serialized.userOpRequest.verificationGasLimit,
-      preVerificationGas: BigNumber.fromString(serialized.userOpRequest.preVerificationGas).number,
-      maxFeePerGas: BigNumber.fromString(serialized.userOpRequest.maxFeePerGas).number,
-      maxPriorityFeePerGas: BigNumber.fromString(serialized.userOpRequest.maxPriorityFeePerGas).number,
+      preVerificationGas: BigNumberSerializer.fromString(serialized.userOpRequest.preVerificationGas).number,
+      maxFeePerGas: BigNumberSerializer.fromString(serialized.userOpRequest.maxFeePerGas).number,
+      maxPriorityFeePerGas: BigNumberSerializer.fromString(serialized.userOpRequest.maxPriorityFeePerGas).number,
       paymasterAndData: serialized.userOpRequest.paymasterAndData,
-      signature: serialized.userOpRequest.signature
+      signature: serialized.userOpRequest.signature,
     }
 
     const combinedPubKey = Key.fromHex(serialized.combinedPubKey)

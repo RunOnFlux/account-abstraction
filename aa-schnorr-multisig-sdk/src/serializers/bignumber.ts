@@ -1,6 +1,6 @@
 import { BigNumberish } from "ethers"
 
-export class BigNumber {
+export class BigNumberSerializer {
     readonly number: BigNumberish
   
     constructor(number: BigNumberish) {
@@ -11,8 +11,8 @@ export class BigNumber {
       return this.number.toString()
     }
   
-    static fromString(number: string): BigNumber {
-      return new BigNumber(BigInt(number))
+    static fromString(number: string): BigNumberSerializer {
+      return new BigNumberSerializer(BigInt(number))
     }
   }
   

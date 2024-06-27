@@ -2,7 +2,7 @@
 import { AbiCoder, ethers } from "ethers"
 import type { Interface } from "ethers"
 import type { TransactionReceipt, Provider } from "@ethersproject/providers"
-import { Hex } from "viem"
+import type { Hex } from "viem"
 
 export const buildBytecode = (constructorTypes: any[], constructorArgs: any[], contractBytecode: string) =>
   `${contractBytecode}${encodeParams(constructorTypes, constructorArgs).slice(2)}`
@@ -53,13 +53,12 @@ export const deepEqual = (obj1, obj2) => {
 }
 
 export const generateRandomHex = (): Hex => {
-  let hex = '0x'
-  for (let i = 0; i < 40; i++) {
-    hex += Math.floor(Math.random() * 16).toString(16)
-  }
+  let hex = "0x"
+  for (let index = 0; index < 40; index++) hex += Math.floor(Math.random() * 16).toString(16)
+
   return hex as Hex
 }
 
-export const generateRandomBigInt = (min: number = 10, max: number = 1000000000): bigint => {
+export const generateRandomBigInt = (min: number = 10, max: number = 1_000_000_000): bigint => {
   return BigInt(Math.floor(Math.random() * (max - min + 1) + min))
 }

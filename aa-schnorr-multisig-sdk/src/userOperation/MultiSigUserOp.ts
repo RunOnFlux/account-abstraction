@@ -1,11 +1,10 @@
 import Ajv from "ajv"
-
-import { UserOperationStruct_v6 } from "@alchemy/aa-core"
+import type { UserOperationStruct_v6 } from "@alchemy/aa-core"
 import { AbiCoder, ethers } from "ethers"
 import { publicKeyConvert } from "secp256k1"
 
-import { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
-import type { SignersNonces, SignersPubKeys, SignersSignatures } from "../types"
+import { Key } from "../types"
+import type { SignersNonces, SignersPubKeys, SignersSignatures, Challenge, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { Hex } from "../types/misc"
 import { BigNumberSerializer } from "../serializers"
 import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
@@ -31,16 +30,22 @@ interface SerializedMultiSigOp {
     signature: string
   }
   combinedPubKey: string
-  publicNonces: Record<string, {
-    kPublic: string
-    kTwoPublic: string
-  }>
+  publicNonces: Record<
+    string,
+    {
+      kPublic: string
+      kTwoPublic: string
+    }
+  >
   publicKeys: Record<string, string>
-  signatures: Record<string, {
-    finalPublicNonce: string
-    challenge: string
-    signature: string
-  }>
+  signatures: Record<
+    string,
+    {
+      finalPublicNonce: string
+      challenge: string
+      signature: string
+    }
+  >
 }
 
 export class MultiSigUserOp {
@@ -167,19 +172,14 @@ export class MultiSigUserOp {
         signature: this.userOpRequest.signature.toString(),
       },
       combinedPubKey: this.combinedPubKey.toHex(),
-      publicKeys: Object.fromEntries(
-        Object.entries(this.publicKeys).map(([address, key]) => [
-          address,
-          key.toHex()
-        ])
-      ),
+      publicKeys: Object.fromEntries(Object.entries(this.publicKeys).map(([address, key]) => [address, key.toHex()])),
       publicNonces: Object.fromEntries(
         Object.entries(this.publicNonces).map(([address, nonces]) => [
           address,
           {
             kPublic: nonces.kPublic.toHex(),
-            kTwoPublic: nonces.kTwoPublic.toHex()
-          }
+            kTwoPublic: nonces.kTwoPublic.toHex(),
+          },
         ])
       ),
       signatures: Object.fromEntries(
@@ -188,85 +188,95 @@ export class MultiSigUserOp {
           {
             finalPublicNonce: output.finalPublicNonce.toHex(),
             challenge: output.challenge.toHex(),
-            signature: output.signature.toHex()
-          }
+            signature: output.signature.toHex(),
+          },
         ])
       ),
     }
   }
 
-  static fromJson = (serialized: any) => {
+  static fromJson = (serialized) => {
     const schema = {
-      type: 'object',
+      type: "object",
       properties: {
-        id: { type: 'string' },
-        opHash: { type: 'string' },
+        id: { type: "string" },
+        opHash: { type: "string" },
         userOpRequest: {
-          type: 'object',
+          type: "object",
           properties: {
-            sender: { type: 'string' },
-            nonce: { type: 'string' },
-            initCode: { type: 'string' },
-            callData: { type: 'string' },
-            callGasLimit: { type: 'string' },
-            verificationGasLimit: { type: 'string' },
-            preVerificationGas: { type: 'string' },
-            maxFeePerGas: { type: 'string' },
-            maxPriorityFeePerGas: { type: 'string' },
-            paymasterAndData: { type: 'string' },
-            signature: { type: 'string' }
+            sender: { type: "string" },
+            nonce: { type: "string" },
+            initCode: { type: "string" },
+            callData: { type: "string" },
+            callGasLimit: { type: "string" },
+            verificationGasLimit: { type: "string" },
+            preVerificationGas: { type: "string" },
+            maxFeePerGas: { type: "string" },
+            maxPriorityFeePerGas: { type: "string" },
+            paymasterAndData: { type: "string" },
+            signature: { type: "string" },
           },
-          required: ['sender', 'nonce', 'initCode', 'callData', 'callGasLimit', 'verificationGasLimit', 'preVerificationGas', 'maxFeePerGas', 'maxPriorityFeePerGas', 'paymasterAndData', 'signature']
+          required: [
+            "sender",
+            "nonce",
+            "initCode",
+            "callData",
+            "callGasLimit",
+            "verificationGasLimit",
+            "preVerificationGas",
+            "maxFeePerGas",
+            "maxPriorityFeePerGas",
+            "paymasterAndData",
+            "signature",
+          ],
         },
-        combinedPubKey: { type: 'string' },
+        combinedPubKey: { type: "string" },
         publicNonces: {
-          type: 'object',
+          type: "object",
           patternProperties: {
-            '.*': {
-              type: 'object',
+            ".*": {
+              type: "object",
               properties: {
-                kPublic: { type: 'string' },
-                kTwoPublic: { type: 'string' }
+                kPublic: { type: "string" },
+                kTwoPublic: { type: "string" },
               },
-              required: ['kPublic', 'kTwoPublic']
-            }
-          }
+              required: ["kPublic", "kTwoPublic"],
+            },
+          },
         },
         publicKeys: {
-          type: 'object',
+          type: "object",
           patternProperties: {
-            '.*': { type: 'string' }
-          }
+            ".*": { type: "string" },
+          },
         },
         signatures: {
-          type: 'object',
+          type: "object",
           patternProperties: {
-            '.*': {
-              type: 'object',
+            ".*": {
+              type: "object",
               properties: {
-                finalPublicNonce: { type: 'string' },
-                challenge: { type: 'string' },
-                signature: { type: 'string' }
+                finalPublicNonce: { type: "string" },
+                challenge: { type: "string" },
+                signature: { type: "string" },
               },
-              required: ['finalPublicNonce', 'challenge', 'signature']
-            }
-          }
-        }
-      }
+              required: ["finalPublicNonce", "challenge", "signature"],
+            },
+          },
+        },
+      },
     }
 
     const ajv = new Ajv()
 
     const validate = ajv.compile<SerializedMultiSigOp>(schema)
-    const valid = validate(serialized)
+    const isValid = validate(serialized)
 
-    if (!valid) {
-      throw new ValidationError('[MultiSigUserOP]: Invalid JSON format', validate.errors)
-    }
+    if (!isValid) throw new ValidationError("[MultiSigUserOP]: Invalid JSON format", validate.errors)
 
-    const id = serialized.id
+    const { id } = serialized
 
-    const opHash = serialized.opHash
+    const { opHash } = serialized
 
     const userOpRequest = {
       sender: serialized.userOpRequest.sender,
@@ -289,17 +299,12 @@ export class MultiSigUserOp {
         address,
         {
           kPublic: Key.fromHex(nonces.kPublic),
-          kTwoPublic: Key.fromHex(nonces.kTwoPublic)
-        }
+          kTwoPublic: Key.fromHex(nonces.kTwoPublic),
+        },
       ])
     )
 
-    const publicKeys = Object.fromEntries(
-      Object.entries(serialized.publicKeys).map(([address, key]) => [
-        address,
-        Key.fromHex(key)
-      ])
-    )
+    const publicKeys = Object.fromEntries(Object.entries(serialized.publicKeys).map(([address, key]) => [address, Key.fromHex(key)]))
 
     const signatures = Object.fromEntries(
       Object.entries(serialized.signatures).map(([address, output]) => [
@@ -307,8 +312,8 @@ export class MultiSigUserOp {
         {
           finalPublicNonce: Key.fromHex(output.finalPublicNonce),
           challenge: Key.fromHex(output.challenge),
-          signature: Key.fromHex(output.signature)
-        }
+          signature: Key.fromHex(output.signature),
+        },
       ])
     )
 

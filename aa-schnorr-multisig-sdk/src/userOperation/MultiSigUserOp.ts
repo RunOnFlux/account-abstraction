@@ -1,5 +1,6 @@
 import {AbiCoder, ethers} from "ethers"
 
+import { publicKeyConvert } from "secp256k1"
 import type { Challenge, Key, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { Hex } from "../types/misc"
 import { sumSchnorrSigs } from "../helpers/schnorr-helpers"
@@ -26,7 +27,7 @@ export class MultiSigUserOp {
 
     // map public keys and public nonces
     const _publicKeys = publicKeys.map((pk, index) => {
-      const _address = pubKey2Address(pk.buffer)
+      const _address = pubKey2Address(Buffer.from(publicKeyConvert(pk.buffer, false)))
       this.publicNonces[_address] = publicNonces[index]
       this.publicKeys[_address] = pk
       return pk

@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/aa-schnorr-multisig-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Account Abstraction Schnorr Multi-Signatures SDK",
   "keywords": [
     "Account Abstraction",

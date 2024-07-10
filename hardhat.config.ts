@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
       chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_MAINNET],
     },
     [KNOWN_NETWORK.POLYGON_AMOY]: {
-      url: `https://polygon-amoy.g.alchemy.com/v2/${process.env.POLYGON_MUMBAI_ALCHEMY_API_KEY}`,
+      url: `https://polygon-amoy.g.alchemy.com/v2/${process.env.POLYGON_AMOY_ALCHEMY_API_KEY}`,
       accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`], // use if want to use private account; important! use `0x` prefix
       chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_AMOY],
     },

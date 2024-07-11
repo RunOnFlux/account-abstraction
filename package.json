@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/account-abstraction",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",

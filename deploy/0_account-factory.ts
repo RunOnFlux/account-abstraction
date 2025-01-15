@@ -38,7 +38,7 @@ const deployFct: DeployFunction = async function (hre: HardhatRuntimeEnvironment
   if (deployResults.receipt?.transactionHash) {
     await verifyContract(deployedAddress, hre, args)
 
-    const Factory = MultiSigSmartAccountFactory__factory.connect(deployedAddress)
+    const Factory = MultiSigSmartAccountFactory__factory.connect(deployedAddress, await ethers.getSigner(deployer))
     const accountImplementation = await Factory.accountImplementation()
     console.log(`---> Account Implementation address: ${accountImplementation}`)
     await verifyContract(accountImplementation, hre, [ENTRY_POINT_ALCHEMY_ADDRESS])

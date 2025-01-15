@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/account-abstraction",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",
@@ -39,7 +39,7 @@
     "build": "tsc --project tsconfig.build.json",
     "deploy:sepolia": "hardhat deploy --network sepolia --tags ACCOUNT_FACTORY",
     "clean-full-sepolia:mumbai": "hardhat clean && hardhat compile && npm run deploy:sepolia",
-    "verify": "npx hardhat verify --network sepolia 0xA76f98D25C9775F67DCf8B9EF9618d454D287467 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+    "verify": "npx hardhat verify --network sepolia 0x3974821943e9cA3549744D910999332eE387Fda4 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
   },
   "author": "",
   "license": "MIT",

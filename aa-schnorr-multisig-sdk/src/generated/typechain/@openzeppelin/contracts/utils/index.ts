@@ -9,5 +9,4 @@ import type * as math from "./math";
 export type { math };
 export type { Address } from "./Address";
 export type { Create2 } from "./Create2";
-export type { ReentrancyGuard } from "./ReentrancyGuard";
 export type { Strings } from "./Strings";

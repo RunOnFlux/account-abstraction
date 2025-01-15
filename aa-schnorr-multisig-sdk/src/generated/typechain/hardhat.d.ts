@@ -22,10 +22,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAccessControl__factory>;
     getContractFactory(
-      name: "Ownable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Ownable__factory>;
-    getContractFactory(
       name: "IERC1822Proxiable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1822Proxiable__factory>;
@@ -114,10 +110,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Math__factory>;
     getContractFactory(
-      name: "ReentrancyGuard",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ReentrancyGuard__factory>;
-    getContractFactory(
       name: "Strings",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
@@ -125,26 +117,6 @@ declare module "hardhat/types/runtime" {
       name: "BaseAccount",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BaseAccount__factory>;
-    getContractFactory(
-      name: "BasePaymaster",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BasePaymaster__factory>;
-    getContractFactory(
-      name: "EntryPoint",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EntryPoint__factory>;
-    getContractFactory(
-      name: "NonceManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.NonceManager__factory>;
-    getContractFactory(
-      name: "SenderCreator",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SenderCreator__factory>;
-    getContractFactory(
-      name: "StakeManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.StakeManager__factory>;
     getContractFactory(
       name: "IAccount",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -209,11 +181,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IAccessControl>;
     getContractAt(
-      name: "Ownable",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Ownable>;
-    getContractAt(
       name: "IERC1822Proxiable",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -324,11 +291,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Math>;
     getContractAt(
-      name: "ReentrancyGuard",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ReentrancyGuard>;
-    getContractAt(
       name: "Strings",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -338,31 +300,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.BaseAccount>;
-    getContractAt(
-      name: "BasePaymaster",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BasePaymaster>;
-    getContractAt(
-      name: "EntryPoint",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EntryPoint>;
-    getContractAt(
-      name: "NonceManager",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.NonceManager>;
-    getContractAt(
-      name: "SenderCreator",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SenderCreator>;
-    getContractAt(
-      name: "StakeManager",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.StakeManager>;
     getContractAt(
       name: "IAccount",
       address: string | ethers.Addressable,
@@ -438,10 +375,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IAccessControl>;
     deployContract(
-      name: "Ownable",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Ownable>;
-    deployContract(
       name: "IERC1822Proxiable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC1822Proxiable>;
@@ -530,10 +463,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Math>;
     deployContract(
-      name: "ReentrancyGuard",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ReentrancyGuard>;
-    deployContract(
       name: "Strings",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
@@ -541,26 +470,6 @@ declare module "hardhat/types/runtime" {
       name: "BaseAccount",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseAccount>;
-    deployContract(
-      name: "BasePaymaster",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePaymaster>;
-    deployContract(
-      name: "EntryPoint",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.EntryPoint>;
-    deployContract(
-      name: "NonceManager",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.NonceManager>;
-    deployContract(
-      name: "SenderCreator",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SenderCreator>;
-    deployContract(
-      name: "StakeManager",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StakeManager>;
     deployContract(
       name: "IAccount",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -625,11 +534,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IAccessControl>;
     deployContract(
-      name: "Ownable",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Ownable>;
-    deployContract(
       name: "IERC1822Proxiable",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -740,11 +644,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Math>;
     deployContract(
-      name: "ReentrancyGuard",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ReentrancyGuard>;
-    deployContract(
       name: "Strings",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -754,31 +653,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseAccount>;
-    deployContract(
-      name: "BasePaymaster",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePaymaster>;
-    deployContract(
-      name: "EntryPoint",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.EntryPoint>;
-    deployContract(
-      name: "NonceManager",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.NonceManager>;
-    deployContract(
-      name: "SenderCreator",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SenderCreator>;
-    deployContract(
-      name: "StakeManager",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StakeManager>;
     deployContract(
       name: "IAccount",
       args: any[],

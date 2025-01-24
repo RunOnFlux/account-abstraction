@@ -1,4 +1,4 @@
-# Account Abstraction Schnorr Signatures
+# Account Abstraction Schnorr Multi Signatures SDK
 A typescript library for creating ERC-4337 Account Abstraction which utilizes Schnorr Signatures for multi signatures.
 
 
@@ -8,26 +8,64 @@ Current library provide utilities to sign/send User Operation's with Schnorr Sig
 of library go to ***Examples*** section.
 
 
-## Installation
+## ⚠️ Critical Information
 
+### Public Nonces
+
+Never reuse public nonces. Reusing them will cryptographically expose your private keys and lead to a loss of funds. Implement robust nonce management in your application is crucial for security, make sure to delete nonce after usage and never use it again.
+
+### Salts
+
+Construction of multisignature address uses salts. Ensure salts are deterministic and consistent to maintain cross-wallet compatibility. Usage of different salts will lead to different multisignature address. Use the following salts that are used by SSP Wallet:
+- `accountSalt`: `aasalt`
+- `factorySalt`: `aafactorysalt`
+
+
+## 📦 Installation
+
+Install via npm:
+
+```bash
+npm install @runonflux/aa-schnorr-multisig-sdk
 ```
-git clone https://github.com/RunOnFlux/aa-schnorr-multisig-sdk.git
-cd aa-schnorr-multisig-sdk
+
+Or clone the repository:
+
+```bash
+git clone https://github.com/RunOnFlux/account-abstraction.git
+cd account-abstraction/aa-schnorr-multisig-sdk
 npm i
 ```
 
-## Examples
-To execute examples add `.env` file with required variables according to `.env.sample`
-```
-ALCHEMY_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/0000000000000000000000000"
-# Private key of account with fund's to cover transaction's costs 
-# (ex. 0.5 Sepolia ETH in case of sepolia chain)
-PRIVATE_KEY="0x"
-```
-* [Get Smart Account Address On-Chain/Off-Chain](./examples/account-address/account_address.md)
-* [Smart Account Deployment](./examples/account-deployment/account-deployment.md)
-* [Sign 3 of 3](./examples/sign_3_of_3/sign-3_of_3.md)
+## 🛠️ Usage
+
+To get started, explore our examples and documentation. Ensure you have a `.env` file configured with the necessary environment variables as shown in `.env.sample`.
+
+### Examples
+
+- **[Get Smart Account Address On-Chain/Off-Chain](./examples/account-address/account_address.md)**
+- **[Smart Account Deployment](./examples/account-deployment/account-deployment.md)**
+- **[Sign 3 of 3](./examples/sign_3_of_3/sign-3_of_3.md)**
 
 
-## Associated package
-* [MultiSig Smart Account - ERC-4337 Smart Contracts](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig)
+## 🐛 Reporting Issues
+
+Found a bug? Please report it on our [issue tracker](https://github.com/RunOnFlux/account-abstraction/issues).
+
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+## 🌐 Associated Packages
+
+- **[MultiSig Smart Account - ERC-4337 Smart Contracts](https://www.npmjs.com/package/@runonflux/account-abstraction)**
+- **[Account Abstraction - Schnorr Multisig SDK](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig-sdk)**
+
+
+## SSP Wallet
+
+SSP Wallet is a multi-signature multi-asset wallet that uses this AA Schnorr Multi-Signature SDK for EVM chains. Check out the SSP Wallet repository for more information and proper usage of the library
+
+- **[SSP Wallet Repository](https://github.com/RunOnFlux/ssp-wallet)**
+

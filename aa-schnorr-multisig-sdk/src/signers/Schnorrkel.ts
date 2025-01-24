@@ -23,9 +23,23 @@ import { Challenge, FinalPublicNonce } from "../types/signature"
 
 export class Schnorrkel {
   #nonces: Nonces = {}
+  #usedNonces: Set<string> = new Set()
+
+  private markNonceAsUsed(privateKey: Key): void {
+    const x = privateKey.buffer
+    const hash = _hashPrivateKey(x)
+
+    this.#usedNonces.add(hash)
+  }
+
+  private isNonceUsed(hash: string): boolean {
+    return this.#usedNonces.has(hash)
+  }
 
   private _setNonce(privateKey: Buffer): string {
     const { publicNonceData, privateNonceData, hash } = _generatePublicNonces(privateKey)
+
+    if (this.isNonceUsed(hash)) throw new Error("Nonce has already been used and cannot be reused.")
 
     const mappedPublicNonce: PublicNonces = {
       kPublic: new Key(Buffer.from(publicNonceData.kPublic)),
@@ -43,6 +57,8 @@ export class Schnorrkel {
 
   private _restoreNonce(privateKey: Buffer, kPrivateKey, kTwoPrivateKey): string {
     const { publicNonceData, privateNonceData, hash } = _restorePublicNonces(privateKey, kPrivateKey, kTwoPrivateKey)
+
+    if (this.isNonceUsed(hash)) throw new Error("Nonce has already been used and cannot be reused.")
 
     const mappedPublicNonce: PublicNonces = {
       kPublic: new Key(Buffer.from(publicNonceData.kPublic)),
@@ -167,21 +183,23 @@ export class Schnorrkel {
     const mappedPublicNonce = this.getMappedPublicNonces(publicNonces)
     const mappedNonces = this.getMappedNonces()
 
-    const musigData = _multiSigSign(
-      mappedNonces,
-      combinedPublicKey.buffer,
-      privateKey.buffer,
-      msg,
-      publicKeys.map((key) => key.buffer),
-      mappedPublicNonce,
-      hashFn
-    )
+    try {
+      const musigData = _multiSigSign(
+        mappedNonces,
+        combinedPublicKey.buffer,
+        privateKey.buffer,
+        msg,
+        publicKeys.map((key) => key.buffer),
+        mappedPublicNonce,
+        hashFn
+      )
 
-    // absolutely crucial to delete the nonces once a signature has been crafted with them.
-    // nonce reuse will lead to private key leakage!
-    this.clearNonces(privateKey)
-
-    return this.getMultisigOutput(musigData)
+      return this.getMultisigOutput(musigData)
+    } finally {
+      // Ensure nonces are marked as used and cleared regardless of success or failure
+      this.markNonceAsUsed(privateKey)
+      this.clearNonces(privateKey)
+    }
   }
 
   multiSigSignHash(privateKey: Key, hash: string, publicKeys: Key[], publicNonces: PublicNonces[]): SignatureOutput {
@@ -189,20 +207,22 @@ export class Schnorrkel {
     const mappedPublicNonce = this.getMappedPublicNonces(publicNonces)
     const mappedNonces = this.getMappedNonces()
 
-    const musigData = _multiSigSignHash(
-      mappedNonces,
-      combinedPublicKey.buffer,
-      privateKey.buffer,
-      hash,
-      publicKeys.map((key) => key.buffer),
-      mappedPublicNonce
-    )
+    try {
+      const musigData = _multiSigSignHash(
+        mappedNonces,
+        combinedPublicKey.buffer,
+        privateKey.buffer,
+        hash,
+        publicKeys.map((key) => key.buffer),
+        mappedPublicNonce
+      )
 
-    // absolutely crucial to delete the nonces once a signature has been crafted with them.
-    // nonce reuse will lead to private key leakage!
-    this.clearNonces(privateKey)
-
-    return this.getMultisigOutput(musigData)
+      return this.getMultisigOutput(musigData)
+    } finally {
+      // Ensure nonces are marked as used and cleared regardless of success or failure
+      this.markNonceAsUsed(privateKey)
+      this.clearNonces(privateKey)
+    }
   }
 
   static sign(privateKey: Key, msg: string, hashFn: HashFunction | null = null): SignatureOutput {

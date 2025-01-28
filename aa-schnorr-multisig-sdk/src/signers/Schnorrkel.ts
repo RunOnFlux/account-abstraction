@@ -194,13 +194,17 @@ export class Schnorrkel {
         hashFn
       )
 
-      return this.getMultisigOutput(musigData)
-    } finally {
-      // Ensure nonces are marked as used and cleared regardless of success or failure
-      this.markNonceAsUsed(privateKey)
       // absolutely crucial to delete the nonces once a signature has been crafted with them.
       // nonce reuse will lead to private key leakage!
       this.clearNonces(privateKey)
+
+      return this.getMultisigOutput(musigData)
+    } finally {
+      // absolutely crucial to delete the nonces once a signature has been crafted with them.
+      // nonce reuse will lead to private key leakage!
+      this.clearNonces(privateKey)
+      // Ensure nonces are marked as used and cleared regardless of success or failure
+      this.markNonceAsUsed(privateKey)
     }
   }
 
@@ -219,13 +223,17 @@ export class Schnorrkel {
         mappedPublicNonce
       )
 
-      return this.getMultisigOutput(musigData)
-    } finally {
-      // Ensure nonces are marked as used and cleared regardless of success or failure
-      this.markNonceAsUsed(privateKey)
       // absolutely crucial to delete the nonces once a signature has been crafted with them.
       // nonce reuse will lead to private key leakage!
       this.clearNonces(privateKey)
+
+      return this.getMultisigOutput(musigData)
+    } finally {
+      // absolutely crucial to delete the nonces once a signature has been crafted with them.
+      // nonce reuse will lead to private key leakage!
+      this.clearNonces(privateKey)
+      // Ensure nonces are marked as used and cleared regardless of success or failure
+      this.markNonceAsUsed(privateKey)
     }
   }
 

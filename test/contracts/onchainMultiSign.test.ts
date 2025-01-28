@@ -128,7 +128,17 @@ describe("Onchain Multi Sign Tests", function () {
     const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
     const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
     signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    signerOne.resetUsedNonces()
     expect(signerOne.signMultiSigMsg.bind(signerOne, msg, publicKeys, publicNonces)).to.throw("Nonces should be exchanged before signing")
+  })
+
+  it("should fail on reusal of nonce a signer tries to sign twice with the same nonce", function () {
+    const publicKeys = [signerOne.getPubKey(), signerTwo.getPubKey()]
+    const publicNonces = [signerOne.getPubNonces(), signerTwo.getPubNonces()]
+    signerOne.signMultiSigMsg(msg, publicKeys, publicNonces)
+    expect(signerOne.signMultiSigMsg.bind(signerOne, msg, publicKeys, publicNonces)).to.throw(
+      "Nonce has already been used and cannot be reused."
+    )
   })
 
   it("should fail if only one signer tries to sign the transaction providing 2 messages", async function () {
@@ -141,7 +151,7 @@ describe("Onchain Multi Sign Tests", function () {
     // try to generate new signature with old signerTwo's nonces
     signerOne.generatePubNonces()
     const _invalidPublicNonces = [signerOne.getPubNonces(), signerTwoNonces]
-
+    signerOne.resetUsedNonces()
     const { signature: sigTwo } = signerOne.signMultiSigMsg(msg, publicKeys, _invalidPublicNonces)
     const sSummed = Schnorrkel.sumSigs([sigOne, sigTwo])
 

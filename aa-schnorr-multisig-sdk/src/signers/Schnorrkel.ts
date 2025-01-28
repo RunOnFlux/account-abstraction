@@ -16,6 +16,7 @@ import {
   _verifyHash,
   _multiSigSignHash,
   _restorePublicNonces,
+  _hashMessage,
 } from "../core"
 import type { HashFunction, InternalNonces, InternalPublicNonces, InternalSignature } from "../core/types"
 import type { SignatureOutput } from "../types/signature"
@@ -177,7 +178,7 @@ export class Schnorrkel {
     msg: string,
     publicKeys: Key[],
     publicNonces: PublicNonces[],
-    hashFn: HashFunction | null = null
+    hashFn: HashFunction = _hashMessage
   ): SignatureOutput {
     const combinedPublicKey = Schnorrkel.getCombinedPublicKey(publicKeys)
     const mappedPublicNonce = this.getMappedPublicNonces(publicNonces)
@@ -237,7 +238,7 @@ export class Schnorrkel {
     }
   }
 
-  static sign(privateKey: Key, msg: string, hashFn: HashFunction | null = null): SignatureOutput {
+  static sign(privateKey: Key, msg: string, hashFn: HashFunction = _hashMessage): SignatureOutput {
     const output = _sign(privateKey.buffer, msg, hashFn)
 
     return {
@@ -268,7 +269,7 @@ export class Schnorrkel {
     msg: string,
     finalPublicNonce: FinalPublicNonce,
     publicKey: Key,
-    hashFn: HashFunction | null = null
+    hashFn: HashFunction = _hashMessage
   ): boolean {
     return _verify(signature.buffer, msg, finalPublicNonce.buffer, publicKey.buffer, hashFn)
   }

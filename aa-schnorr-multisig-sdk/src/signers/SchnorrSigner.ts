@@ -3,6 +3,7 @@ import { privateKeyVerify, publicKeyCreate } from "secp256k1"
 import type { Key, PublicNonces, SignatureOutput } from "../types"
 import { pubKey2Address } from "../helpers/converters"
 import type { HashFunction } from "../core/types"
+import { _hashMessage } from "../core"
 import { KeyPair } from "../types"
 
 import { Schnorrkel } from "./Schnorrkel"
@@ -66,7 +67,7 @@ export class SchnorrSigner extends Schnorrkel {
     return this.multiSigSignHash(this.#privateKey, hash, publicKeys, publicNonces)
   }
 
-  signMessage(msg: string, hashFn: HashFunction | null = null): SignatureOutput {
+  signMessage(msg: string, hashFn: HashFunction = _hashMessage): SignatureOutput {
     return Schnorrkel.sign(this.#privateKey, msg, hashFn)
   }
 

@@ -133,6 +133,11 @@ export class Schnorrkel {
   static getCombinedPublicKey(publicKeys: Key[]): Key {
     if (publicKeys.length < 2) throw new Error("At least 2 public keys should be provided")
 
+    // validate that public keys are valid points on the secp256k1 curve
+    publicKeys.forEach((publicKey) => {
+      if (!secp256k1.publicKeyVerify(publicKey.buffer)) throw new Error("Invalid public key provided")
+    })
+
     const bufferPublicKeys = publicKeys.map((publicKey) => publicKey.buffer)
     const L = _generateL(bufferPublicKeys)
 

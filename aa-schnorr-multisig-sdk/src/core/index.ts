@@ -296,9 +296,9 @@ export const _multiSigSign = (
   msg: string,
   publicKeys: Buffer[],
   publicNonces: InternalPublicNonces[],
-  hashFn: HashFunction | null = null
+  hashFn: HashFunction = _hashMessage
 ): InternalSignature => {
-  const hashMsg = hashFn ? hashFn : _hashMessage
+  const hashMsg = hashFn
   const hash = hashMsg(msg)
   return internalMultiSigSign(nonces, combinedPublicKey, privateKey, hash, publicKeys, publicNonces)
 }
@@ -323,8 +323,8 @@ export const _sumSigs = (signatures: Buffer[]): Buffer => {
   return combined.mod(n).toBuffer(32)
 }
 
-export const _verify = (s: Buffer, msg: string, R: Buffer, publicKey: Buffer, hashFn: HashFunction | null = null): boolean => {
-  const hashMsg = hashFn ? hashFn : _hashMessage
+export const _verify = (s: Buffer, msg: string, R: Buffer, publicKey: Buffer, hashFn: HashFunction = _hashMessage): boolean => {
+  const hashMsg = hashFn
   const hash = hashMsg(msg)
   return internalVerify(s, hash, R, publicKey)
 }
@@ -338,8 +338,8 @@ export const _generatePk = (combinedPublicKey: Buffer): Hex => {
   return `0x${px.slice(-40, px.length)}`
 }
 
-export const _sign = (privateKey: Buffer, msg: string, hashFn: HashFunction | null = null): InternalSignature => {
-  const hashMsg = hashFn ? hashFn : _hashMessage
+export const _sign = (privateKey: Buffer, msg: string, hashFn: HashFunction = _hashMessage): InternalSignature => {
+  const hashMsg = hashFn
   const hash = hashMsg(msg)
   return internalSign(privateKey, hash)
 }

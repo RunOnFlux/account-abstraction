@@ -75,6 +75,7 @@
     "viem": "^2.22.13"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
     "@types/bigi": "^1.4.5",
     "@types/chai": "^4.3.16",
     "@types/ecurve": "^1.0.3",

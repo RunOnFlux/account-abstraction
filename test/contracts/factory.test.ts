@@ -9,7 +9,6 @@ import { getAllCombinedAddrFromSigners } from "../../aa-schnorr-multisig-sdk/src
 import type { SchnorrSigner } from "../../aa-schnorr-multisig-sdk/src/signers"
 import type { Hex } from "../../aa-schnorr-multisig-sdk/src/types/misc"
 import {
-  createSmartAccount,
   getAccountImplementationAddress,
   predictAccountAddrOffchain,
   predictAccountAddrOnchain,
@@ -92,14 +91,13 @@ describe("Account Factory", function () {
     const _combined: string[] = [random.getAddress()]
     expect(await factory.getAccountAddress(_combined, saltHash)).to.not.be.eql(contract.target)
   })
-  it.skip("should return address without creation if account already created", async function () {
-    const _salt = getSaltHash("aasalt")
+  it("should return address without creation if account already created", async function () {
+    const _salt = getSaltHash("aasaltdifferent")
     const _predicted = await factory.getAccountAddress(combinedAddresses, _salt)
-    expect(await factory.createAccount(combinedAddresses, _salt))
-      .to.emit(factory, "SmartAccountCreated")
-      .withArgs(_predicted)
-
-    expect(await factory.createAccount(combinedAddresses, _salt)).to.not.emit(factory, "SmartAccountCreated")
+    const tx = factory.createAccount(combinedAddresses, _salt)
+    await expect(tx).to.emit(factory, "MultiSigSmartAccountCreated").withArgs(_predicted)
+    const tx2 = factory.createAccount(combinedAddresses, _salt)
+    await expect(tx2).to.not.emit(factory, "MultiSigSmartAccountCreated")
   })
   it("should get account implementation address with helper", async function () {
     console.log(factory.target)
@@ -110,21 +108,19 @@ describe("Account Factory", function () {
 
     expect(aaImplHelperFct).to.be.eql(aaImplContractCall)
   })
-  it.skip("should predict AA address onchain", async function () {
-    const _salt = "aasalt"
+  it("should predict AA address onchain", async function () {
+    const _salt = "aasaltdifferent"
     const _saltHash = getSaltHash(_salt)
     const _predicted = await factory.getAccountAddress(combinedAddresses, _saltHash)
 
     // check helper function
     const _factoryAddress = factory.target as Hex
-    const provider = ethers.provider.getSigner()
-    console.log(provider)
+    const provider = await ethers.provider.getSigner()
     const _predictedByHelper = await predictAccountAddrOnchain(_factoryAddress, combinedAddresses, _salt, provider)
     expect(_predictedByHelper).to.be.eql(_predicted)
 
-    expect(await factory.createAccount(combinedAddresses, _saltHash))
-      .to.emit(factory, "SmartAccountCreated")
-      .withArgs(_predicted)
+    const tx = factory.createAccount(combinedAddresses, _saltHash)
+    await expect(tx).to.emit(factory, "MultiSigSmartAccountCreated").withArgs(_predicted)
   })
   it("should predict AA address offchain", async function () {
     const _salt = "aasalt"
@@ -136,20 +132,5 @@ describe("Account Factory", function () {
     const predictedOffchain = predictAccountAddrOffchain(factoryAddress, accountImplAddress, combinedAddresses, _salt)
 
     expect(predictedOnchain).to.be.eql(predictedOffchain)
-  })
-  it.skip("should create account with predicted address with helper", async function () {
-    const _salt = "aasalt"
-    const _saltHash = saltToHex(_salt)
-    const predictedOnchain = await factory.getAccountAddress(combinedAddresses, _saltHash)
-    const factoryAddress = factory.target as Hex
-    const accountImplAddress = await factory.accountImplementation()
-
-    const predictedOffchain = predictAccountAddrOffchain(factoryAddress, accountImplAddress, combinedAddresses, _salt)
-    expect(predictedOnchain).to.be.eql(predictedOffchain)
-
-    // use helper function to create account with default salt empty string
-    const createdAccount: Hex = await createSmartAccount(combinedAddresses, deployer, undefined, factoryAddress)
-    // check if addresses equals
-    expect(predictedOnchain).to.be.eql(createdAccount)
   })
 })

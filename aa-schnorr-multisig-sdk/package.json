@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/aa-schnorr-multisig-sdk",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Account Abstraction Schnorr Multi-Signatures SDK",
   "keywords": [
     "Account Abstraction",
@@ -40,5 +40,11 @@
   "devDependencies": {
     "dotenv": "^16.4.7",
     "ts-node": "^10.9.2"
+  },
+  "overrides": {
+    "viem": "^2.22.21"
+  },
+  "resolutions": {
+    "viem": "^2.22.21"
   }
 }

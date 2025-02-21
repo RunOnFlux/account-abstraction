@@ -42,9 +42,9 @@
     "ts-node": "^10.9.2"
   },
   "overrides": {
-    "viem": "^2.22.21"
+    "viem": "^2.23.3"
   },
   "resolutions": {
-    "viem": "^2.22.21"
+    "viem": "^2.23.3"
   }
 }

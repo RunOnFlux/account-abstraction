@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/account-abstraction",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",
@@ -72,9 +72,10 @@
     "hardhat-deploy": "^0.14.0",
     "secp256k1": "^5.0.1",
     "typechain": "^8.3.2",
-    "viem": "^2.22.13"
+    "viem": "^2.23.3"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
     "@types/bigi": "^1.4.5",
     "@types/chai": "^4.3.16",
     "@types/ecurve": "^1.0.3",
@@ -102,6 +103,11 @@
     "typescript": "^5.7.3"
   },
   "overrides": {
-    "@nomicfoundation/hardhat-verify": "^2.0.12"
+    "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "viem": "^2.23.3"
+  },
+  "resolutions": {
+    "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "viem": "^2.23.3"
   }
 }

@@ -71,7 +71,7 @@ async function main() {
 
   const publicKey3 = schnorrSigner3.getPubKey()
 
-  const salt = "this is salt shared by participants"
+  const salt = "aasalt" // To maintain cross-wallet compatibility with SSP Wallet, we are using 'aasalt', usage of different salt will lead to different multisignature address
 
   const publicKeys = [publicKey1, publicKey2, publicKey3]
 

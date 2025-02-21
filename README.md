@@ -2,63 +2,97 @@
 
 Account Abstraction - Schnorr Multi Signature ERC-4337 compliant smart contracts.
 
-## About
-Package contains two main contracts:
-* MultiSigSmartAccount - ERC-4337 Account Abstraction implementation
-* MultiSigSmartAccountFactory - factory contract for account abstraction
+## Overview
 
-Account Abstraction is [UUPS Upgradeable Proxy](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable) and implementation can be upgraded only by the Owner.
-[The Owner Role](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl) is granted for every Schnorr's combined public address - `combinedAddress` - passed during Account initialization (read more about the `combinedAddress` creation [here](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig-sdk#0-deploy-multisigsmartaccountfactory-and-create-account-abstraction) ). It means that the most crucial functions, such as upgrade or deposit withdrawal, can be done only if a transaction is signed with Schnorr Multi-signature algorithm. 
+This package provides a robust implementation of ERC-4337 Account Abstraction using Schnorr Multi-Signatures. It includes two main smart contracts:
 
+- **MultiSigSmartAccount**: Implements the ERC-4337 Account Abstraction.
+- **MultiSigSmartAccountFactory**: A factory contract for creating account abstractions.
 
-## Requirements:
+The contracts are designed to be [UUPS Upgradeable Proxies](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable), allowing upgrades by the Owner. The Owner role is assigned to the combined public address (`combinedAddress`) during account initialization, ensuring that critical functions like upgrades or withdrawals require Schnorr Multi-signature authorization.
 
-* Node: >=18.0.0 <20.0.0
-* npm (Node.js package manager): v9.x.x
+## Key Features
+
+- **Secure Multi-Signature Transactions**: Utilizes Schnorr signatures for enhanced security.
+- **Upgradeable Contracts**: Supports UUPS proxy pattern for contract upgrades.
+- **ERC-4337 Compliance**: Adheres to the latest Ethereum standards for account abstraction.
+
+## Requirements
+
+- **Node.js**: Version >=18
+- **npm**: Version >=9
 
 ## Installation
 
-```
-git clone https://github.com/RunOnFlux/account-abstraction.git
-cd account-abstraction
-npm i
+NPM package
+
+```bash
+npm install @runonflux/account-abstraction
 ```
 
-### Testing
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/RunOnFlux/account-abstraction.git
+cd account-abstraction
+npm install
 ```
+
+## Testing
+
+Run the test suite using:
+
+```bash
 npm run test
 ```
 
-# Deployment
-[Deployments](./deployments.md)
+## Deployments
 
-Make sure to include the `deployments` folder in the repository and add the `env` file as in the `env.sample` file.
+Refer to the [Deployments](./deployments.md) for information about deployed contracts.
 
-To deploy MultiSigSmartAccount Factory on Ethereum Sepolia Testnet run command: 
+Deploy the MultiSigSmartAccount Factory on Ethereum Sepolia Testnet:
+
 ```bash
 npm run deploy:sepolia
 ```
 
-To deploy on any different supported network run
+For other supported networks, use:
+
 ```bash
 npx hardhat deploy --network <NETWORK_NAME> --tags ACCOUNT_FACTORY
 ```
-List of supported network names:
-  * mainnet,
-  * sepolia,
-  * polygon-mainnet,
 
+Supported networks include:
+- mainnet
+- sepolia
+- polygon-mainnet
 
-## Build package
+## Build Package
+
+Build the package with:
 
 ```bash
+npm run prebuild
 npm run build
 ```
 
-The package contains the following folders:
-* `abi` - generated smart contracts' ABI json files
-* `deployments` - addresses of deployed contracts (if any) for every supported network
-* `typechain` - generated TypeScript typings based on the given ABI files
+The package includes:
+- `abi`: Generated ABI JSON files for smart contracts.
+- `deployments`: Addresses of deployed contracts for each supported network.
+- `typechain`: TypeScript typings generated from ABI files.
 
-## Associated package
-* [MultiSig Schnorr Signature SDK](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig-sdk)
+## Associated Packages
+
+- **[MultiSig Schnorr Signature SDK](https://www.npmjs.com/package/@runonflux/aa-schnorr-multisig-sdk)**: A TypeScript library for creating ERC-4337 Account Abstractions with Schnorr Signatures. Refer to the [SDK README](https://github.com/RunOnFlux/account-abstraction/tree/main/aa-schnorr-multisig-sdk) for usage guides and examples.
+
+## SSP Wallet
+
+The SSP Wallet is a multi-signature, multi-asset wallet leveraging this SDK for EVM chains. For more information and usage examples, visit the [SSP Wallet Repository](https://github.com/RunOnFlux/ssp-wallet).
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+## Reporting Issues
+
+Found a bug? Please report it on our [issue tracker](https://github.com/RunOnFlux/account-abstraction/issues).

@@ -76,7 +76,7 @@ async function main() {
   const publicKeys = [publicKey1, publicKey2, publicKey3]
 
   const combinedAddresses = getAllCombinedAddrFromKeys(publicKeys, 3)
-  const salt = "random salt for randomly generated priv keys"
+  const salt = "aasalt" // To maintain cross-wallet compatibility with SSP Wallet, we are using 'aasalt', usage of different salt will lead to different multisignature address
 
   const addressOffChain = getAddressOffChain(combinedAddresses, salt)
   console.log("Get address off chain:", addressOffChain)

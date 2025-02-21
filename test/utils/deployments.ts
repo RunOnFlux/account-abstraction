@@ -20,13 +20,13 @@ export async function deployMultiSigSmartAccount(
   signer?: Signer
 ): Promise<MultiSigSmartAccountSet> {
   const deployer: Signer = signer ?? (await ethers.getSigners())[0]
-  const saltAccount = saltToHex(salt ?? "salt")
+  const saltAccount = saltToHex(salt ?? "aasalt")
   const chainId = await getChainId()
   const deployerAddress = await deployer.getAddress()
   const ENTRY_POINT_ADDRESS = getEntryPointByChainId(chainId)
   if (!ENTRY_POINT_ADDRESS) throw new Error("Entry Point undefined")
   const { deterministic } = deployments
-  const saltFactory = saltToHex("factoryrandomsalt")
+  const saltFactory = saltToHex("aafactorysalt")
 
   const { deploy } = await deterministic("MultiSigSmartAccountFactory", {
     from: deployerAddress,

@@ -96,3 +96,23 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 ## Reporting Issues
 
 Found a bug? Please report it on our [issue tracker](https://github.com/RunOnFlux/account-abstraction/issues).
+
+## Security Audits  
+
+The smart contracts and SDK underwent a comprehensive security audit by [Halborn](https://halborn.com/) finalised in **February 2025**.  
+
+### Audit Reports  
+
+📄 **Smart Contracts Audit**  
+- **[Halborn Audit Report – Smart Contracts](https://github.com/RunOnFlux/account-abstraction/blob/main/Account_Abstraction_Schnorr_MultiSig_SmartContracts_SecAudit_HALBORN.pdf)** (GitHub)  
+- **[Halborn Public Report – Smart Contracts](https://www.halborn.com/audits/influx-technologies/account-abstraction-schnorr-multisig)** (Halborn)  
+
+📄 **SDK Audit**  
+- **[Halborn Audit Report – SDK](https://github.com/RunOnFlux/account-abstraction/blob/main/Account_Abstraction_Schnorr_MultiSig_SDK_SecAudit_HALBORN.pdf)** (GitHub)  
+- **[Halborn Public Report – SDK](https://www.halborn.com/audits/influx-technologies/account-abstraction-schnorr-signatures-sdk)** (Halborn)  
+
+
+### Findings & Notes
+
+- **Smart Contracts:** All findings were in **unused code**, which has been **removed** in the `main` branch. Contracts were **redeployed**, and the `main` branch is recommended for production while `master` branch is an archive where audits were assessed and perfectly safe to continue using. ([Fix PR](https://github.com/RunOnFlux/account-abstraction/pull/15))  
+- **SDK:** All important findigs were addressed in the `main` branch. Be noted that examples are using hard coded values, furthermore this library requires proper **nonce management** on the client side, and following a strict **error-throwing approach**. ([Fix PR](https://github.com/RunOnFlux/account-abstraction/pull/17))  

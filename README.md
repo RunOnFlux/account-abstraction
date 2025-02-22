@@ -97,6 +97,10 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 Found a bug? Please report it on our [issue tracker](https://github.com/RunOnFlux/account-abstraction/issues).
 
+## Inspiration, Credits & Acknowledgements
+
+**"This library is based on [Borislav Itskov research](https://hackmd.io/@0xbobby/rkIGEBVb2) and draws inspiration from the [schnorrkel.js](https://github.com/borislav-itskov/schnorrkel.js) implementation."**  
+
 ## Security Audits  
 
 The smart contracts and SDK underwent a comprehensive security audit by [Halborn](https://halborn.com/) finalised in **February 2025**.  
@@ -116,3 +120,4 @@ The smart contracts and SDK underwent a comprehensive security audit by [Halborn
 
 - **Smart Contracts:** All findings were in **unused code**, which has been **removed** in the `main` branch. Contracts were **redeployed**, and the `main` branch is recommended for production while `master` branch is an archive where audits were assessed and perfectly safe to continue using. ([Fix PR](https://github.com/RunOnFlux/account-abstraction/pull/15))  
 - **SDK:** All important findigs were addressed in the `main` branch. Be noted that examples are using hard coded values, furthermore this library requires proper **nonce management** on the client side, and following a strict **error-throwing approach**. ([Fix PR](https://github.com/RunOnFlux/account-abstraction/pull/17))  
+

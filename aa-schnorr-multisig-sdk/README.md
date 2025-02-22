@@ -69,6 +69,9 @@ SSP Wallet is a multi-signature multi-asset wallet that uses this AA Schnorr Mul
 
 - **[SSP Wallet Repository](https://github.com/RunOnFlux/ssp-wallet)**
 
+## Inspiration, Credits & Acknowledgements
+
+**"This library is based on [Borislav Itskov research](https://hackmd.io/@0xbobby/rkIGEBVb2) and draws inspiration from the [schnorrkel.js](https://github.com/borislav-itskov/schnorrkel.js) implementation."**  
 
 ## Security Audits  
 

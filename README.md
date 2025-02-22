@@ -99,7 +99,8 @@ Found a bug? Please report it on our [issue tracker](https://github.com/RunOnFlu
 
 ## Inspiration, Credits & Acknowledgements
 
-**"This library is based on [Borislav Itskov research](https://hackmd.io/@0xbobby/rkIGEBVb2) and draws inspiration from the [schnorrkel.js](https://github.com/borislav-itskov/schnorrkel.js) implementation."**  
+- *This library is based on [Borislav Itskov research](https://hackmd.io/@0xbobby/rkIGEBVb2) and draws inspiration from the [schnorrkel.js](https://github.com/borislav-itskov/schnorrkel.js) implementation.*
+- *Account Abstraction ERC4337 [eth-infinitism/account-abstraction](https://github.com/eth-infinitism/account-abstraction)*
 
 ## Security Audits  
 

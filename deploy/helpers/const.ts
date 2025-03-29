@@ -33,6 +33,18 @@ export const getEntryPointByChainId = (chainId: string | undefined): string | un
       // hardhat
       return ENTRY_POINT_ALCHEMY_ADDRESS
     }
+    case "56": {
+      // bsc
+      return ENTRY_POINT_ALCHEMY_ADDRESS
+    }
+    case "8453": {
+      // base
+      return ENTRY_POINT_ALCHEMY_ADDRESS
+    }
+    case "43114": {
+      // avalanche
+      return ENTRY_POINT_ALCHEMY_ADDRESS
+    }
 
     default: {
       throw new Error("Wrong chainId")

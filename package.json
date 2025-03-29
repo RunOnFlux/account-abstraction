@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/account-abstraction",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Account Abstraction Schnorr Multi-Signatures",
   "keywords": [
     "Account Abstraction",
@@ -37,7 +37,7 @@
     "copy-to-sdk": "./scripts/copy.sh",
     "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi && npm run generate-index && npm run export-deployments && npm run copy-to-sdk",
     "build": "tsc --project tsconfig.build.json",
-    "deploy:sepolia": "hardhat deploy --network sepolia --tags ACCOUNT_FACTORY",
+    "deploy:sepolia": "hardhat deploy --network base-mainnet --tags ACCOUNT_FACTORY",
     "clean-full-sepolia:mumbai": "hardhat clean && hardhat compile && npm run deploy:sepolia",
     "verify": "npx hardhat verify --network sepolia 0x3974821943e9cA3549744D910999332eE387Fda4 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
   },
@@ -55,7 +55,7 @@
     "@alchemy/aa-core": "^3.19.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
-    "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
     "@openzeppelin/contracts": "~5.0.2",
     "@openzeppelin/contracts-upgradeable": "~5.0.2",
     "@openzeppelin/hardhat-upgrades": "^3.9.0",
@@ -66,13 +66,13 @@
     "ecurve": "^1.0.6",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^6.13.5",
-    "hardhat": "^2.22.18",
+    "hardhat": "^2.22.19",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-dependency-compiler": "^1.2.1",
     "hardhat-deploy": "^0.14.0",
     "secp256k1": "^5.0.1",
     "typechain": "^8.3.2",
-    "viem": "^2.23.3"
+    "viem": "^2.24.2"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
@@ -91,23 +91,23 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-prettier": "^5.2.5",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "eslint-plugin-unicorn": "^56.0.1",
     "mocha": "^10.7.3",
-    "prettier": "^3.4.2",
+    "prettier": "^3.5.3",
     "prettier-plugin-solidity": "^1.4.2",
     "solc": "0.8.20",
     "solhint": "^4.5.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "overrides": {
-    "@nomicfoundation/hardhat-verify": "^2.0.12",
-    "viem": "^2.23.3"
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
+    "viem": "^2.24.2"
   },
   "resolutions": {
-    "@nomicfoundation/hardhat-verify": "^2.0.12",
-    "viem": "^2.23.3"
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
+    "viem": "^2.24.2"
   }
 }

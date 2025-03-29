@@ -60,6 +60,22 @@ const config: HardhatUserConfig = {
       accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`], // use if want to use private account; important! use `0x` prefix
       chainId: CHAIN_IDS[CHAIN_NAMES.POLYGON_AMOY],
     },
+    [KNOWN_NETWORK.BINANCE_SMART_CHAIN]: {
+      url: `https://rpc.etherspot.io/v1/56?api-key=${process.env.BINANCE_SMART_CHAIN_ETHERSPOT_API_KEY}`,
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.BINANCE_SMART_CHAIN],
+    },
+    [KNOWN_NETWORK.BASE_CHAIN]: {
+      url: `https://base-mainnet.g.alchemy.com/v2/${process.env.BASE_CHAIN_ALCHEMY_API_KEY}`,
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.BASE_CHAIN],
+    },
+    [KNOWN_NETWORK.AVALANCHE]: {
+      url: `https://avax-mainnet.g.alchemy.com/v2/${process.env.AVALANCHE_ALCHEMY_API_KEY}`,
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.AVALANCHE],
+      loggingEnabled: true,
+    },
   },
 
   paths: {
@@ -76,6 +92,9 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY ?? "",
       polygon: process.env.POLYGONSCAN_API_KEY ?? "",
       polygonAmoy: process.env.POLYGONSCAN_API_KEY ?? "",
+      bsc: process.env.BSCSCAN_API_KEY ?? "",
+      base: process.env.BASESCAN_API_KEY ?? "",
+      avalanche: process.env.AVALANCHE_API_KEY ?? "",
     },
   },
   namedAccounts: {

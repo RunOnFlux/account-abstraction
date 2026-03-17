@@ -159,6 +159,54 @@ export function getAllCombinedAddrFromKeys(pubKeys: Key[], x?: number): Hex[] {
 }
 
 /**
+ * Creates an array of Schnorr combined addresses from signers for exactly X of Y.
+ * Unlike getAllCombinedAddrFromSigners which returns combinations of size >= X,
+ * this returns only combinations of exactly size X.
+ *
+ * @param signers array of Schnorr signers
+ * @param x exact combination length for X of Y
+ * @returns combined addresses for exactly X-sized groups
+ *
+ * @example
+ * X of Y array defined as [A, B, C]
+ * 3 of 3: [ABC]
+ * 2 of 3: [AB, AC, BC]
+ * 1 of 3: [A, B, C]
+ */
+export function getAllCombinedAddrFromSignersStrict(signers: SchnorrSigner[], x: number): string[] {
+  const allSignersCombos: SchnorrSigner[][] = getAllCombos(signers, x).filter((combo) => combo.length === x)
+  const allCombinedAddresses = allSignersCombos.map((signersCombo) =>
+    signersCombo.length > 1 ? getCombinedAddrFromSigners(signersCombo) : _generatePk(signersCombo[0].getPubKey().buffer)
+  )
+
+  return allCombinedAddresses
+}
+
+/**
+ * Creates an array of Schnorr combined addresses from public keys for exactly X of Y.
+ * Unlike getAllCombinedAddrFromKeys which returns combinations of size >= X,
+ * this returns only combinations of exactly size X.
+ *
+ * @param pubKeys array of signers' public keys
+ * @param x exact combination length for X of Y
+ * @returns combined addresses for exactly X-sized groups
+ *
+ * @example
+ * X of Y array defined as [A, B, C]
+ * 3 of 3: [ABC]
+ * 2 of 3: [AB, AC, BC]
+ * 1 of 3: [A, B, C]
+ */
+export function getAllCombinedAddrFromKeysStrict(pubKeys: Key[], x: number): Hex[] {
+  const exactCombos: Key[][] = getAllCombos(pubKeys, x).filter((combo) => combo.length === x)
+  const allCombinedAddresses = exactCombos.map((pubKeysCombo) =>
+    pubKeysCombo.length > 1 ? getCombinedAddrFromKeys(pubKeysCombo) : _generatePk(pubKeysCombo[0].buffer)
+  )
+
+  return allCombinedAddresses
+}
+
+/**
  * Creates an array of possible Schnorr combined public keys from signers.
  * Optionally limited by given X (out of Y).
  *

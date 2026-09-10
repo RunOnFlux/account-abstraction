@@ -45,6 +45,10 @@ export const getEntryPointByChainId = (chainId: string | undefined): string | un
       // avalanche
       return ENTRY_POINT_ALCHEMY_ADDRESS
     }
+    case "50": {
+      // xdc mainnet
+      return ENTRY_POINT_ALCHEMY_ADDRESS
+    }
 
     default: {
       throw new Error("Wrong chainId")

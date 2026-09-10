@@ -16,6 +16,7 @@
     "dist"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "reinstall": "rm -rf node_modules/ && npm install",
     "clear": "rm -rf dist",
     "compile": "hardhat compile && npm run copy-to-sdk",
@@ -33,13 +34,16 @@
     "generate-contract-abi": "npm run export-contract-abi && npm run generate-exported-abi-index",
     "generate-index": "ts-node scripts/build/generate-index.ts",
     "export-deployments-sepolia": "npx hardhat --network sepolia run scripts/build/export-deployments.ts",
+    "export-deployments-xdc": "npx hardhat --network xdc-mainnet run scripts/build/export-deployments.ts",
     "export-deployments": "npm run export-deployments-sepolia",
     "copy-to-sdk": "./scripts/copy.sh",
     "prebuild": "npm run clear && npm run generate-typechain && npm run generate-contract-abi && npm run generate-index && npm run export-deployments && npm run copy-to-sdk",
     "build": "tsc --project tsconfig.build.json",
     "deploy:sepolia": "hardhat deploy --network base-mainnet --tags ACCOUNT_FACTORY",
+    "deploy:xdc": "hardhat deploy --network xdc-mainnet --tags ACCOUNT_FACTORY",
     "clean-full-sepolia:mumbai": "hardhat clean && hardhat compile && npm run deploy:sepolia",
-    "verify": "npx hardhat verify --network sepolia 0x3974821943e9cA3549744D910999332eE387Fda4 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+    "verify": "npx hardhat verify --network sepolia 0x3974821943e9cA3549744D910999332eE387Fda4 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "verify:xdc": "npx hardhat verify --network xdc-mainnet 0x3974821943e9cA3549744D910999332eE387Fda4 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
   },
   "author": "",
   "license": "MIT",
@@ -95,6 +99,7 @@
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "eslint-plugin-unicorn": "^56.0.1",
     "mocha": "^10.7.3",
+    "patch-package": "8.0.1",
     "prettier": "^3.5.3",
     "prettier-plugin-solidity": "^1.4.2",
     "solc": "0.8.20",

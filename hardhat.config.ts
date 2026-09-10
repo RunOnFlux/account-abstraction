@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 
 import { HardhatUserConfig } from "hardhat/config"
 
-import '@nomicfoundation/hardhat-ethers'
+import "@nomicfoundation/hardhat-ethers"
 import "@nomicfoundation/hardhat-verify"
 import "@nomicfoundation/hardhat-network-helpers"
 import "@nomicfoundation/hardhat-chai-matchers"
@@ -76,6 +76,11 @@ const config: HardhatUserConfig = {
       chainId: CHAIN_IDS[CHAIN_NAMES.AVALANCHE],
       loggingEnabled: true,
     },
+    [KNOWN_NETWORK.XDC_MAINNET]: {
+      url: process.env.XDC_MAINNET_RPC_URL ?? "https://erpc.xinfin.network",
+      accounts: [`0x${process.env.DEPLOYER_PRIVATE_KEY}`],
+      chainId: CHAIN_IDS[CHAIN_NAMES.XDC_MAINNET],
+    },
   },
 
   paths: {
@@ -95,7 +100,18 @@ const config: HardhatUserConfig = {
       bsc: process.env.BSCSCAN_API_KEY ?? "",
       base: process.env.BASESCAN_API_KEY ?? "",
       avalanche: process.env.AVALANCHE_API_KEY ?? "",
+      [KNOWN_NETWORK.XDC_MAINNET]: process.env.ETHERSCAN_API_KEY ?? "",
     },
+    customChains: [
+      {
+        network: KNOWN_NETWORK.XDC_MAINNET,
+        chainId: CHAIN_IDS[CHAIN_NAMES.XDC_MAINNET],
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api?chainid=50",
+          browserURL: "https://xdcscan.com",
+        },
+      },
+    ],
   },
   namedAccounts: {
     [KNOWN_ACCOUNT.DEPLOYER]: 0,

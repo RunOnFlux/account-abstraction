@@ -35,14 +35,14 @@ const deployFct: DeployFunction = async function (hre: HardhatRuntimeEnvironment
   console.log(`---> ${CONTRACT_NAME} address: ${deployedAddress}`)
   console.log(`---> ${CONTRACT_NAME} salt used: ${saltHex}`)
 
-  if (deployResults.receipt?.transactionHash) {
-    await verifyContract(deployedAddress, hre, args)
+  // if (deployResults.receipt?.transactionHash) {
+  await verifyContract(deployedAddress, hre, args)
 
-    const Factory = MultiSigSmartAccountFactory__factory.connect(deployedAddress, await ethers.getSigner(deployer))
-    const accountImplementation = await Factory.accountImplementation()
-    console.log(`---> Account Implementation address: ${accountImplementation}`)
-    await verifyContract(accountImplementation, hre, [ENTRY_POINT_ALCHEMY_ADDRESS])
-  }
+  const Factory = MultiSigSmartAccountFactory__factory.connect(deployedAddress, await ethers.getSigner(deployer))
+  const accountImplementation = await Factory.accountImplementation()
+  console.log(`---> Account Implementation address: ${accountImplementation}`)
+  await verifyContract(accountImplementation, hre, [ENTRY_POINT_ALCHEMY_ADDRESS])
+  // }
 }
 
 deployFct.tags = [TAGS.FULL, TAGS.ACCOUNT_FACTORY]

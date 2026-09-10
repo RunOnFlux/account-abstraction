@@ -21,8 +21,8 @@ deplyments_dir="$parent_dir/src/deployments"
 package_dir="$parent_dir/aa-schnorr-multisig-sdk/src/generated"
 
 # Copy only needed abi files
-cp "$abi_dir/MultiSigSmartAccount.json" -t "$package_dir/abi"
-cp "$abi_dir/MultiSigSmartAccountFactory.json" -t "$package_dir/abi"
+cp "$abi_dir/MultiSigSmartAccount.json" "$package_dir/abi/"
+cp "$abi_dir/MultiSigSmartAccountFactory.json" "$package_dir/abi/"
 
 # Copy entire folders
 cp -r "$typechain_dir"/* "$package_dir/typechain"

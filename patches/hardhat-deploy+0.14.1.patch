@@ -1,0 +1,22 @@
+diff --git a/node_modules/hardhat-deploy/dist/src/helpers.js b/node_modules/hardhat-deploy/dist/src/helpers.js
+index c290fa5..dc5b077 100644
+--- a/node_modules/hardhat-deploy/dist/src/helpers.js
++++ b/node_modules/hardhat-deploy/dist/src/helpers.js
+@@ -329,9 +329,15 @@ getArtifact, saveDeployment, willSaveToDisk, onPendingTx, getGasPrice, log, prin
+             maxFeePerGas: options.maxFeePerGas,
+             maxPriorityFeePerGas: options.maxPriorityFeePerGas,
+             value: options.value,
+-            nonce: options.nonce,
+-            customData: options.customData
++            nonce: options.nonce
+         };
++        // SSP patch: only include customData when actually provided. An
++        // always-present (undefined) key survives into the unsigned tx and
++        // ethers v5's JsonRpcSigner/serialize reject any tx containing it,
++        // breaking every non-zksync deploy ("invalid object key - customData").
++        if (options.customData !== undefined) {
++            overrides.customData = options.customData;
++        }
+         const factory = new DeploymentFactory_1.DeploymentFactory(getArtifact, linkedArtifact, args, network, ethersSigner, overrides);
+         const unsignedTx = await factory.getDeployTransaction();
+         let create2Address;

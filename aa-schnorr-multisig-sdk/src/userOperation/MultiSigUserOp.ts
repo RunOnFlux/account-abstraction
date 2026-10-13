@@ -48,6 +48,9 @@ interface SerializedMultiSigOp {
   >
 }
 
+const SYNC_WITH_NONCE_STORE_ERROR =
+  "A persistent nonce store is configured on this signer: use MultiSigUserOp.signMultiSigHashAsync so burned nonces are checked and persisted before signing"
+
 export class MultiSigUserOp {
   readonly id: string
   readonly opHash: Hex
@@ -86,7 +89,14 @@ export class MultiSigUserOp {
     return this.opHash
   }
 
+  /**
+   * Synchronous partial signature over the op hash. Unchanged for signers
+   * without a persistent NonceBurnStore. A signer created with
+   * `{ nonceStore }` must use {@link signMultiSigHashAsync}: the sync path
+   * cannot consult the store, so it refuses (nothing is signed).
+   */
   signMultiSigHash(signer: SchnorrSigner) {
+    if (signer.hasNonceStore()) throw new Error(SYNC_WITH_NONCE_STORE_ERROR)
     const op = this.opHash
     const pk = this._getPublicKeys()
     const pn = this._getPublicNonces()
@@ -96,8 +106,46 @@ export class MultiSigUserOp {
     return _signatureOutput
   }
 
+  /**
+   * Async partial signature over the op hash (AA-7). Uses the signer's
+   * persistent NonceBurnStore when one is configured: the nonce pair is
+   * checked and durably burned before the partial signature is computed; if
+   * the store refuses or fails, nothing is signed and no signature is
+   * recorded on this op. Without a store it behaves like
+   * {@link signMultiSigHash}.
+   */
+  async signMultiSigHashAsync(signer: SchnorrSigner): Promise<SignatureOutput> {
+    const op = this.opHash
+    const pk = this._getPublicKeys()
+    const pn = this._getPublicNonces()
+
+    const _signatureOutput = await signer.signMultiSigHashAsync(op, pk, pn)
+    this.signatures[signer.getAddress()] = _signatureOutput
+    return _signatureOutput
+  }
+
   getSummedSigData(): Hex {
     if (!this.combinedPubKey || !this.signatures) throw new Error("Summed signature input data is missing")
+
+    // AA-6: verify every partial signature against its signer's key and nonces
+    // before summing, so a bad contribution is attributed to its signer instead
+    // of producing an invalid aggregate signature.
+    const allPublicKeys = this._getPublicKeys()
+    const allPublicNonces = this._getPublicNonces()
+    Object.entries(this.signatures).forEach(([address, output]) => {
+      const signerKey = this.publicKeys[address]
+      const signerNonces = this.publicNonces[address]
+      if (!signerKey || !signerNonces) throw new Error(`Signature from unknown signer ${address}`)
+      const isValid = Schnorrkel.verifyPartialSignatureHash(
+        output.signature,
+        this.opHash,
+        signerKey,
+        signerNonces,
+        allPublicKeys,
+        allPublicNonces
+      )
+      if (!isValid) throw new Error(`Invalid partial signature from signer ${address}`)
+    })
 
     const _signatureOutputs = this._getSignatures()
     const _sigs: SchnorrSignature[] = _signatureOutputs.map((sig) => sig.signature)

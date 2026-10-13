@@ -14,6 +14,28 @@ of library go to ***Examples*** section.
 
 Never reuse public nonces. Reusing them will cryptographically expose your private keys and lead to a loss of funds. Implement robust nonce management in your application is crucial for security, make sure to delete nonce after usage and never use it again.
 
+The SDK's own guard is in memory only (keyed by the public nonce) and is lost on a restart. Give the signer a persistent burned-nonce ledger and sign with the `*Async` methods, which check the ledger and persist the burn **before** the partial signature is computed:
+
+```typescript
+const signer = createSchnorrSigner(privKey, {
+  nonceStore: {
+    isNonceBurned: async (kPublicHex) => burnedSet.has(kPublicHex),
+    markNonceBurned: async (kPublicHex) => persistBurn(kPublicHex), // resolve only once stored
+  },
+})
+await signer.restorePubNoncesAsync(k, kTwo)
+const partial = await signer.signMultiSigHashAsync(opHash, publicKeys, publicNonces)
+
+// with a MultiSigUserOp (records the partial signature on the op only on success)
+await multiSigUserOp.signMultiSigHashAsync(signer)
+```
+
+With a `nonceStore` configured, the synchronous `signMultiSigHash` / `signMultiSigMsg` (and `MultiSigUserOp.signMultiSigHash`) throw, so switch every signing call to the async variant when you adopt the store. Without a store, the synchronous methods behave exactly as before. Verify co-signers' partial signatures with `Schnorrkel.verifyPartialSignatureHash` (or sum them with `Schnorrkel.sumVerifiedSigsHash`) before combining them.
+
+### Owner lists
+
+Owner (combined-address) lists are validated before an address or initCode is computed from them: no zero address, no duplicates, and at most 255 entries (`MultiSigSmartAccount.initialize` uses a `uint8` loop counter). The combination helpers refuse inputs that would produce more than 255 combinations.
+
 ### Salts
 
 Construction of multisignature address uses salts. Ensure salts are deterministic and consistent to maintain cross-wallet compatibility. Usage of different salts will lead to different multisignature address. Use the following salts that are used by SSP Wallet:

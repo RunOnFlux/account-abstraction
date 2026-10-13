@@ -4,12 +4,15 @@ import { ethers } from "ethers"
 import type { Hex } from "../types/misc"
 import { MultiSigSmartAccountFactory_abi } from "../abi"
 
+import { validateAccountOwners } from "./owners"
+
 export async function predictAccountAddress(
   factoryAddress: Hex,
   signer: Signer,
   combinedPubKeys: string[],
   salt: string
 ): Promise<`0x${string}`> {
+  validateAccountOwners(combinedPubKeys)
   const smartAccountFactory = new ethers.Contract(factoryAddress, MultiSigSmartAccountFactory_abi, signer)
   const saltHash = ethers.keccak256(ethers.toUtf8Bytes(salt))
   const predictedAccount = await smartAccountFactory.getAccountAddress(combinedPubKeys, saltHash)

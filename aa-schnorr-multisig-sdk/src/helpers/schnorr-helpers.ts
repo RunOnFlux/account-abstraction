@@ -4,17 +4,22 @@ import { AbiCoder, ethers } from "ethers"
 import { Key } from "../types"
 import { _generatePk } from "../core"
 import { SchnorrSigner, Schnorrkel } from "../signers"
+import type { SchnorrkelOptions } from "../signers"
 import type { Challenge, PublicNonces, SchnorrSignature, SignatureOutput } from "../types"
 import type { Hex } from "../types/misc"
+
+import { assertOwnerCombinationCount } from "./owners"
 
 /**
  * Creates new Schnorr Signer from given private key.
  * @param privKey private key hexadecimal value
+ * @param options optional signer options, e.g. a persistent `nonceStore`
+ *   (burned-nonce ledger) — then sign with the `*Async` methods
  * @returns Schnorr Signer
  */
-export function createSchnorrSigner(privKey: Hex): SchnorrSigner {
+export function createSchnorrSigner(privKey: Hex, options?: SchnorrkelOptions): SchnorrSigner {
   const privKeyBuffer = new Key(Buffer.from(ethers.getBytes(privKey))).buffer
-  return new SchnorrSigner(privKeyBuffer)
+  return new SchnorrSigner(privKeyBuffer, options)
 }
 
 /**
@@ -127,6 +132,7 @@ export function generateSingleSigDataAndHash(signer: SchnorrSigner, msg: string)
  * 1 of 3: [A, B, C, AB, AC, BC, ABC]
  */
 export function getAllCombinedAddrFromSigners(signers: SchnorrSigner[], x?: number): string[] {
+  assertOwnerCombinationCount(signers.length, x ?? 1)
   const allSignersCombos: SchnorrSigner[][] = getAllCombos(signers, x)
   const allCombinedAddresses = allSignersCombos.map((signersCombo) =>
     signersCombo.length > 1 ? getCombinedAddrFromSigners(signersCombo) : _generatePk(signersCombo[0].getPubKey().buffer)
@@ -150,6 +156,7 @@ export function getAllCombinedAddrFromSigners(signers: SchnorrSigner[], x?: numb
  * 1 of 3: [A, B, C, AB, AC, BC, ABC]
  */
 export function getAllCombinedAddrFromKeys(pubKeys: Key[], x?: number): Hex[] {
+  assertOwnerCombinationCount(pubKeys.length, x ?? 1)
   const allPubKeysCombos: Key[][] = getAllCombos(pubKeys, x)
   const allCombinedAddresses = allPubKeysCombos.map((pubKeysCombo) =>
     pubKeysCombo.length > 1 ? getCombinedAddrFromKeys(pubKeysCombo) : _generatePk(pubKeysCombo[0].buffer)
@@ -174,6 +181,7 @@ export function getAllCombinedAddrFromKeys(pubKeys: Key[], x?: number): Hex[] {
  * 1 of 3: [A, B, C]
  */
 export function getAllCombinedAddrFromSignersStrict(signers: SchnorrSigner[], x: number): string[] {
+  assertOwnerCombinationCount(signers.length, x, true)
   const allSignersCombos: SchnorrSigner[][] = getAllCombos(signers, x).filter((combo) => combo.length === x)
   const allCombinedAddresses = allSignersCombos.map((signersCombo) =>
     signersCombo.length > 1 ? getCombinedAddrFromSigners(signersCombo) : _generatePk(signersCombo[0].getPubKey().buffer)
@@ -198,6 +206,7 @@ export function getAllCombinedAddrFromSignersStrict(signers: SchnorrSigner[], x:
  * 1 of 3: [A, B, C]
  */
 export function getAllCombinedAddrFromKeysStrict(pubKeys: Key[], x: number): Hex[] {
+  assertOwnerCombinationCount(pubKeys.length, x, true)
   const exactCombos: Key[][] = getAllCombos(pubKeys, x).filter((combo) => combo.length === x)
   const allCombinedAddresses = exactCombos.map((pubKeysCombo) =>
     pubKeysCombo.length > 1 ? getCombinedAddrFromKeys(pubKeysCombo) : _generatePk(pubKeysCombo[0].buffer)
@@ -222,6 +231,7 @@ export function getAllCombinedAddrFromKeysStrict(pubKeys: Key[], x: number): Hex
  */
 export function getAllCombinedPubKeysFromSigners(signers: SchnorrSigner[], x?: number): Key[] {
   if (signers.length < 2) throw new Error("At least 2 signers should be provided")
+  assertOwnerCombinationCount(signers.length, x ?? 1)
 
   const allSignersCombos: SchnorrSigner[][] = getAllCombos(signers, x)
   const publicKeysCombos: Key[][] = allSignersCombos.map((s) => s.map((signer) => signer.getPubKey()))

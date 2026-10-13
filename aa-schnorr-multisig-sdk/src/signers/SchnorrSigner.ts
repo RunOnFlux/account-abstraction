@@ -7,14 +7,15 @@ import { _hashMessage } from "../core"
 import { KeyPair } from "../types"
 
 import { Schnorrkel } from "./Schnorrkel"
+import type { SchnorrkelOptions } from "./Schnorrkel"
 
 export class SchnorrSigner extends Schnorrkel {
   #privateKey: Key
   #publicKey: Key
   #address: `${string}`
 
-  constructor(_privKey: Uint8Array) {
-    super()
+  constructor(_privKey: Uint8Array, options?: SchnorrkelOptions) {
+    super(options)
 
     const privKey = Buffer.from(_privKey)
     if (!privateKeyVerify(privKey)) throw new Error("Invalid private key")
@@ -55,8 +56,14 @@ export class SchnorrSigner extends Schnorrkel {
     return this.restorePublicNonces(this.#privateKey, kPrivateKey, kTwoPrivateKey)
   }
 
+  /** restorePubNonces that also refuses a pair burned in the persistent NonceBurnStore. */
+  restorePubNoncesAsync(kPrivateKey: Key, kTwoPrivateKey: Key): Promise<PublicNonces> {
+    return this.restorePublicNoncesAsync(this.#privateKey, kPrivateKey, kTwoPrivateKey)
+  }
+
   hasNonces(): boolean {
-    return this.hasNonce(this.#publicKey)
+    // nonces are indexed by the hash of the PRIVATE key
+    return this.hasNonce(this.#privateKey)
   }
 
   signMultiSigMsg(msg: string, publicKeys: Key[], publicNonces: PublicNonces[]): SignatureOutput {
@@ -65,6 +72,16 @@ export class SchnorrSigner extends Schnorrkel {
 
   signMultiSigHash(hash: string, publicKeys: Key[], publicNonces: PublicNonces[]): SignatureOutput {
     return this.multiSigSignHash(this.#privateKey, hash, publicKeys, publicNonces)
+  }
+
+  /** signMultiSigMsg that consults and updates the persistent NonceBurnStore (if configured). */
+  signMultiSigMsgAsync(msg: string, publicKeys: Key[], publicNonces: PublicNonces[]): Promise<SignatureOutput> {
+    return this.multiSigSignAsync(this.#privateKey, msg, publicKeys, publicNonces)
+  }
+
+  /** signMultiSigHash that consults and updates the persistent NonceBurnStore (if configured). */
+  signMultiSigHashAsync(hash: string, publicKeys: Key[], publicNonces: PublicNonces[]): Promise<SignatureOutput> {
+    return this.multiSigSignHashAsync(this.#privateKey, hash, publicKeys, publicNonces)
   }
 
   signMessage(msg: string, hashFn: HashFunction = _hashMessage): SignatureOutput {

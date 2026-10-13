@@ -86,6 +86,10 @@ jobs:
           npx --no-install tsc -p tsconfig.build.json
 
       # --ignore-scripts: publish exactly the tarball of what was built above.
-      - name: Publish with provenance
+      - name: Stage publish with provenance (maintainer approves on npm)
         working-directory: aa-schnorr-multisig-sdk
-        run: npm publish --provenance --access public --ignore-scripts
+        # Staged publishing: CI uploads the version (with provenance) but it is
+        # NOT live until a maintainer approves it with 2FA on npmjs.com or via
+        # `npm stage approve <stage-id>`. The npm trusted publisher is configured
+        # without 'Allow npm publish', so a direct `npm publish` would be refused.
+        run: npm stage publish --provenance --access public --ignore-scripts

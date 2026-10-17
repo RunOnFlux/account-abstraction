@@ -19,6 +19,7 @@ import { ethers } from "ethers"
 import { deployments } from "../generated/deployments"
 import { MultiSigSmartAccount_abi } from "../generated/abi"
 import { MultiSigSmartAccountFactory_abi } from "../abi"
+import { validateAccountOwners } from "../helpers/owners"
 
 export const MULTISIG_ACCOUNT_SOURCE = "MultiSigSmartAccount"
 
@@ -52,8 +53,12 @@ export async function createMultiSigSmartAccount({
     chain,
   })
   const salt = _salt ?? ethers.encodeBytes32String("salt")
+  // AA-4 / AA-8: never derive an address or initCode from an owner list with
+  // the zero address, duplicates or more than 255 entries.
+  if (combinedAddress.length > 0) validateAccountOwners(combinedAddress)
 
   const getAccountInitCode = async () => {
+    validateAccountOwners(combinedAddress)
     return concatHex([
       deployments[chain.id]?.MultiSigSmartAccountFactory as Address,
       encodeFunctionData({

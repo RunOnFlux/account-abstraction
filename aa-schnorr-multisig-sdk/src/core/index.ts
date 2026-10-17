@@ -136,6 +136,7 @@ const internalMultiSigSign = (
   publicNonces: InternalPublicNonces[]
 ): InternalSignature => {
   if (publicKeys.length < 2) throw new Error("At least 2 public keys should be provided")
+  if (publicNonces.length !== publicKeys.length) throw new Error("Exactly one public nonce pair per public key should be provided")
 
   const localPk = Buffer.from(privateKey)
   const xHashed = _hashPrivateKey(localPk)
@@ -143,9 +144,21 @@ const internalMultiSigSign = (
   if (!(xHashed in nonces) || Object.keys(nonces[xHashed]).length === 0) throw new Error("Nonces should be exchanged before signing")
 
   const publicKey = Buffer.from(secp256k1.publicKeyCreate(localPk))
-  const L = _generateL(publicKeys)
+  const normalizedKeys = _normalizePublicKeys(publicKeys)
+  _assertDistinctPublicKeys(normalizedKeys)
+  // BIP-327: never produce a partial signature for a key list that does not
+  // contain the signer's own key (the coefficient would be computed against a
+  // foreign aggregate).
+  if (!normalizedKeys.some((key) => areBuffersSame(key, publicKey)))
+    throw new Error("Signer public key is not part of the provided public keys")
+  const aggregatedKey = _combinePublicKeys(normalizedKeys)
+  if (!areBuffersSame(aggregatedKey, _normalizePublicKey(combinedPublicKey))) {
+    throw new Error("Combined public key does not match the provided public keys")
+  }
+
+  const L = _generateL(normalizedKeys)
   const a = _aCoefficient(publicKey, L)
-  const b = _bCoefficient(combinedPublicKey, hash, publicNonces)
+  const b = _bCoefficient(aggregatedKey, hash, publicNonces)
 
   const effectiveNonces = publicNonces.map((batch) => {
     return Buffer.from(secp256k1.publicKeyCombine([batch.kPublic, secp256k1.publicKeyTweakMul(batch.kTwoPublic, b)]))
@@ -158,7 +171,7 @@ const internalMultiSigSign = (
   if (!isInArray) throw new Error("Passed nonces are invalid")
 
   const R = Buffer.from(secp256k1.publicKeyCombine(effectiveNonces))
-  const e = challenge(R, hash, combinedPublicKey)
+  const e = challenge(R, hash, aggregatedKey)
 
   const { k, kTwo } = nonces[xHashed]
 
@@ -186,6 +199,51 @@ const internalMultiSigSign = (
 }
 
 /**
+ * Verify ONE signer's partial MuSig2 signature before it is summed (attributes
+ * a bad contribution to its signer instead of an anonymous on-chain failure):
+ *
+ *   s_i * G == (kPublic_i + b * kTwoPublic_i) + (e * a_i) * P_i
+ *
+ * where b, R and e are computed from ALL public nonces and the combined key.
+ *
+ * @returns boolean (never throws)
+ */
+export const _verifyPartialSignature = (
+  partialSignature: Buffer,
+  hash: string,
+  signerPublicKey: Buffer,
+  signerPublicNonces: InternalPublicNonces,
+  publicKeys: Buffer[],
+  publicNonces: InternalPublicNonces[]
+): boolean => {
+  try {
+    if (partialSignature.length !== 32) return false
+    const normalizedKeys = _normalizePublicKeys(publicKeys)
+    const signerKey = _normalizePublicKey(signerPublicKey)
+    if (!normalizedKeys.some((key) => areBuffersSame(key, signerKey))) return false
+    const combinedPublicKey = _combinePublicKeys(normalizedKeys)
+    const L = _generateL(normalizedKeys)
+    const a = _aCoefficient(signerKey, L)
+    const b = _bCoefficient(combinedPublicKey, hash, publicNonces)
+    const effectiveNonces = publicNonces.map((batch) =>
+      Buffer.from(secp256k1.publicKeyCombine([batch.kPublic, secp256k1.publicKeyTweakMul(batch.kTwoPublic, b)]))
+    )
+    const signerEffectiveNonce = Buffer.from(
+      secp256k1.publicKeyCombine([signerPublicNonces.kPublic, secp256k1.publicKeyTweakMul(signerPublicNonces.kTwoPublic, b)])
+    )
+    if (!effectiveNonces.some((nonce) => areBuffersSame(nonce, signerEffectiveNonce))) return false
+    const R = Buffer.from(secp256k1.publicKeyCombine(effectiveNonces))
+    const e = challenge(R, hash, combinedPublicKey)
+    const ea = Buffer.from(secp256k1.privateKeyTweakMul(Buffer.from(e), a))
+    const lhs = Buffer.from(secp256k1.publicKeyCreate(partialSignature))
+    const rhs = Buffer.from(secp256k1.publicKeyCombine([signerEffectiveNonce, secp256k1.publicKeyTweakMul(signerKey, ea)]))
+    return areBuffersSame(lhs, rhs)
+  } catch {
+    return false
+  }
+}
+
+/**
  * Verify a signature for the given hash, public nonce and public key
  *
  * @param Buffer s
@@ -206,16 +264,46 @@ const internalVerify = (s: Buffer, hash: string, R: Buffer, publicKey: Buffer): 
 }
 
 export const _concatTypedArrays = (publicKeys: Buffer[]): Buffer => {
-  const c: Buffer = Buffer.alloc(publicKeys.reduce((partialSum, publicKey) => partialSum + publicKey.length, 0))
-  publicKeys.map((publicKey, index) => c.set(publicKey, index * publicKey.length))
-  return Buffer.from(c.buffer)
+  // Offsets accumulate per key, so keys of different lengths cannot overlap.
+  return Buffer.concat(publicKeys.map((publicKey) => Buffer.from(publicKey)))
+}
+
+/**
+ * Normalise a secp256k1 public key to its 33-byte compressed form (validates
+ * the point; throws on an invalid key). Every key that enters L, the `a`
+ * coefficients or the combined key goes through this, so a mixed 33/65-byte
+ * key list can no longer produce a different or corrupted aggregate.
+ */
+export const _normalizePublicKey = (publicKey: Buffer | Uint8Array): Buffer => {
+  return Buffer.from(secp256k1.publicKeyConvert(Uint8Array.from(publicKey), true))
+}
+
+export const _normalizePublicKeys = (publicKeys: (Buffer | Uint8Array)[]): Buffer[] => {
+  return publicKeys.map((publicKey) => _normalizePublicKey(publicKey))
+}
+
+const _assertDistinctPublicKeys = (normalizedKeys: Buffer[]): void => {
+  const seen = new Set(normalizedKeys.map((key) => key.toString("hex")))
+  if (seen.size !== normalizedKeys.length) throw new Error("Duplicate public keys provided")
 }
 
 export const _generateL = (publicKeys: Buffer[]) => {
-  return ethers.keccak256(_concatTypedArrays(publicKeys.sort(Buffer.compare)))
+  // normalise into a NEW array (the caller's array is no longer sorted in place)
+  return ethers.keccak256(_concatTypedArrays(_normalizePublicKeys(publicKeys).sort(Buffer.compare)))
 }
 export const _aCoefficient = (publicKey: Buffer, L: string): Buffer => {
-  return Buffer.from(ethers.getBytes(ethers.solidityPackedKeccak256(["bytes", "bytes"], [L, publicKey])))
+  return Buffer.from(ethers.getBytes(ethers.solidityPackedKeccak256(["bytes", "bytes"], [L, _normalizePublicKey(publicKey)])))
+}
+
+/**
+ * MuSig key aggregation: sum(a_i * P_i) with a_i = H(L, P_i). Keys are
+ * normalised to compressed form first.
+ */
+export const _combinePublicKeys = (publicKeys: Buffer[]): Buffer => {
+  const normalizedKeys = _normalizePublicKeys(publicKeys)
+  const L = _generateL(normalizedKeys)
+  const modifiedKeys = normalizedKeys.map((publicKey) => secp256k1.publicKeyTweakMul(publicKey, _aCoefficient(publicKey, L)))
+  return Buffer.from(secp256k1.publicKeyCombine(modifiedKeys))
 }
 
 export const generateRandomKeys = () => {

@@ -1,0 +1,97 @@
+name: Publish SDK to npm
+
+# Publishes @runonflux/aa-schnorr-multisig-sdk (aa-schnorr-multisig-sdk/) from
+# CI with npm trusted publishing (OIDC) and a signed provenance attestation, so
+# consumers can check that a given npm version was built from this repository
+# at a given tag (`npm audit signatures`). There is no long-lived npm token
+# anywhere: npm exchanges this job's short-lived GitHub OIDC token for a
+# publish credential, and only for the repo + workflow file + environment
+# configured as the package's trusted publisher on npmjs.com.
+#
+# Release: bump aa-schnorr-multisig-sdk/package.json "version", merge to main,
+# then push tag vX.Y.Z (existing convention: v1.4.0 == SDK 1.4.0).
+on:
+  push:
+    tags: ['v*']
+
+# Nothing by default; the job below asks for exactly what it needs.
+permissions: {}
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: verify, test, build, publish (provenance)
+    runs-on: ubuntu-latest
+    # Required reviewers + "selected tags: v*" are configured on this
+    # environment in the repo settings; the npm trusted publisher is bound to it.
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write # OIDC token for npm trusted publishing + provenance
+    steps:
+      # Third-party actions are pinned to full commit SHAs (tags can be moved).
+      # No dependency caches in this job: a release must not restore state
+      # written by other workflow runs (cache poisoning).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          # No registry-url: npm gets its publish token from OIDC (trusted
+          # publishing), and the .npmrc setup-node would write holds an unset
+          # ${NODE_AUTH_TOKEN} that yarn v1 refuses to load.
+
+      # Trusted publishing needs npm >= 11.5.1. Pinned exactly.
+      - name: Pin npm
+        run: npm install -g --ignore-scripts npm@11.19.1 && npm --version
+
+      - name: Tag must equal SDK package.json version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(node -p "require('./aa-schnorr-multisig-sdk/package.json').version")"
+          if [ "$TAG" != "v${version}" ]; then
+            echo "::error::tag ${TAG} does not match SDK package.json version ${version}"
+            exit 1
+          fi
+
+      # Contract + Schnorr test suite (it imports the SDK sources). Lifecycle
+      # scripts of dependencies never run on the release runner; the root's
+      # only own postinstall (patch-package) is run explicitly.
+      - name: Install root (contracts + tests)
+        run: |
+          npm ci --ignore-scripts
+          npx --no-install patch-package
+      - name: Hardhat tests (in-process network)
+        # hardhat.config.ts validates every network's `accounts` entry at load
+        # time, so it needs some well-formed key. A throwaway random one: no
+        # deployer secret ever enters this job, and nothing is deployed.
+        run: |
+          DEPLOYER_PRIVATE_KEY="$(openssl rand -hex 32)"
+          export DEPLOYER_PRIVATE_KEY
+          npx --no-install hardhat test
+
+      - name: Install SDK
+        working-directory: aa-schnorr-multisig-sdk
+        run: npm ci --ignore-scripts
+      # Builds from the committed src/generated (ABIs, typechain, deployments).
+      # The `prebuild` copy hook is skipped on purpose: it copies from root
+      # src/abi + src/typechain, which are gitignored build products.
+      - name: Build SDK (tsc)
+        working-directory: aa-schnorr-multisig-sdk
+        run: |
+          rm -rf dist
+          npx --no-install tsc -p tsconfig.build.json
+
+      # --ignore-scripts: publish exactly the tarball of what was built above.
+      - name: Stage publish with provenance (maintainer approves on npm)
+        working-directory: aa-schnorr-multisig-sdk
+        # Staged publishing: CI uploads the version (with provenance) but it is
+        # NOT live until a maintainer approves it with 2FA on npmjs.com or via
+        # `npm stage approve <stage-id>`. The npm trusted publisher is configured
+        # without 'Allow npm publish', so a direct `npm publish` would be refused.
+        run: npm stage publish --provenance --access public --ignore-scripts

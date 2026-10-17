@@ -6,6 +6,8 @@ import { ERC1967Proxy__factory, MultiSigSmartAccount__factory, MultiSigSmartAcco
 import { MultiSigSmartAccountFactory_abi } from "../generated/abi"
 import type { Hex } from "../accountAbstraction"
 
+import { validateAccountOwners } from "./owners"
+
 // Proxy address contract used to deploy (using create2) new MultiSigSmartAccount Factory
 // see: https://github.com/Arachnid/deterministic-deployment-proxy
 export const PROXY_FACTORY_ADDRESS = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
@@ -28,6 +30,8 @@ export function predictAccountAddrOffchain(
   combinedAddresses: string[],
   salt: string
 ): string {
+  // refuse owner lists the account cannot safely be initialised with (AA-4 / AA-8)
+  validateAccountOwners(combinedAddresses)
   // ERC1967Proxy is the contract which gets deployed when creating new MultiSigSmartAccount
   const erc1967ProxyBytecode = ERC1967Proxy__factory.bytecode
   const smartAccountInterface = MultiSigSmartAccount__factory.createInterface()
@@ -103,6 +107,7 @@ export async function predictAccountAddrOnchain(
   salt: string,
   ethersSignerOrProvider: Signer | Provider
 ): Promise<`0x${string}`> {
+  validateAccountOwners(combinedAddresses)
   const smartAccountFactory = new ethers.Contract(factoryAddress, MultiSigSmartAccountFactory_abi, ethersSignerOrProvider)
   const saltHash = saltToHex(salt)
   const predictedAccount = await smartAccountFactory.getAccountAddress(combinedAddresses, saltHash)
